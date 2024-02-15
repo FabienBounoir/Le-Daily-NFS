@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap");
+
+*,
+*::after,
+*::before {
+	padding: 0;
+	margin: 0;
+
+	box-sizing: border-box;
+	transition: none 400ms cubic-bezier(0, 0.25, 0.5, 1);
+}
+
+:root {
+	font-family: "Nunito", sans-serif;
+
+	--primary: #b46922;
+	--secondary: 218, 218, 230;
+
+	color: var(--primary);
+	background-color: rgb(var(--secondary));
+}
+
+* {
+	&::selection {
+		background-color: var(--primary);
+		color: rgb(var(--secondary));
+	}
+
+	&:disabled {
+		pointer-events: none;
+		opacity: 0.5;
+	}
+}
+
+main {
+	overflow: auto;
+	font-size: 1.25em;
+	padding: 2em;
+
+	font-weight: 300;
+
+	ul,
+	ol,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin-bottom: 1em;
+	}
+
+	p {
+		line-height: 1.5em;
+		letter-spacing: 0.035ch;
+		text-align: justify;
+		margin-bottom: 1.5em;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		&:not(:first-child) {
+			margin-top: 1.5em;
+			padding-top: 1em;
+		}
+	}
+
+	h1 {
+		font-weight: 900;
+	}
+
+	ul,
+	ol {
+		margin-left: 2em;
+
+		li {
+			margin-bottom: 0.5em;
+		}
+	}
+
+	a {
+		color: rgb(var(--secondary));
+		background-color: var(--primary);
+	}
+
+	q {
+		margin: 1em;
+		margin-left: 0;
+
+		display: block;
+		padding: 0.5em 0.75em;
+		width: max-content;
+
+		font-size: 0.85em;
+		font-style: italic;
+		font-family: monospace;
+
+		border-radius: 0.25em;
+		background-color: rgb(200, 200, 218);
+		border-left: 0.5em solid var(--primary);
+
+		white-space: pre-line;
+
+		b {
+			font-weight: bold;
+			text-transform: uppercase;
+
+			&::before {
+				content: "{";
+			}
+			&::after {
+				content: "}";
+			}
+		}
+	}
+}
+
+input {
+	font: inherit;
+	color: var(--primary);
+	border: 1px solid var(--primary);
+	width: 100%;
+	background-color: rgb(var(--secondary));
+
+	padding: 0.25em 0.5em;
+	border-radius: 0.25em;
+	outline: 0px solid var(--primary);
+
+	transition: linear 75ms outline-width;
+
+	&:focus {
+		outline-width: 2px;
+	}
+
+	&::placeholder {
+		color: inherit;
+		opacity: 0.5;
+	}
+}
+
+button {
+	cursor: pointer;
+	font: inherit;
+	border: none;
+	color: rgb(var(--secondary));
+	background-color: var(--primary);
+	width: 100%;
+
+	text-transform: lowercase;
+	text-align: center;
+	padding: 0.25em 0.5em;
+	border-radius: 0.25em;
+}

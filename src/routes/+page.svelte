@@ -1,59 +1,65 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+    import "../app.scss";
+	import { goto } from "$app/navigation";
+	import { snacks } from "$lib/stores/snacks";
+	// import { user } from "$lib/stores/user";
+
+    const pwd =  "admin"
+    const user = "admin"
+
+    let username = "";
+	let password = "";
+
+	let submitting = false;
+
+	const login = async () => {
+		submitting = true;
+		try {
+			if(username !== user || password !== pwd) throw new Error("Mauvais identifiants");
+			await goto("/init");
+		} catch (error) {
+			// @ts-ignore
+            console.error(error);
+			snacks.error("user.not_found");
+		} finally {
+			submitting = false;
+		}
+	};
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
+<main>
+	<h1>Hummm, <br />identifiez-vous<br />🕵️</h1>
+	<form on:submit|preventDefault={login}>
+		<input
+			type="text"
+			bind:value={username}
+			autocomplete="username"
+			placeholder="Nom d'utilisateur"
+			disabled={submitting}
+		/>
+		<input
+			type="password"
+			bind:value={password}
+			autocomplete="current-password"
+			placeholder="Mot de passe"
+			disabled={submitting}
+		/>
+		<button type="submit" disabled={submitting}>S'identifier</button>
+	</form>
+</main>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
+<style lang="scss">
+	form {
+		display: grid;
+		gap: 0.5em;
+	}
 
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
-
-<style>
-	section {
+	main {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
 		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
+		justify-content: center;
+		height: 100vh;
+		text-align: center;
 	}
 </style>
