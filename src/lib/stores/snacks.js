@@ -8,7 +8,7 @@ import { writable } from "svelte/store";
  * }} Snack
  */
 const init = () => {
-	const { subscribe, update } = writable(/** @type {Snack[]} */ ([]));
+	const { subscribe, update } = writable(/** @type {Snack[]} */([]));
 
 	let uuid = 0;
 	/** @type {any} */
@@ -55,10 +55,10 @@ const init = () => {
 	const remove = (snack) => update((snacks) => snacks.filter((s) => s !== snack));
 
 	/** @param {string} message */
-	const error = (message) => push(`error:${message}`);
+	const error = (message) => push(`${message}`);
 
 	/** @param {string} message */
-	const success = (message) => push(`success:${message}`);
+	const success = (message) => push(`${message}`);
 
 	return {
 		subscribe,
