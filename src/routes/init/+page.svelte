@@ -5,7 +5,7 @@
 	import Trash from '$lib/components/Trash.svelte';
 
 	let names = [
-		'Emilie'
+		'Emilie',
 		'Fabien',
 		'Ihor',
 		'Cédric',
