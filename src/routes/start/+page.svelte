@@ -31,6 +31,10 @@
 
 	let totalTimer = 0;
 
+	const dateHyrox = new Date('2024-06-07');
+
+	const diffDate = Math.floor((dateHyrox - new Date()) / (1000 * 60 * 60 * 24));
+
 	const timerHistory = new Map();
 	const timeResult = new Map();
 
@@ -227,8 +231,12 @@
 				<h3>Quelques informations supplémentaires :</h3>
 				<br />
 				<pre>Le daily a commencé à {startDailyDaily.toLocaleTimeString()}</pre>
-				<pre>Le daily a duré {timeSpeaker} secondes</pre>
+				<pre>Le daily a duré {timeFormater(totalTimer)}</pre>
 			</div>
+		</div>
+
+		<div class="hyrox-info">
+			<p>HYROX dans {diffDate} jours</p>
 		</div>
 
 		{#if weatherSophia}
@@ -460,5 +468,26 @@
 	.return:hover {
 		background-color: var(--primary-hover);
 		cursor: pointer;
+	}
+
+	.hyrox-info{
+		position: fixed;
+		top: 0;
+		left: 0;
+		padding: 2em;
+		animation: zoom 1s linear infinite;
+		font-weight: bold;
+	}
+
+	@keyframes zoom {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 </style>
