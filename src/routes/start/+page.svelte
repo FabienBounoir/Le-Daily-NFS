@@ -55,13 +55,13 @@
 		textToSpeech(names[i]);
 
 		interval = setInterval(() => {
-			if (pause) return;
-			if (!time) return;
 			if (endDaily) return;
+			if (!time) return;
+			totalTimer++;
+			if (pause) return;
 
 			actualTime--;
 			timeSpeaker++;
-			totalTimer++;
 
 			if (actualTime == 5) {
 				textToSpeech(`5 secondes restantes`);
@@ -268,7 +268,9 @@
 			</div>
 		{/if}
 
-		<p id="infoTimeDaily">Le Daily a commencé à {startDailyDaily.toLocaleTimeString()}</p>
+		<p id="infoTimeDaily">
+			Le Daily a commencé à {startDailyDaily.toLocaleTimeString()} - {timeFormater(totalTimer)}
+		</p>
 		<div id="infoKeys">
 			<div>
 				<span class={actualKeyDown == 'KeyP' ? 'key-down' : ''}>P</span>
