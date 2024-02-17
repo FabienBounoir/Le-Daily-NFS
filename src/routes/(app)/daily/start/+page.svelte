@@ -1,12 +1,22 @@
 <script>
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { fly, scale } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import { api } from '$lib/utils/api';
 	import Pause from '$lib/components/Pause.svelte';
 	import Return from '$lib/components/Return.svelte';
-	import { getWeather } from '$lib/weather';
-	import { getResultEuromillion } from '$lib/euroMillion';
+	import Weather from '$lib/components/Weather.svelte';
+	import EuroMillion from '$lib/components/EuroMillion.svelte';
+	import { user } from '$lib/stores/user';
+	import '@fortawesome/fontawesome-free/css/all.min.css';
 
+	/**
+	 * @type {string | any[]}
+	 */
 	let names = [];
+	/**
+	 * @type {number | null}
+	 */
 	let time = null;
 	let i = 0;
 
@@ -22,21 +32,17 @@
 
 	let actualKeyDown = '';
 
+	/**
+	 * @type {number | null | undefined}
+	 */
 	let keydownInterval = null;
-
-	let weatherSophia = null;
-	let weatherMontpellier = null;
-
-	let euromillions = null;
-
 	let totalTimer = 0;
-
-	const dateHyrox = new Date('2024-06-07');
-
-	const diffDate = Math.floor((dateHyrox - new Date()) / (1000 * 60 * 60 * 24));
 
 	const timerHistory = new Map();
 	const timeResult = new Map();
+
+	let couleur = 'rgb(255, 0, 0)';
+	$: couleur = `hsl(${(120 * actualTime) / time}deg 71.85% 42.47%)`;
 
 	onMount(async () => {
 		const url = new URL(window.location.href);
@@ -81,26 +87,14 @@
 
 			keydownInterval = setTimeout(() => {
 				actualKeyDown = '';
-			}, 400);
+			}, 300);
 
-			if (e.code === 'Space') {
+			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
-				if (i - 1 < 0) {
-					return;
-				} else {
+				if (i - 1 >= 0) {
 					timerHistory.set(names[i], actualTime);
 					i--;
-					actualTime = timerHistory.get(names[i]) || time;
-					timeSpeaker = timeResult.get(names[i]) || 0;
-					textToSpeech(names[i]);
-				}
-			} else if (e.code === 'ArrowRight') {
-				if (i + 1 >= names.length) {
-					return;
-				} else {
-					timerHistory.set(names[i], actualTime);
-					i++;
 					actualTime = timerHistory.get(names[i]) || time;
 					timeSpeaker = timeResult.get(names[i]) || 0;
 					textToSpeech(names[i]);
@@ -113,6 +107,8 @@
 
 	const textToSpeech = (text) => {
 		if (!voiceSynthesis) return;
+		if (endDaily) return;
+
 		if ('speechSynthesis' in window) {
 			if (window.speechSynthesis.speaking) {
 				window.speechSynthesis.cancel();
@@ -130,6 +126,7 @@
 			timerHistory.set(names[i], actualTime);
 			timeResult.set(names[i], timeSpeaker);
 			i = 0;
+			saveDaily();
 		} else {
 			timerHistory.set(names[i], actualTime);
 			timeResult.set(names[i], timeSpeaker);
@@ -146,52 +143,10 @@
 		let result = '';
 
 		for (const [name, time] of speakerInfo) {
-			result += `${name} : ${time} secondes \n`;
+			result += `${name} : ${timeFormater(time)} \n`;
 		}
 
 		return result;
-	};
-
-	const renderWeather = (data) => {
-		return `<div style=" text-items: center; display:flex; flex-direction: column; align-items: center;"><h3>${data.name}</h3>
-			<div style="display: flex; align-items: center; gap: 1em;">
-				<img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="Météo" />
-				<p>${data.main.temp}°C</p>
-			</div>
-			</div>`;
-	};
-
-	const renderEuroMillion = (data) => {
-		if (!data || data.length === 0) return;
-		const lastTirage = data[data.length - 1];
-
-		let render = `<div style="display: flex; flex-direction: row; align-items: center; gap: 1em;">`;
-
-		for (let i = 0; i < lastTirage.numbers.length; i++) {
-			render += `<p style="color: var(--primary); font-size: 1.5em; border-radius: 50%; border: 1px solid var(--primary-hover); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;"
-			>${lastTirage.numbers[i]}</p>`;
-		}
-
-		render += '<p><p>';
-
-		for (let i = 0; i < lastTirage.stars.length; i++) {
-			render += `<p style="position: relative; color: var(--primary); font-size: 1.5em; border-radius: 50%; border: 1px solid var(--primary-hover); width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;"
-			
-			>${lastTirage.stars[i]}
-			
-			<svg style=" position: absolute; width: 20px; top: -3px; right: -3px;" fill="yellow" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-			</p>`;
-		}
-
-		render += `</div>`;
-
-		return render;
-	};
-
-	const getInfo = async () => {
-		weatherSophia = await getWeather('Sophia Antipolis');
-		weatherMontpellier = await getWeather('Montpellier');
-		euromillions = await getResultEuromillion();
 	};
 
 	const timeFormater = (time) => {
@@ -202,7 +157,18 @@
 		return `${hours > 0 ? hours + 'h' : ''} ${minutes > 0 ? minutes + 'm' : ''} ${seconds}s`;
 	};
 
-	$: endDaily && getInfo();
+	const saveDaily = () => {
+		const daily = {
+			users: names,
+			team: $user.teams[0],
+			totalTime: totalTimer,
+			userTime: time
+		};
+
+		console.log(daily);
+
+		api.post('/daily', daily);
+	};
 </script>
 
 <svelte:head>
@@ -216,10 +182,6 @@
 <section>
 	{#if endDaily}
 		<h1>Le daily est terminé</h1>
-
-		<div class="return" on:click={() => goto('/init')}>
-			<Return />
-		</div>
 
 		<div class="container-result">
 			<div>
@@ -236,37 +198,41 @@
 		</div>
 
 		<div class="hyrox-info">
-			<p>HYROX dans {diffDate} jours</p>
+			<p>
+				HYROX dans {Math.floor((new Date('2024-06-07') - new Date()) / (1000 * 60 * 60 * 24))} jours
+			</p>
 		</div>
 
-		{#if weatherSophia}
-			<div class="widget-meteo-1">{@html renderWeather(weatherSophia)}</div>
-		{/if}
+		<div class="widget-meteo-1">
+			<Weather city="Sophia Antipolis" />
+		</div>
 
-		{#if weatherMontpellier}
-			<div class="widget-meteo-2">{@html renderWeather(weatherMontpellier)}</div>
-		{/if}
+		<div class="widget-meteo-2">
+			<Weather city="Montpellier" />
+		</div>
 
-		{#if euromillions}
-			<div class="widget-euromillion">{@html renderEuroMillion(euromillions)}</div>
-		{/if}
+		<div class="widget-euromillion">
+			<EuroMillion />
+		</div>
 	{:else}
-		<h1>Le daily NFS</h1>
+		<h1>Le daily {$user?.username || 'NFS'}</h1>
 
 		{#if names.length > 0}
 			<div class="actualSpeaker">
 				<div>
-					<p>{i > 0 ? names[i - 1] : ''}</p>
-					<p>{names[i]}</p>
-					<p>{i + 1 < names.length ? names[i + 1] : ''}</p>
+					{#key names[i]}
+						<p in:fly={{ duration: 300, x: 20, y: 0, opacity: 0 }}>
+							{i > 0 ? names[i - 1] : ''}
+						</p>
+						<p in:scale={{ duration: 300, opacity: 0 }}>
+							{names[i]}
+						</p>
+						<p in:fly={{ duration: 300, x: 20, y: 0, opacity: 0 }}>
+							{i + 1 < names.length ? names[i + 1] : ''}
+						</p>
+					{/key}
 				</div>
-				<p
-					class={actualTime <= 5 && actualTime > 0 && !pause
-						? 'warn'
-						: actualTime <= 0 && !pause
-							? 'danger'
-							: ''}
-				>
+				<p style="--couleur: {couleur}" class={'timer' + (actualTime == 0 ? ' danger' : '')}>
 					{#if pause}
 						<Pause />
 					{:else}
@@ -280,23 +246,64 @@
 			Le Daily a commencé à {startDailyDaily.toLocaleTimeString()} - {timeFormater(totalTimer)}
 		</p>
 		<div id="infoKeys">
-			<div>
+			<div
+				on:click={() => {
+					pause = !pause;
+				}}
+			>
 				<span class={actualKeyDown == 'KeyP' ? 'key-down' : ''}>P</span>
 				{pause ? ' Play ' : 'Pause'}
 			</div>
-			<div>
+			<div
+				on:click={() => {
+					newSpeaker();
+				}}
+			>
 				<span class={actualKeyDown == 'Space' ? 'key-down' : ''}>Space</span>
-				New
+				Next
 			</div>
-			<div>
+			<div
+				on:click={() => {
+					if (i - 1 < 0) {
+						return;
+					} else {
+						timerHistory.set(names[i], actualTime);
+						i--;
+						actualTime = timerHistory.get(names[i]) || time;
+						timeSpeaker = timeResult.get(names[i]) || 0;
+						textToSpeech(names[i]);
+					}
+				}}
+			>
 				<span class={actualKeyDown == 'ArrowLeft' ? 'key-down' : ''}>←</span>
 				Previous
 			</div>
 		</div>
 	{/if}
+
+	<i
+		on:click={() => {
+			goto('/daily');
+		}}
+		class="fa-solid fa-rectangle-xmark close-daily"
+	></i>
 </section>
 
 <style lang="scss">
+	.close-daily {
+		position: fixed;
+		top: 0;
+		right: 0;
+		margin: 1em;
+		font-size: 2em;
+		cursor: no-drop;
+		transition: filter 0.5s;
+
+		&:hover {
+			filter: grayscale(0.9);
+		}
+	}
+
 	.container-result {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
@@ -340,6 +347,10 @@
 		bottom: 0;
 		left: 0;
 		padding: 1em;
+	}
+
+	.timer {
+		color: var(--couleur) !important;
 	}
 
 	#infoKeys {
@@ -418,10 +429,6 @@
 		}
 	}
 
-	.warn {
-		color: orange;
-	}
-
 	.danger {
 		color: red;
 		animation: blinker 1s linear infinite;
@@ -436,15 +443,14 @@
 
 	.widget-meteo-1 {
 		position: fixed;
-		bottom: 0;
-		left: 0;
-		padding: 1em;
+		bottom: 1em;
+		left: 1em;
 	}
 
 	.widget-meteo-2 {
 		position: fixed;
-		bottom: 0;
-		right: 0;
+		bottom: 1em;
+		right: 1em;
 		padding: 1em;
 	}
 
@@ -470,7 +476,7 @@
 		cursor: pointer;
 	}
 
-	.hyrox-info{
+	.hyrox-info {
 		position: fixed;
 		top: 0;
 		left: 0;

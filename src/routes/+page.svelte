@@ -1,26 +1,22 @@
 <script>
-    import "../app.scss";
-	import { goto } from "$app/navigation";
-	import { snacks } from "$lib/stores/snacks";
-	// import { user } from "$lib/stores/user";
+	import '../app.scss';
+	import { goto } from '$app/navigation';
+	import { snacks } from '$lib/stores/snacks';
+	import { user } from '$lib/stores/user';
 
-    const pwd =  "admin"
-    const user = "admin"
-
-    let username = "";
-	let password = "";
+	let username = '';
+	let password = '';
 
 	let submitting = false;
 
 	const login = async () => {
 		submitting = true;
 		try {
-			if(username !== user || password !== pwd) throw new Error("Mauvais identifiants");
-			await goto("/init");
+			await user.login(username, password);
+			await goto('/daily');
 		} catch (error) {
 			// @ts-ignore
-            console.error(error);
-			snacks.error("user.not_found");
+			snacks.error('user not found');
 		} finally {
 			submitting = false;
 		}
@@ -61,5 +57,11 @@
 		justify-content: center;
 		height: 100vh;
 		text-align: center;
+	}
+
+	h1 {
+		font-weight: 900;
+		font-size: 2em;
+		padding-bottom: 1em;
 	}
 </style>

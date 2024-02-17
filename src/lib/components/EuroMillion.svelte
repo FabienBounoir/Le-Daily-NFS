@@ -1,0 +1,82 @@
+<script>
+	import { getResultEuromillion } from '$lib/euroMillion';
+	import { getWeather } from '$lib/weather';
+
+	let result = getResultEuromillion();
+</script>
+
+{#await result}
+	<p>Le dernier tirage de l'euromillion:</p>
+	<p>Waiting...</p>
+{:then data}
+	{#if data && data.length > 0}
+	<p>Le dernier tirage de l'euromillion:</p>
+		<div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
+			{#each data[data.length - 1].numbers as number}
+				<p
+					class="number"
+				>
+					{number}
+				</p>
+			{/each}
+			<p></p>
+
+			{#each data[data.length - 1].stars as star}
+				<p
+					class="star"
+				>
+					{star}
+
+					<svg
+						fill="var(--primary-200)"
+						focusable="false"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						><path
+							d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+						></path></svg
+					>
+				</p>
+			{/each}
+		</div>
+	{/if}
+{:catch error}
+	error: {error}
+{/await}
+
+<style lang="scss">
+	.number{
+		color: var(--primary-600); 
+		font-size: 1.5em; 
+		border-radius: 50%; 
+		border: 1px solid var(--primary-300); 
+		background-color: var(--primary-200);
+		width: 50px; height: 50px; 
+		display: flex; 
+		justify-content: center; 
+		align-items: center;
+	}
+
+	.star{
+		position: relative; 
+		color: var(--primary-600); 
+		font-size: 1.5em; 
+		// border-radius: 50%; 
+		// border: 1px solid var(--primary-300); 
+		width: 50px; height: 50px; 
+		display: flex; 
+		justify-content: center; 
+		align-items: center;
+	
+		svg{
+			position: absolute; 
+			width: 60px; 
+			// top: -3px; 
+			// right: -3px;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: -1;
+		}
+	}
+</style>

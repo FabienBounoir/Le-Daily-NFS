@@ -11,7 +11,6 @@ export const getWeather = async (city) => {
         }
 
         return res.json();
-
     } catch (error) {
         throw new Error('City not found');
     }

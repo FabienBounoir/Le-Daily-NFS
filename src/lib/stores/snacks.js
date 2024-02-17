@@ -26,8 +26,6 @@ const init = () => {
 			message
 		};
 
-		console.log(snack, browser);
-
 		if (!browser) return;
 
 		update((snacks) => [snack, ...snacks]);

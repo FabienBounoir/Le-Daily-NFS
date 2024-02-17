@@ -13,130 +13,112 @@
 :root {
 	font-family: "Nunito", sans-serif;
 
-	--primary: #b46922;
+	--primary: #e8760b;
 	--primary-hover: #d4893f85;
 	--secondary: 218, 218, 230;
 
-	color: var(--primary);
-	background-color: rgb(var(--secondary));
+	--primary-50: #fffaec;
+	--primary-100: #fff3d3;
+	--primary-200: #ffe3a5;
+	--primary-300: #ffcd6d;
+	--primary-400: #ffac32;
+	--primary-500: #ff910a;
+	--primary-600: #ff7900;
+	--primary-700: #cc5802;
+	--primary-800: #a1440b;
+	--primary-900: #823a0c;
+
+	--on-primary-50: var(--primary-900);
+	--on-primary-100: var(--primary-900);
+	--on-primary-200: var(--primary-900);
+	--on-primary-300: var(--primary-900);
+	--on-primary-400: var(--primary-100);
+	--on-primary-500: var(--primary-100);
+	--on-primary-600: var(--primary-100);
+	--on-primary-700: var(--primary-100);
+	--on-primary-800: var(--primary-100);
+	--on-primary-900: var(--primary-100);
+
+	color: var(--primary-600);
+
+	// background-color: #fafafa;
 }
 
-* {
-	&::selection {
-		background-color: var(--primary);
-		color: rgb(var(--secondary));
-	}
-
-	&:disabled {
-		pointer-events: none;
-		opacity: 0.5;
-	}
-}
-
-main {
-	overflow: auto;
-	font-size: 1.25em;
-	padding: 2em;
-
-	font-weight: 300;
-
-	ul,
-	ol,
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		margin-bottom: 1em;
-	}
-
-	p {
-		line-height: 1.5em;
-		letter-spacing: 0.035ch;
-		text-align: justify;
-		margin-bottom: 1.5em;
-	}
-
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		&:not(:first-child) {
-			margin-top: 1.5em;
-			padding-top: 1em;
-		}
-	}
-
-	h1 {
-		font-weight: 900;
-	}
-
-	ul,
-	ol {
-		margin-left: 2em;
-
-		li {
-			margin-bottom: 0.5em;
-		}
-	}
-
-	a {
-		color: rgb(var(--secondary));
-		background-color: var(--primary);
-	}
-
-	q {
-		margin: 1em;
-		margin-left: 0;
-
-		display: block;
-		padding: 0.5em 0.75em;
-		width: max-content;
-
-		font-size: 0.85em;
-		font-style: italic;
-		font-family: monospace;
-
-		border-radius: 0.25em;
-		background-color: rgb(200, 200, 218);
-		border-left: 0.5em solid var(--primary);
-
-		white-space: pre-line;
-
-		b {
-			font-weight: bold;
-			text-transform: uppercase;
-
-			&::before {
-				content: "{";
-			}
-
-			&::after {
-				content: "}";
-			}
-		}
-	}
-}
-
-input {
+*,
+*::after,
+*::before {
 	font: inherit;
-	color: var(--primary);
-	border: 1px solid var(--primary);
+	color: inherit;
+
+	margin: 0;
+	padding: 0;
+
+	box-sizing: border-box;
+
+	transition: none cubic-bezier(0.1, 1.25, 0.25, 1) 600ms;
+}
+
+*::selection {
+	background-color: var(--primary-700);
+	color: var(--on-primary-700);
+}
+
+*,
+*::after,
+*::before {
+	font: inherit;
+	color: inherit;
+
+	margin: 0;
+	padding: 0;
+
+	box-sizing: border-box;
+
+	transition: none cubic-bezier(0.1, 1.25, 0.25, 1) 600ms;
+}
+
+*::selection {
+	background-color: var(--primary-700);
+	color: var(--on-primary-700);
+}
+
+ul,
+ol {
+	list-style: none;
+}
+
+.avatar {
+	display: block;
+	border-radius: 50%;
+
+	width: var(--size, 3rem);
+	height: var(--size, 3rem);
+
+	object-fit: cover;
+}
+
+select,
+input,
+button {
 	width: 100%;
-	background-color: rgb(var(--secondary));
+	outline: 0px solid var(--primary-50);
 
-	padding: 0.25em 0.5em;
-	border-radius: 0.25em;
-	outline: 0px solid var(--primary);
-
-	transition: linear 75ms outline-width;
+	transition: outline-width 100ms linear;
 
 	&:focus {
-		outline-width: 2px;
+		outline-width: 3px;
 	}
+}
+
+select,
+input {
+	display: block;
+
+	border: 1px solid var(--primary-300);
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+
+	color: var(--primary-700);
 
 	&::placeholder {
 		color: inherit;
@@ -146,14 +128,53 @@ input {
 
 button {
 	cursor: pointer;
-	font: inherit;
-	border: none;
-	color: rgb(var(--secondary));
-	background-color: var(--primary);
-	width: 100%;
 
-	text-transform: lowercase;
+	border: none;
+
+	background-color: var(--primary-600);
+	color: var(--on-primary-600);
+
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.5rem;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+
+	outline-color: var(--primary-200);
 	text-align: center;
-	padding: 0.25em 0.5em;
-	border-radius: 0.25em;
+
+	transition-property: outline-width, opacity;
+
+	&:disabled {
+		pointer-events: none;
+		opacity: 0.5;
+	}
 }
+
+a.cover {
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+}
+
+.fa-load {
+	animation: fa-spin 800ms ease infinite;
+}
+
+// button {
+// 	cursor: pointer;
+// 	font: inherit;
+// 	border: none;
+// 	color: rgb(var(--secondary));
+// 	background-color: var(--primary);
+// 	width: 100%;
+
+// 	text-transform: lowercase;
+// 	text-align: center;
+// 	padding: 0.25em 0.5em;
+// 	border-radius: 0.25em;
+// }

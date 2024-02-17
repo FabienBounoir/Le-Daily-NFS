@@ -1,0 +1,71 @@
+<script>
+	import { getWeather } from '$lib/weather';
+
+	export let city;
+
+	let weather = getWeather(city);
+</script>
+
+{#await weather}
+	Waiting...
+{:then data}
+	<div class="weather-container">
+		<h1>{data.weather[0].description}</h1>
+		<div class="weather">
+			<h1>{parseFloat(data.main.temp).toFixed(1)}°</h1>
+			<span> </span>
+			<div class="weather-info">
+				<p><i class="fa-solid fa-wind"></i> {parseFloat(data.wind.speed || 0).toFixed(1)} km/h</p>
+				<p><i class="fa-solid fa-location-dot"></i> {data.name}</p>
+			</div>
+			<img src="http://openweathermap.org/img/wn/01n@4x.png" alt="weather" />
+		</div>
+	</div>
+{:catch error}
+	error: {error}
+{/await}
+
+<style lang="scss">
+	.weather-container {
+		display: flex;
+		flex-direction: column;
+		width: fit-content;
+		border-radius: 1em;
+		background-color: var(--primary-100);
+		padding: 0.5em 1em;
+		position: relative;
+
+		img {
+			width: 100px;
+			position: absolute;
+			top: -40px;
+			right: -40px;
+		}
+	}
+
+	.weather {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: row;
+		gap: 1em;
+
+		h1 {
+			font-size: 3em;
+		}
+
+		span {
+			background-color: var(--primary-600);
+			border-radius: 0.5em;
+			width: 0.2em;
+			height: 2.8em;
+		}
+	}
+
+	.weather-info {
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		gap: 0.3em;
+	}
+</style>
