@@ -19,6 +19,7 @@
 				<p><i class="fa-solid fa-location-dot"></i> {data.name}</p>
 			</div>
 			<img src="http://openweathermap.org/img/wn/01n@4x.png" alt="weather" />
+			<img src="http://openweathermap.org/img/wn/01n@4x.png" alt="weather" />
 		</div>
 	</div>
 {:catch error}
@@ -36,10 +37,19 @@
 		position: relative;
 
 		img {
+			width: 120px;
+			position: absolute;
+			top: -48px;
+			right: -48px;
+			filter: blur(1em);
+		}
+
+		img:last-child {
 			width: 100px;
 			position: absolute;
 			top: -40px;
 			right: -40px;
+			filter: none;
 		}
 	}
 

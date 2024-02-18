@@ -36,7 +36,6 @@ class DailyService {
 	 * @param {string} userTime
 	 */
 	async create(users, team, totalTime, userTime) {
-		console.log(users, team, totalTime, userTime);
 		return await this.#collection.insertOne({
 			users,
 			team,

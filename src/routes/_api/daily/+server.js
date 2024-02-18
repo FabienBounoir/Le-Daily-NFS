@@ -24,7 +24,6 @@ export const GET = async ({ request }) => {
 		return json(dailies.reverse());
 	}
 	catch (e) {
-		console.error(e);
 		return json({ error: e.message }, { status: 500 });
 	}
 };
@@ -58,7 +57,6 @@ export const POST = async ({ request }) => {
 		return json(daily);
 	}
 	catch (e) {
-		console.error(e);
 		return json({ error: e.message }, { status: 500 });
 	}
 };

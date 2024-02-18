@@ -137,13 +137,13 @@
 		}
 	};
 
-	const returnTimeSpeaker = (name) => {
+	const returnTimeSpeaker = () => {
 		const speakerInfo = Array.from(timeResult.entries()).sort((a, b) => b[1] - a[1]);
 
 		let result = '';
 
 		for (const [name, time] of speakerInfo) {
-			result += `${name} : ${timeFormater(time)} \n`;
+			result += `<div style="display:flex; justify-content: space-between;" ><p>» ${name}</p><p>${timeFormater(time)}</p></div>\n`;
 		}
 
 		return result;
@@ -165,8 +165,6 @@
 			userTime: time
 		};
 
-		console.log(daily);
-
 		api.post('/daily', daily);
 	};
 </script>
@@ -185,12 +183,12 @@
 
 		<div class="container-result">
 			<div>
-				<h3>Voici le temps de parole de chacun :</h3>
+				<h1>Participants</h1>
 				<br />
-				<pre>{returnTimeSpeaker()}</pre>
+				{@html returnTimeSpeaker()}
 			</div>
 			<div>
-				<h3>Quelques informations supplémentaires :</h3>
+				<h1>Informations</h1>
 				<br />
 				<pre>Le daily a commencé à {startDailyDaily.toLocaleTimeString()}</pre>
 				<pre>Le daily a duré {timeFormater(totalTimer)}</pre>
@@ -311,17 +309,19 @@
 		justify-content: center;
 
 		div {
+			height: fit-content;
 			margin: 1em;
 			display: flex;
 			flex-direction: column;
-			align-items: center;
+
 			padding: 1em;
 			border-radius: 5px;
 			color: var(--primary);
-			border: 1px solid var(--primary);
+			background-color: var(--primary-100);
 
-			padding: 0.25em 0.5em;
-			border-radius: 0.25em;
+			padding: 0.8em 1em;
+			border-radius: 1em;
+			gap: 0.3em;
 
 			p {
 				font-size: 2em;
@@ -329,6 +329,10 @@
 
 			pre {
 				font-size: 1.5em;
+			}
+
+			div {
+				display: flex;
 			}
 		}
 	}
@@ -450,8 +454,7 @@
 	.widget-meteo-2 {
 		position: fixed;
 		bottom: 1em;
-		right: 1em;
-		padding: 1em;
+		right: 1.2em;
 	}
 
 	.widget-euromillion {
