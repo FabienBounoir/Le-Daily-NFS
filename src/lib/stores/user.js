@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 
 function init() {
 	const { set, update, subscribe } = writable(
-		/** @type {User} */ ({
+		/** @type {User} */({
 			_id: "-1",
 			profiles: ["anonymous"]
 		})
@@ -20,14 +20,19 @@ function init() {
 	 * @param {string} password
 	 */
 	async function login(username, password) {
-		const jwt = await api.post("/sessions", {
-			username,
-			password
-		});
+		try {
+			const jwt = await api.post("/sessions", {
+				username,
+				password
+			});
 
-		localStorage.setItem("jwt", jwt);
+			localStorage.setItem("jwt", jwt);
 
-		await refresh();
+			await refresh();
+		}
+		catch (e) {
+			throw e;
+		}
 	}
 
 	function logout() {

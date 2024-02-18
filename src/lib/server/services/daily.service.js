@@ -30,6 +30,79 @@ class DailyService {
 	}
 
 	/**
+	 * 
+	 * @param {String} _id 
+	 * @returns 
+	 */
+	get(_id) {
+		return this.#collection.findOne({ _id: new ObjectId(_id) });
+	}
+
+	/**
+	 * 
+	 * @param {String} team 
+	 */
+	async getStats(team) {
+
+		//Moyen total daily for a team
+		const moyen = await this.#collection.aggregate([
+			{
+				$match: {
+					team
+				}
+			},
+			{
+				$group: {
+					_id: "$team",
+					average: { $avg: "$totalTime" }
+				}
+			}
+		]).toArray();
+
+		//Total Time all daily for a team
+		const total = await this.#collection.aggregate([
+			{
+				$match: {
+					team
+				}
+			},
+			{
+				$group: {
+					_id: "$team",
+					total: { $sum: "$totalTime" }
+				}
+			}
+		]).toArray();
+
+		//Moyen de participants par daily
+		const moyenParticipants = await this.#collection.aggregate([
+			{
+				$match: {
+					team
+				}
+			},
+			{
+				$group: {
+					_id: "$team",
+					totalParticipants: { $sum: { $size: "$users" } },
+					totalDays: { $sum: 1 }
+				}
+			},
+			{
+				$project: {
+					average: { $divide: ["$totalParticipants", "$totalDays"] }
+				}
+			}
+		]).toArray();
+
+		return {
+			moyen: moyen[0]?.average || 0,
+			total: total[0]?.total || 0,
+			moyenPersonne: moyenParticipants[0]?.average || 0
+		};
+	}
+
+	/**
 	 * @param {string[]} users
 	 * @param {string} team
 	 * @param {string} totalTime

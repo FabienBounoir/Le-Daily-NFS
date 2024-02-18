@@ -1,7 +1,7 @@
 import { connection } from "$lib/server/db.server";
 import { dailyService } from "$lib/server/services/daily.service";
 import { userService } from "$lib/server/services/user.service";
-import { json } from "@sveltejs/kit";
+import { error, json } from "@sveltejs/kit";
 
 /**
  * @type {import("./$types").RequestHandler}
@@ -16,7 +16,7 @@ export const GET = async ({ request }) => {
 
 		// @ts-ignore
 		if (!user) {
-			throw new Error("Unauthorized");
+			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
 		const dailies = await dailyService.getAll(user.teams);
@@ -36,11 +36,11 @@ export const POST = async ({ request }) => {
 		const { users, team, totalTime, userTime } = await request.json();
 
 		if (!users || !team || !totalTime || !userTime) {
-			throw new Error("Invalid request");
+			throw error(404, { id: "request.invalid", message: "Invalid request" });
 		}
 
 		if (!request.headers || !request.headers.get("authorization")) {
-			throw new Error("Unauthorized");
+			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
 		// @ts-ignore
@@ -49,7 +49,7 @@ export const POST = async ({ request }) => {
 		const user = await userService.getFromJWT(token);
 
 		if (!user.teams.includes(team)) {
-			throw new Error("Unauthorized");
+			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
 		const daily = await dailyService.create(users, team, totalTime, userTime);

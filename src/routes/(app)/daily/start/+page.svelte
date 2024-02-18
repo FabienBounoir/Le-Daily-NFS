@@ -31,6 +31,7 @@
 	let voiceSynthesis = true;
 
 	let actualKeyDown = '';
+	let stats = new Promise(() => {});
 
 	/**
 	 * @type {number | null | undefined}
@@ -154,8 +155,28 @@
 		const minutes = Math.floor((time % 3600) / 60);
 		const seconds = time % 60;
 
-		return `${hours > 0 ? hours + 'h' : ''} ${minutes > 0 ? minutes + 'm' : ''} ${seconds}s`;
+		const formattedHours =
+			hours > 0 ? (hours % 1 !== 0 ? hours.toFixed(1) : Math.floor(hours)) + 'h' : '';
+		const formattedMinutes =
+			minutes > 0 ? (minutes % 1 !== 0 ? minutes.toFixed(1) : Math.floor(minutes)) + 'm' : '';
+		const formattedSeconds = (seconds % 1 !== 0 ? seconds.toFixed(1) : Math.floor(seconds)) + 's';
+
+		return `${formattedHours} ${formattedMinutes} ${formattedSeconds}`;
 	};
+
+	/**
+	 * @param {number} nombre
+	 * @param nombre
+	 */
+	function fixeNumber(nombre) {
+		const partieDecimale = nombre.toString().split('.')[1];
+
+		if (partieDecimale && partieDecimale.length > 1) {
+			return parseFloat(`${nombre.toFixed(1)}`);
+		}
+
+		return nombre;
+	}
 
 	const saveDaily = () => {
 		const daily = {
@@ -165,7 +186,9 @@
 			userTime: time
 		};
 
-		api.post('/daily', daily);
+		api.post('/daily', daily).then((res) => {
+			stats = api.get(`/daily/stats/${$user.teams[0]}`);
+		});
 	};
 </script>
 
@@ -190,8 +213,22 @@
 			<div>
 				<h1>Informations</h1>
 				<br />
-				<pre>Le daily a commencé à {startDailyDaily.toLocaleTimeString()}</pre>
-				<pre>Le daily a duré {timeFormater(totalTimer)}</pre>
+
+				{#await stats then data}
+					<p>
+						Le daily a commencé à <b>{startDailyDaily.toLocaleTimeString()}</b> il a duré
+						<b>{timeFormater(totalTimer)}</b>
+						c'est
+						<u class={totalTimer > data.moyen ? 'warning' : 'success'}
+							>{totalTimer > data.moyen ? 'plus' : 'moins'}</u
+						>
+						long que la moyenne qui est à
+						<b>{timeFormater(data.moyen)}</b>
+					</p>
+
+					<p>Vous avez passé <b>{timeFormater(data.total)}</b> dans un daily</p>
+					<p>En moyenne il y a <b>{fixeNumber(data.moyenPersonne)}</b> personnes dans un daily</p>
+				{/await}
 			</div>
 		</div>
 
@@ -308,6 +345,23 @@
 		gap: 1em;
 		justify-content: center;
 
+		b {
+			color: var(--primary-800);
+			font-weight: bold;
+		}
+
+		u {
+			text-decoration: underline;
+
+			&.warning {
+				color: red;
+			}
+
+			&.success {
+				color: green;
+			}
+		}
+
 		div {
 			height: fit-content;
 			margin: 1em;
@@ -323,9 +377,9 @@
 			border-radius: 1em;
 			gap: 0.3em;
 
-			p {
-				font-size: 2em;
-			}
+			// p {
+			// 	font-size: 2em;
+			// }
 
 			pre {
 				font-size: 1.5em;

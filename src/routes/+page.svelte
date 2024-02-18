@@ -15,8 +15,7 @@
 			await user.login(username, password);
 			await goto('/daily');
 		} catch (error) {
-			// @ts-ignore
-			snacks.error('user not found');
+			snacks.error(error.message);
 		} finally {
 			submitting = false;
 		}
