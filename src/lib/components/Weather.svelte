@@ -18,8 +18,8 @@
 				<p><i class="fa-solid fa-wind"></i> {parseFloat(data.wind.speed || 0).toFixed(1)} km/h</p>
 				<p><i class="fa-solid fa-location-dot"></i> {data.name}</p>
 			</div>
-			<img src="http://openweathermap.org/img/wn/01n@4x.png" alt="weather" />
-			<img src="http://openweathermap.org/img/wn/01n@4x.png" alt="weather" />
+			<img src="http://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png" alt="weather" />
+			<img src="http://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png" alt="weather" />
 		</div>
 	</div>
 {:catch error}
