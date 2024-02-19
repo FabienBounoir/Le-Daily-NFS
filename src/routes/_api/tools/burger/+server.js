@@ -1,6 +1,5 @@
 import { userService } from "$lib/server/services/user.service";
 import { json, text } from "@sveltejs/kit";
-import cheerio from 'cheerio';
 
 
 /**

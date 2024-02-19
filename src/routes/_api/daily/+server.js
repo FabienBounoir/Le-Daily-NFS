@@ -1,5 +1,6 @@
 import { connection } from "$lib/server/db.server";
 import { dailyService } from "$lib/server/services/daily.service";
+import { speakerService } from "$lib/server/services/speaker.service";
 import { userService } from "$lib/server/services/user.service";
 import { error, json } from "@sveltejs/kit";
 
@@ -33,7 +34,7 @@ export const GET = async ({ request }) => {
  */
 export const POST = async ({ request }) => {
 	try {
-		const { users, team, totalTime, userTime } = await request.json();
+		const { users, team, totalTime, userTime, speakerTime } = await request.json();
 
 		if (!users || !team || !totalTime || !userTime) {
 			throw error(404, { id: "request.invalid", message: "Invalid request" });
@@ -53,6 +54,16 @@ export const POST = async ({ request }) => {
 		}
 
 		const daily = await dailyService.create(users, team, totalTime, userTime);
+
+
+		if (speakerTime && speakerTime.length > 0) {
+			let promises = [];
+			for (let speaker of speakerTime) {
+				promises.push(speakerService.addSpeakerTime(speaker.name, team, speaker.time));
+			}
+
+			await Promise.all(promises);
+		}
 
 		return json(daily);
 	}

@@ -114,7 +114,7 @@ class DailyService {
 			team,
 			totalTime: parseInt(`${totalTime}`),
 			userTime: parseInt(`${userTime}`),
-			date: new Date()
+			date: new Date(new Date().getTime() - (parseInt(`${totalTime}`) * 1000))
 		});
 	}
 

@@ -13,6 +13,7 @@ class UserService {
 	 *  username: string;
 	 *  password: string;
 	 *  teams: string[];
+	 * 	speakers: string[];
 	 * }>} collection
 	 */
 	constructor(collection) {
