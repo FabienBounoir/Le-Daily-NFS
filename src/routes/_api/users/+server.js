@@ -18,7 +18,7 @@ export const GET = async () => {
 export const POST = async ({ request }) => {
 	const { username, password } = await request.json();
 
-	const user = await userService.create(username, password, ["admin"], ["nfs"]);
+	const user = await userService.create(username, password, ["user"], [""]);
 
 	return json(user);
 };
