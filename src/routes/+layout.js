@@ -18,4 +18,7 @@ export const load = async ({ url }) => {
 	if (is("anonymous") && url.pathname !== "/") {
 		throw redirect(302, "/");
 	}
+	else if (!is("anonymous") && url.pathname === "/") {
+		throw redirect(302, "/daily");
+	}
 };
