@@ -11,6 +11,8 @@
 		'https://media.tenor.com/9Hrom-q-xKsAAAAM/minions-banana.gif'
 	];
 
+	links.sort(() => Math.random() - 0.5);
+
 	let current = links[0];
 
 	onMount(() => {

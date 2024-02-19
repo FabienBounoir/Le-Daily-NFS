@@ -1,17 +1,18 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { snacks } from '$lib/stores/snacks';
+	import { user } from '$lib/stores/user';
 
 	let names = [
 		'Emilie',
 		'Fabien',
-		'Ihor',
-		'Cédric',
 		'Maxime',
 		'Guillaume',
-		'Samuel',
+		'Ihor',
 		'Eoghann',
+		'Samuel',
 		'Thomas',
+		'Cédric',
 		'Damien',
 		'Benjamin'
 	];
