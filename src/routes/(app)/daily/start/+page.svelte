@@ -24,7 +24,7 @@
 	let timeSpeaker = 0;
 
 	let startDailyDaily = new Date();
-	let endDaily = true;
+	let endDaily = false;
 	let interval = null;
 
 	let pause = false;
@@ -183,7 +183,11 @@
 			users: names,
 			team: $user.teams[0],
 			totalTime: totalTimer,
-			userTime: time
+			userTime: time,
+			speakerTime: Array.from(timeResult.entries()).map(([name, time]) => ({
+				name,
+				time
+			}))
 		};
 
 		api.post('/daily', daily).then((res) => {
@@ -205,12 +209,12 @@
 		<h1>Le daily est terminé</h1>
 
 		<div class="container-result">
-			<div>
+			<div class="participants">
 				<h1>Participants</h1>
 				<br />
 				{@html returnTimeSpeaker()}
 			</div>
-			<div>
+			<div class="informations">
 				<h1>Informations</h1>
 				<br />
 
@@ -230,25 +234,26 @@
 					<p>En moyenne il y a <b>{fixeNumber(data.moyenPersonne)}</b> personnes dans un daily</p>
 				{/await}
 			</div>
+			<div class="weather1">
+				<Weather city="Sophia Antipolis" />
+			</div>
+
+			<div class="weather2">
+				<Weather className="weather2" city="Montpellier" />
+			</div>
+
+			<div class="euromillion">
+				<EuroMillion />
+			</div>
+
+			<div class="hyrox-info">
+				<p>
+					HYROX dans {Math.floor((new Date('2024-10-12') - new Date()) / (1000 * 60 * 60 * 24))} jours
+				</p>
+			</div>
 		</div>
 
-		<div class="hyrox-info">
-			<p>
-				HYROX dans {Math.floor((new Date('2024-10-12') - new Date()) / (1000 * 60 * 60 * 24))} jours
-			</p>
-		</div>
-
-		<div class="widget-1">
-			<EuroMillion />
-			<Weather city="Sophia Antipolis" />
-		</div>
-
-		<div class="widget-2">
-			<Weather city="Montpellier" />
-		</div>
-
-		<div class="widget-euromillion">
-		</div>
+		<div class="widget-euromillion"></div>
 	{:else}
 		<h1>Le daily {$user?.username || 'NFS'}</h1>
 
@@ -278,8 +283,24 @@
 		{/if}
 
 		<p id="infoTimeDaily">
-			Le Daily a commencé à {startDailyDaily.toLocaleTimeString()} - {timeFormater(totalTimer)}
+			<i class="fa-solid fa-calendar-days"></i>
+			{`${startDailyDaily.getHours()}`.padStart(2, '0') +
+				':' +
+				`${startDailyDaily.getMinutes()}`.padStart(2, '0') +
+				':' +
+				`${startDailyDaily.getSeconds()}`.padStart(2, '0')} -
+			{`${startDailyDaily.getDate()}`.padStart(2, '0') +
+				'/' +
+				`${startDailyDaily.getMonth() + 1}`.padStart(2, '0') +
+				'/' +
+				startDailyDaily.getFullYear()}
 		</p>
+
+		<p class="actualTime">
+			<i class="fa-regular fa-clock"></i>
+			{timeFormater(totalTimer)}
+		</p>
+
 		<div id="infoKeys">
 			<div
 				on:click={() => {
@@ -321,6 +342,7 @@
 			goto('/daily');
 		}}
 		class="fa-solid fa-rectangle-xmark close-daily"
+		style={endDaily ? 'cursor: pointer;' : ''}
 	></i>
 </section>
 
@@ -340,10 +362,33 @@
 	}
 
 	.container-result {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
 		gap: 1em;
-		justify-content: center;
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		grid-template-rows: repeat(3, 1fr);
+		grid-column-gap: 0px;
+		grid-row-gap: 0px;
+
+		.participants {
+			grid-area: 1 / 1 / 6 / 3;
+		}
+
+		.informations {
+			grid-area: 1 / 3 / 2 / 7;
+		}
+
+		.weather1 {
+			grid-area: 2 / 3 / 3 / 5;
+		}
+
+		.weather2 {
+			grid-area: 2 / 5 / 4 / 7;
+		}
+
+		.euromillion {
+			width: max-content;
+			grid-area: 3/1/6/4;
+		}
 
 		b {
 			color: var(--primary-800);
@@ -405,6 +450,15 @@
 		bottom: 0;
 		left: 0;
 		padding: 1em;
+		font-size: 1.2em;
+	}
+
+	.actualTime {
+		position: fixed;
+		top: 0;
+		left: 0;
+		padding: 1em;
+		font-size: 1.7em;
 	}
 
 	.timer {
@@ -455,6 +509,7 @@
 
 		p {
 			font-size: 3em;
+			color: var(--primary-600);
 		}
 
 		div {
@@ -537,12 +592,11 @@
 	}
 
 	.hyrox-info {
-		position: fixed;
-		top: 0;
-		left: 0;
-		padding: 2em;
+		background: none !important;
 		animation: zoom 1s linear infinite;
 		font-weight: bold;
+		grid-area: 3 / 3 / 4 / 7;
+		text-align: center;
 	}
 
 	@keyframes zoom {
