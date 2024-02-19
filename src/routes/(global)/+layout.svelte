@@ -25,9 +25,9 @@
 			label: "Déjeuner d'équipe"
 		},
 		{
-			href: '/weather',
-			icon: 'fa-cloud',
-			label: 'Météo'
+			href: '/burger',
+			icon: 'fa-burger',
+			label: 'Burger'
 		},
 		{
 			href: '/quarkus',

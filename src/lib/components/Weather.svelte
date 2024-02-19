@@ -7,7 +7,7 @@
 </script>
 
 {#await weather}
-	Waiting...
+	Quel temps fait-il à {city} ? 🔎
 {:then data}
 	<div class="weather-container">
 		<h1>{data.weather[0].description}</h1>

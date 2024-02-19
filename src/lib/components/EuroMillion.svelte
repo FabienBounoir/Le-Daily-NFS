@@ -7,10 +7,11 @@
 
 {#await result}
 	<p>Le dernier tirage de l'euromillion:</p>
-	<p>Waiting...</p>
+	<p>Récupération des données...</p>
 {:then data}
 	{#if data && data.length > 0}
-	<p>Le dernier tirage de l'euromillion:</p>
+	<div>
+	<p>Tirage Euromillion du {new Date(data[data.length - 1].date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
 		<div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
 			{#each data[data.length - 1].numbers as number}
 				<p
@@ -39,6 +40,7 @@
 				</p>
 			{/each}
 		</div>
+	</div>
 	{/if}
 {:catch error}
 	error: {error}

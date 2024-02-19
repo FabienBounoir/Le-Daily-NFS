@@ -24,7 +24,7 @@
 	let timeSpeaker = 0;
 
 	let startDailyDaily = new Date();
-	let endDaily = false;
+	let endDaily = true;
 	let interval = null;
 
 	let pause = false;
@@ -238,16 +238,16 @@
 			</p>
 		</div>
 
-		<div class="widget-meteo-1">
+		<div class="widget-1">
+			<EuroMillion />
 			<Weather city="Sophia Antipolis" />
 		</div>
 
-		<div class="widget-meteo-2">
+		<div class="widget-2">
 			<Weather city="Montpellier" />
 		</div>
 
 		<div class="widget-euromillion">
-			<EuroMillion />
 		</div>
 	{:else}
 		<h1>Le daily {$user?.username || 'NFS'}</h1>
@@ -499,13 +499,16 @@
 		}
 	}
 
-	.widget-meteo-1 {
+	.widget-1 {
 		position: fixed;
 		bottom: 1em;
 		left: 1em;
+		display: flex;
+		gap: 2em;
+		flex-direction: column;
 	}
 
-	.widget-meteo-2 {
+	.widget-2 {
 		position: fixed;
 		bottom: 1em;
 		right: 1.2em;
