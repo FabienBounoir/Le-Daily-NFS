@@ -234,7 +234,7 @@
 
 		<div class="hyrox-info">
 			<p>
-				HYROX dans {Math.floor((new Date('2024-06-07') - new Date()) / (1000 * 60 * 60 * 24))} jours
+				HYROX dans {Math.floor((new Date('2024-10-12') - new Date()) / (1000 * 60 * 60 * 24))} jours
 			</p>
 		</div>
 
