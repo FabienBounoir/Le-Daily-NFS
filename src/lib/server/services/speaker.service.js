@@ -13,7 +13,7 @@ class SpeakerService {
 	 *  team: string;
 	 *  moyenTime: number;
 	 *  totalDaily: number;
-	 *  history: Array<{date: Date, time: number}>
+	 *  history: Array<{date: Date, time: number, dailyId: string}>
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -52,7 +52,7 @@ class SpeakerService {
 		});
 	}
 
-	async addSpeakerTime(name, team, time) {
+	async addSpeakerTime(name, team, time, dailyId) {
 		let speaker = await this.#collection.findOne({ name, team });
 
 		if (!speaker) {
@@ -64,10 +64,9 @@ class SpeakerService {
 			return console.error("Error creating speaker");
 		}
 
-		const history = [...speaker.history, { date: new Date(), time }];
+		const history = [...speaker.history, { date: new Date(), time, dailyId }];
 		const totalDaily = history.length;
 		const moyenTime = history.reduce((acc, curr) => acc + curr.time, 0) / totalDaily;
-
 
 		await this.#collection.updateOne({ name, team }, {
 			$set: {
@@ -76,6 +75,34 @@ class SpeakerService {
 				moyenTime
 			}
 		});
+	}
+
+	async removeDaily(dailyId, team) {
+		const speakers = await this.#collection.find({ team }).toArray();
+
+		console.log("dailyId", dailyId)
+
+		let promises = [];
+		for (let speaker of speakers) {
+			const history = speaker.history.filter(h => {
+				console.log("h.dailyId", h.dailyId)
+				return h.dailyId != dailyId
+			});
+
+			console.log("history", history)
+			const totalDaily = history.length;
+			const moyenTime = history.reduce((acc, curr) => acc + curr.time, 0) / totalDaily;
+
+			promises.push(this.#collection.updateOne({ _id: speaker._id }, {
+				$set: {
+					totalDaily,
+					history,
+					moyenTime
+				}
+			}));
+		}
+
+		await Promise.all(promises);
 	}
 
 	/**

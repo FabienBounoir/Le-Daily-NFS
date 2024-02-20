@@ -3,6 +3,7 @@
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import { scale, slide } from 'svelte/transition';
 	import { user } from '$lib/stores/user';
+	import { snacks } from '$lib/stores/snacks';
 
 	/**
 	 * @type {any[]}
@@ -99,9 +100,13 @@
 						</p>
 
 						<i
-							on:click={() => {
-								api.delete(`/daily/${daily._id}`);
-								dailies = dailies.filter((_, index) => index !== i);
+							on:click={async () => {
+								try {
+									await api.delete(`/daily/${daily._id}`);
+									dailies = dailies.filter((_, index) => index !== i);
+								} catch (e) {
+									snacks.error(e.message);
+								}
 							}}
 							class="fa-solid fa-trash"
 						></i>
