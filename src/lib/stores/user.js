@@ -1,3 +1,4 @@
+import myshades from "$lib/myshades";
 import { api } from "$lib/utils/api";
 import { writable } from "svelte/store";
 
@@ -12,6 +13,11 @@ function init() {
 	async function refresh() {
 		const user = await api.get("/sessions/me");
 		set(user);
+
+		myshades({
+			primary: user.color
+		})
+
 		return user;
 	}
 
@@ -43,10 +49,20 @@ function init() {
 		});
 	}
 
+	function change(user) {
+		set(user);
+	}
+
+	async function save(user) {
+		return await api.put("/sessions/me", user);
+	}
+
 	return {
 		subscribe,
 		refresh,
+		change,
 		login,
+		save,
 		logout
 	};
 }

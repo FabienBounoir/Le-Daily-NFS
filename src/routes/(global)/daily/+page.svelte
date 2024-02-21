@@ -3,21 +3,23 @@
 	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
 
-	let names = [
-		'Emilie',
-		'Fabien',
-		'Maxime',
-		'Guillaume',
-		'Ihor',
-		'Eoghann',
-		'Samuel',
-		'Thomas',
-		'Cédric',
-		'Damien',
-		'Benjamin'
-	];
+	// let names = [
+	// 	'Emilie',
+	// 	'Fabien',
+	// 	'Maxime',
+	// 	'Guillaume',
+	// 	'Ihor',
+	// 	'Eoghann',
+	// 	'Samuel',
+	// 	'Thomas',
+	// 	'Cédric',
+	// 	'Damien',
+	// 	'Benjamin'
+	// ];
 
-	let timeByUser = 120;
+	let names = $user.speakers;
+
+	let timeByUser = $user.timer || 120;
 	let randomized = true;
 	let voiceSynthesis = true;
 
@@ -40,32 +42,20 @@
 	<div class="container">
 		<h1>Participants:</h1>
 		<div class="participants">
-			{#each names as name}
+			{#each $user.speakers || [] as name}
 				<p
+					class={names.includes(name) ? '' : 'active'}
 					on:click={() => {
-						names = names.filter((n) => n !== name);
+						if (names.includes(name)) {
+							names = names.filter((n) => n !== name);
+						} else {
+							names = [...names, name];
+						}
 					}}
 				>
 					{name}
 				</p>
 			{/each}
-			<input
-				type="text"
-				placeholder="Ajouter un participant"
-				on:keydown={(e) => {
-					if (e.key === 'Enter') {
-						let formatted = e.target.value.trim();
-						formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-
-						if (names.includes(formatted))
-							return snacks.error('Ce participant est déjà dans la liste');
-
-						names = [...names, formatted];
-
-						e.target.value = '';
-					}
-				}}
-			/>
 		</div>
 	</div>
 
@@ -125,7 +115,8 @@
 			transition: filter 0.2s;
 		}
 
-		p:hover {
+		p:hover,
+		.active {
 			filter: grayscale(1);
 		}
 

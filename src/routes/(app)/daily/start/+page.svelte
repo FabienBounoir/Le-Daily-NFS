@@ -415,20 +415,12 @@
 
 			padding: 1em;
 			border-radius: 5px;
-			color: var(--primary);
+			color: var(--primary-600);
 			background-color: var(--primary-100);
 
 			padding: 0.8em 1em;
 			border-radius: 1em;
 			gap: 0.3em;
-
-			// p {
-			// 	font-size: 2em;
-			// }
-
-			pre {
-				font-size: 1.5em;
-			}
 
 			div {
 				display: flex;
@@ -484,12 +476,12 @@
 
 			span {
 				padding: 0.25em 0.5em;
-				border: 1px solid var(--primary);
+				border: 1px solid var(--primary-600);
 				border-radius: 0.25em;
 			}
 
 			span.key-down {
-				background-color: var(--primary);
+				background-color: var(--primary-600);
 				color: white;
 			}
 		}
@@ -582,7 +574,7 @@
 		right: 0;
 		margin: 3em;
 		padding: 0.5em;
-		border: 2px solid var(--primary);
+		border: 2px solid var(--primary-600);
 		border-radius: 5px;
 	}
 

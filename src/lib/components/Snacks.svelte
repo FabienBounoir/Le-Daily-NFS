@@ -1,7 +1,7 @@
 <script>
-	import { scale, slide } from "svelte/transition";
-	import { snacks } from "$lib/stores/snacks";
-	import Icon from "./Icon.svelte";
+	import { scale, slide } from 'svelte/transition';
+	import { snacks } from '$lib/stores/snacks';
+	import Icon from './Icon.svelte';
 </script>
 
 {#if $snacks.length}
@@ -33,9 +33,9 @@
 	li {
 		position: relative;
 		margin-top: 1em;
-		background-color: var(--primary);
+		background-color: var(--primary-600);
 		border: 1px solid currentColor;
-		color: rgb(var(--secondary));
+		color: var(--primary-100);
 		border-radius: 1em;
 		padding: 1em;
 		transform-origin: inherit;
