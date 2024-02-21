@@ -58,6 +58,30 @@ function init() {
 		});
 	}
 
+	/**
+	 * @param {string} username
+	 * @param {string} password
+	 */
+	async function register(username, password, team) {
+		try {
+			const jwt = await api.post("/users", {
+				username,
+				password,
+				team
+			});
+
+
+
+
+			localStorage.setItem("jwt", jwt);
+
+			await refresh();
+		}
+		catch (e) {
+			throw e;
+		}
+	}
+
 	function change(user) {
 		set(user);
 	}
@@ -72,6 +96,7 @@ function init() {
 		change,
 		login,
 		save,
+		register,
 		logout
 	};
 }

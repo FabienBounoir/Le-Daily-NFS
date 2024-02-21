@@ -25,7 +25,6 @@
 
 	let startDailyDaily = new Date();
 	let endDaily = false;
-	let interval = null;
 
 	let pause = false;
 	let voiceSynthesis = true;
@@ -65,7 +64,7 @@
 
 		textToSpeech(names[i]);
 
-		interval = setInterval(() => {
+		let interval = setInterval(() => {
 			if (endDaily) return;
 			if (!time) return;
 			totalTimer++;
@@ -104,6 +103,10 @@
 				pause = !pause;
 			}
 		});
+
+		return () => {
+			if (interval) clearInterval(interval);
+		};
 	});
 
 	const textToSpeech = (text) => {

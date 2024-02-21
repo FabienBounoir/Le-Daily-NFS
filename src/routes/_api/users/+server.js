@@ -1,6 +1,6 @@
 import { connection } from "$lib/server/db.server";
 import { userService } from "$lib/server/services/user.service";
-import { json } from "@sveltejs/kit";
+import { error, json } from "@sveltejs/kit";
 
 /**
  * @type {import("./$types").RequestHandler}
@@ -16,9 +16,22 @@ export const GET = async () => {
  * @type {import("./$types").RequestHandler}
  */
 export const POST = async ({ request }) => {
-	const { username, password } = await request.json();
+	const { username, password, team } = await request.json();
 
-	const user = await userService.create(username, password, ["user"], [""]);
+	//check if user exists 
+	const existingUser = await userService.getByUsername(username);
+
+	if (existingUser) {
+		throw error(400, "Username already taken");
+	}
+
+	const existingTeam = await userService.getByTeam(team);
+	console.log("existingTeam", existingTeam);
+	if (existingTeam && existingTeam.length > 0) {
+		throw error(400, "Team already exists");
+	}
+
+	const user = await userService.create(username, password, ["user"], [team]);
 
 	return json(user);
 };

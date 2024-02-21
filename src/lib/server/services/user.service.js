@@ -28,6 +28,25 @@ class UserService {
 	}
 
 	/**
+	 * 
+	 * @param {String} team 
+	 * @returns 
+	 */
+	getByTeam(team) {
+		return this.#collection.find({ teams: { $in: [team] } }).toArray();
+	}
+
+	/**
+	 * 
+	 * @param {String} username 
+	 * @returns 
+	 */
+	getByUsername(username) {
+		return this.#collection.findOne({ username });
+	}
+
+
+	/**
 	 * @param {string?} jwtString
 	 */
 	async getFromJWT(jwtString) {
@@ -63,7 +82,11 @@ class UserService {
 			username,
 			password: await crypter.hash(password),
 			profiles,
-			teams
+			teams,
+			speakers: [],
+			timer: 120,
+			nicknames: new Map(),
+			color: "#" + Math.floor(Math.random() * 16777215).toString(16)
 		});
 	}
 

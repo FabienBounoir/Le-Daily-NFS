@@ -15,7 +15,7 @@ export const load = async ({ url }) => {
 	 */
 	const is = (id) => $user.profiles.includes(id);
 
-	if (is("anonymous") && url.pathname !== "/") {
+	if (is("anonymous") && (url.pathname !== "/" && url.pathname !== "/register")) {
 		throw redirect(302, "/");
 	}
 	else if (!is("anonymous") && url.pathname === "/") {

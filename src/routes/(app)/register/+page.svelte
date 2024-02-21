@@ -1,17 +1,18 @@
 <script>
-	import '../app.scss';
 	import { goto } from '$app/navigation';
 	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
 
 	let username = '';
 	let password = '';
+	let team = '';
 
 	let submitting = false;
 
 	const login = async () => {
 		submitting = true;
 		try {
+			await user.register(username, password, team);
 			await user.login(username, password);
 			await goto('/daily');
 		} catch (error) {
@@ -23,7 +24,7 @@
 </script>
 
 <main>
-	<h1>Hummm, <br />identifiez-vous<br />🕵️</h1>
+	<h1>Hello, <br />Qui es tu ?<br />🔎</h1>
 	<form on:submit|preventDefault={login}>
 		<input
 			type="text"
@@ -39,11 +40,18 @@
 			placeholder="Mot de passe"
 			disabled={submitting}
 		/>
+		<input
+			type="text"
+			bind:value={team}
+			autocomplete="team"
+			placeholder="Nom de l'équipe"
+			disabled={submitting}
+		/>
 		<button type="submit" disabled={submitting}>S'identifier</button>
 		<span
 			on:click={() => {
-				goto('/register');
-			}}>Pas encore de compte ?</span
+				goto('/');
+			}}>Déjà un compte ?</span
 		>
 	</form>
 </main>

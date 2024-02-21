@@ -27,6 +27,9 @@
 	<div class="container">
 		<h1>Participants:</h1>
 		<div class="participants">
+			{#if !$user.speakers || $user.speakers.length === 0}
+				<p>Pas encore de speaker ! Tu peux en ajouter dans les paramètres.</p>
+			{/if}
 			{#each $user.speakers || [] as name}
 				<p
 					class={names.includes(name) ? '' : 'active'}
@@ -63,7 +66,7 @@
 		<input type="number" bind:value={timeByUser} min="30" max="300" step="30" />
 	</div>
 
-	<button on:click={() => start()} disabled={names.length === 0 || !timeByUser}
+	<button on:click={() => start()} disabled={names?.length === 0 || !timeByUser || !$user.speakers}
 		>Démarrer le daily</button
 	>
 </section>
