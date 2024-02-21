@@ -16,6 +16,7 @@ class UserService {
 	 * 	speakers: string[];
 	 *  color: string;
 	 *  timer: number;
+	 *  nicknames: Map<string, string>;
 	 * }>} collection
 	 */
 	constructor(collection) {

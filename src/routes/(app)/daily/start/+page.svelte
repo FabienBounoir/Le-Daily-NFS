@@ -115,6 +115,16 @@
 				window.speechSynthesis.cancel();
 			}
 
+			console.log('$user?.nicknames', $user?.nicknames, $user?.nicknames[text]);
+
+			try {
+				if ($user?.nicknames && $user?.nicknames[text]) {
+					text = $user?.nicknames[text];
+				}
+			} catch (e) {
+				console.log(e);
+			}
+
 			let utterance = new SpeechSynthesisUtterance(text);
 			window.speechSynthesis.speak(utterance);
 		}

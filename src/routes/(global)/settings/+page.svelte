@@ -9,6 +9,21 @@
 
 	$: color && myshades({ primary: color });
 	$: timer && user.change({ ...$user, timer });
+
+	let nicknames = new Map([...$user.speakers.map((name) => [name, name])]);
+
+	const updateElementMap = (map, key, value) => {
+		map.set(key, value);
+
+		user.change({
+			...$user,
+			nicknames: Object.fromEntries(map)
+		});
+
+		console.log($user);
+
+		return map;
+	};
 </script>
 
 <section>
@@ -77,6 +92,24 @@
 		<input type="number" bind:value={timer} min="10" max="3600" step="5" />
 	</div>
 
+	<!-- <div class="container">
+		<h1>Nicknames:</h1>
+		<p>Changez le nom de vos participants pour une expérience plus personnalisée</p>
+		{#each Array.from(nicknames, ([key, value]) => ({ key, value })) as { key, value }}
+			<div class="nickname">
+				<p>{key}</p>
+				<input
+					type="text"
+					value={nicknames.get(key)}
+					on:change={(e) => {
+						console.log('e', e);
+						// nicknames = updateElementMap(nicknames, key, '');
+					}}
+				/>
+			</div>
+		{/each}
+	</div> -->
+
 	<button
 		on:click={async () => {
 			try {
@@ -129,6 +162,15 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2em;
+	}
+
+	.nickname {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+		p {
+			min-width: 5em;
+		}
 	}
 
 	input[type='color'] {
