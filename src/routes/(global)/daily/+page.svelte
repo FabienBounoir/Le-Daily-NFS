@@ -1,21 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
-
-	// let names = [
-	// 	'Emilie',
-	// 	'Fabien',
-	// 	'Maxime',
-	// 	'Guillaume',
-	// 	'Ihor',
-	// 	'Eoghann',
-	// 	'Samuel',
-	// 	'Thomas',
-	// 	'Cédric',
-	// 	'Damien',
-	// 	'Benjamin'
-	// ];
 
 	let names = $user.speakers;
 

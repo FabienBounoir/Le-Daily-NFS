@@ -45,7 +45,16 @@ function init() {
 		localStorage.removeItem("jwt");
 		set({
 			_id: "-1",
-			profiles: ["anonymous"]
+			profiles: ["anonymous"],
+			username: "",
+			teams: [],
+			color: "#FF7900",
+			time: 0,
+			speakers: []
+		});
+
+		myshades({
+			primary: "#FF7900"
 		});
 	}
 
