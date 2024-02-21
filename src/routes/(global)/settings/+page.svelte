@@ -20,8 +20,6 @@
 			nicknames: Object.fromEntries(map)
 		});
 
-		console.log($user);
-
 		return map;
 	};
 </script>

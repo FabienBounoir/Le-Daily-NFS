@@ -115,8 +115,6 @@
 				window.speechSynthesis.cancel();
 			}
 
-			console.log('$user?.nicknames', $user?.nicknames, $user?.nicknames[text]);
-
 			try {
 				if ($user?.nicknames && $user?.nicknames[text]) {
 					text = $user?.nicknames[text];

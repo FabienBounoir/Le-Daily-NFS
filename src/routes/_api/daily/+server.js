@@ -59,7 +59,7 @@ export const POST = async ({ request }) => {
 		if (speakerTime && speakerTime.length > 0) {
 			let promises = [];
 			for (let speaker of speakerTime) {
-				promises.push(speakerService.addSpeakerTime(speaker.name, team, speaker.time));
+				promises.push(speakerService.addSpeakerTime(speaker.name, team, speaker.time, daily.insertedId.toString()));
 			}
 
 			await Promise.all(promises);

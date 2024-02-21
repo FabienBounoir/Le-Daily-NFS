@@ -3,6 +3,7 @@ import { error } from "@sveltejs/kit";
 import jwt from "jsonwebtoken";
 import { ObjectId } from "mongodb";
 import { db } from "../db.server";
+import { speakerService } from "./speaker.service";
 
 class DailyService {
 	#collection;
@@ -121,8 +122,8 @@ class DailyService {
 	/**
 	 * @param {string} _id
 	 */
-	delete(_id) {
-		return this.#collection.deleteOne({ _id: new ObjectId(_id) });
+	async delete(_id) {
+		return await this.#collection.deleteOne({ _id: new ObjectId(_id) });
 	}
 }
 
