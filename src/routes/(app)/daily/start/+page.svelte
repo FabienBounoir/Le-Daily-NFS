@@ -72,10 +72,6 @@
 
 			actualTime--;
 			timeSpeaker++;
-
-			if (actualTime == 5) {
-				textToSpeech(`5 secondes restantes`);
-			}
 		}, 1000);
 
 		document.addEventListener('keydown', (e) => {
