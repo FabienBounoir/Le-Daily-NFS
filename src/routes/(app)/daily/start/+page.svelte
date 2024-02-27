@@ -140,7 +140,7 @@
 			timeResult.set(names[i], timeSpeaker);
 			i++;
 			actualTime = time;
-			timeSpeaker = 0;
+			timeSpeaker = timeResult.get(names[i]) || 0;
 			textToSpeech(names[i]);
 		}
 	};
