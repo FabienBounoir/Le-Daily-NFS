@@ -40,7 +40,7 @@
 				{/if}
 
 				{#each speakers as speaker, i}
-					<div in:slide={{ duration: 500, delay: i * 100 }}>
+					<div in:slide={{ duration: 500, delay: i * 100 }} on:click={() => (window.location.href = `/statistics/${speaker.name}`)}>
 						<h1>{speaker.name}</h1>
 						<p>
 							<i class="fa-solid fa-stopwatch-20"></i>

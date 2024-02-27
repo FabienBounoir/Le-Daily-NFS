@@ -39,6 +39,16 @@ class SpeakerService {
 	}
 
 	/**
+	 * 
+	 * @param {String} team 
+	 * @param {String} name 
+	 * @returns 
+	 */
+	getByName(team, name) {
+		return this.#collection.findOne({team, name});
+	}
+
+	/**
 	 * @param {string} name
 	 * @param {string} team
 	 */
