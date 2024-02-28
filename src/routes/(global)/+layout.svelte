@@ -20,9 +20,9 @@
 			label: 'Statistiques'
 		},
 		{
-			href: '/lunch',
-			icon: 'fa-champagne-glasses',
-			label: "Déjeuner d'équipe"
+			href: '/wheel',
+			icon: 'fa-dharmachakra',
+			label: 'La roue de la MEP'
 		},
 		{
 			href: '/burger',
