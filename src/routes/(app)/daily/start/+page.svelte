@@ -32,6 +32,8 @@
 	let actualKeyDown = '';
 	let stats = new Promise(() => {});
 
+	let thomasTime = false;
+
 	/**
 	 * @type {number | null | undefined}
 	 */
@@ -90,6 +92,7 @@
 			} else if (e.code === 'ArrowLeft') {
 				if (i - 1 >= 0) {
 					timerHistory.set(names[i], actualTime);
+					timeResult.set(names[i], timeSpeaker);
 					i--;
 					actualTime = timerHistory.get(names[i]) || time;
 					timeSpeaker = timeResult.get(names[i]) || 0;
@@ -97,6 +100,8 @@
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
+			} else if (e.code === 'KeyT') {
+				thomasTime = !thomasTime;
 			}
 		});
 
@@ -286,6 +291,7 @@
 						{actualTime}
 					{/if}
 				</p>
+				<div class={`thomastime ${thomasTime ? '' : 'disabled'}`}>Thomas' time</div>
 			</div>
 		{/if}
 
@@ -309,6 +315,14 @@
 		</p>
 
 		<div id="infoKeys">
+			<div
+				on:click={() => {
+					pause = !pause;
+				}}
+			>
+				<span class={actualKeyDown == 'KeyT' ? 'key-down' : ''}>T</span>
+				Thomas
+			</div>
 			<div
 				on:click={() => {
 					pause = !pause;
@@ -596,6 +610,53 @@
 		font-weight: bold;
 		grid-area: 3 / 3 / 4 / 7;
 		text-align: center;
+	}
+
+	.thomastime {
+		margin-top: 4em;
+		font-size: 1.3em;
+		animation:
+			megaZoom 1s linear infinite,
+			arc-en-ciel 5s linear infinite;
+		color: var(--primary-400);
+		border-radius: 5px;
+
+		&.disabled {
+			display: none;
+		}
+	}
+
+	@keyframes megaZoom {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(2);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	@keyframes arc-en-ciel {
+		0% {
+			border: red 1px solid;
+		}
+		20% {
+			border: orange 1px solid;
+		}
+		40% {
+			border: yellow 1px solid;
+		}
+		60% {
+			border: green 1px solid;
+		}
+		80% {
+			border: blue 1px solid;
+		}
+		100% {
+			border: purple 1px solid;
+		}
 	}
 
 	@keyframes zoom {
