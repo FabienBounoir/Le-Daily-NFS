@@ -26,10 +26,10 @@
 	let startDailyDaily = new Date();
 	let endDaily = false;
 
-	let audio = null
+	let audio = null;
 
-	let displayGif = false
-	let gifUrl = "https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif"
+	let displayGif = false;
+	let gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
 
 	let pause = false;
 	let voiceSynthesis = true;
@@ -90,7 +90,7 @@
 				actualKeyDown = '';
 			}, 300);
 
-			console.log("e.code", e.code)
+			console.log('e.code', e.code);
 
 			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
@@ -105,90 +105,130 @@
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
-			} else if(e.code === "KeyS"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+			} else if (e.code === 'KeyS') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media1.tenor.com/m/rXBmuLxryLMAAAAd/ciao-squeezie.gif"
-				displayGif = true
+				gifUrl = 'https://media1.tenor.com/m/rXBmuLxryLMAAAAd/ciao-squeezie.gif';
+				displayGif = true;
 
-				audioManager("ciao")
-			} else if(e.code === "KeyC"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+				audioManager('ciao');
+			} else if (e.code === 'KeyC') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media.tenor.com/wY5SYwnbO24AAAAM/wolf.gif"
-				displayGif = true
+				gifUrl = 'https://media.tenor.com/wY5SYwnbO24AAAAM/wolf.gif';
+				displayGif = true;
 
-				audioManager("clapping")
-			} else if(e.code === "KeyH"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+				audioManager('clapping');
+			} else if (e.code === 'KeyH') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif"
-				displayGif = true
-				audioManager("coucou")
-
-			} else if(e.code === "KeyL"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+				gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
+				displayGif = true;
+				audioManager('coucou');
+			} else if (e.code === 'KeyL') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif"
-				displayGif = true
+				gifUrl = 'https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif';
+				displayGif = true;
 
-				audioManager("laught")
-			} else if(e.code === "KeyL"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+				audioManager('laught');
+			} else if (e.code === 'KeyL') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif"
-				displayGif = true
+				gifUrl = 'https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif';
+				displayGif = true;
 
-				audioManager("laught")
-			} else if(e.code === "KeyQ"){
-				audioManager("attends")
-			} else if(e.code === "KeyK"){
-				if(audio){
-					audio.pause()
+				audioManager('laught');
+			} else if (e.code === 'KeyQ') {
+				audioManager('attends');
+			} else if (e.code === 'KeyK') {
+				if (audio) {
+					audio.pause();
 				}
-			} else if(e.code === "Semicolon"){
-				if(displayGif){
-					displayGif = false
-					if(audio){
-						audio.pause()
+			} else if (e.code === 'Semicolon') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
 					}
-					return
+					return;
 				}
 
-				gifUrl = "https://media.tenor.com/RU195QLMRgQAAAAj/what-the-fuck-alex-pall.gif"
-				displayGif = true
+				gifUrl = 'https://media.tenor.com/RU195QLMRgQAAAAj/what-the-fuck-alex-pall.gif';
+				displayGif = true;
 
-				audioManager("merde")
+				audioManager('merde');
+			} else if (e.code === 'KeyG') {
+				audioManager('greg');
+			} else if (e.code === 'KeyE') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
+					}
+					return;
+				}
+
+				gifUrl = 'https://media1.tenor.com/m/tg2CztUPUCgAAAAC/cest-honteux-honteux.gif';
+				displayGif = true;
+
+				audioManager('honteux');
+			} else if (e.code === 'KeyO') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
+					}
+					return;
+				}
+
+				gifUrl = 'https://media1.tenor.com/m/MIYCaMBClE8AAAAC/ok-lol.gif';
+				displayGif = true;
+
+				audioManager('ok');
+			} else if (e.code === 'KeyZ') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
+					}
+					return;
+				}
+
+				gifUrl = 'https://media1.tenor.com/m/WF9ahkVEZZUAAAAC/eevee-eevee-wow.gif';
+				displayGif = true;
+
+				audioManager('wow');
 			}
 		});
 
@@ -197,10 +237,10 @@
 		};
 	});
 
-	const audioManager = (audioName) =>{
-		audio = new Audio('/'+ audioName +'.mp3');
+	const audioManager = (audioName) => {
+		audio = new Audio('/' + audioName + '.mp3');
 		audio.play();
-	}
+	};
 
 	const textToSpeech = (text) => {
 		if (!voiceSynthesis) return;
@@ -473,7 +513,7 @@
 		</div>
 
 		{#if displayGif}
-			<img class="gifFullScreen" src={gifUrl} alt="gif" /> 
+			<img class="gifFullScreen" src={gifUrl} alt="gif" />
 		{/if}
 	{/if}
 
@@ -487,7 +527,7 @@
 </section>
 
 <style lang="scss">
-	.gifFullScreen{
+	.gifFullScreen {
 		z-index: 1000;
 		position: fixed;
 		top: 0;
