@@ -26,13 +26,16 @@
 	let startDailyDaily = new Date();
 	let endDaily = false;
 
+	let audio = null
+
+	let displayGif = false
+	let gifUrl = "https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif"
+
 	let pause = false;
 	let voiceSynthesis = true;
 
 	let actualKeyDown = '';
 	let stats = new Promise(() => {});
-
-	let thomasTime = false;
 
 	/**
 	 * @type {number | null | undefined}
@@ -87,6 +90,8 @@
 				actualKeyDown = '';
 			}, 300);
 
+			console.log("e.code", e.code)
+
 			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
@@ -100,8 +105,90 @@
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
-			} else if (e.code === 'KeyT') {
-				thomasTime = !thomasTime;
+			} else if(e.code === "KeyS"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media1.tenor.com/m/rXBmuLxryLMAAAAd/ciao-squeezie.gif"
+				displayGif = true
+
+				audioManager("ciao")
+			} else if(e.code === "KeyC"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media.tenor.com/wY5SYwnbO24AAAAM/wolf.gif"
+				displayGif = true
+
+				audioManager("clapping")
+			} else if(e.code === "KeyH"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif"
+				displayGif = true
+				audioManager("coucou")
+
+			} else if(e.code === "KeyL"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif"
+				displayGif = true
+
+				audioManager("laught")
+			} else if(e.code === "KeyL"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif"
+				displayGif = true
+
+				audioManager("laught")
+			} else if(e.code === "KeyQ"){
+				audioManager("attends")
+			} else if(e.code === "KeyK"){
+				if(audio){
+					audio.pause()
+				}
+			} else if(e.code === "Semicolon"){
+				if(displayGif){
+					displayGif = false
+					if(audio){
+						audio.pause()
+					}
+					return
+				}
+
+				gifUrl = "https://media.tenor.com/RU195QLMRgQAAAAj/what-the-fuck-alex-pall.gif"
+				displayGif = true
+
+				audioManager("merde")
 			}
 		});
 
@@ -109,6 +196,11 @@
 			if (interval) clearInterval(interval);
 		};
 	});
+
+	const audioManager = (audioName) =>{
+		audio = new Audio('/'+ audioName +'.mp3');
+		audio.play();
+	}
 
 	const textToSpeech = (text) => {
 		if (!voiceSynthesis) return;
@@ -291,7 +383,6 @@
 						{actualTime}
 					{/if}
 				</p>
-				<div class={`thomastime ${thomasTime ? '' : 'disabled'}`}>Thomas' time</div>
 			</div>
 		{/if}
 
@@ -320,8 +411,32 @@
 					pause = !pause;
 				}}
 			>
-				<span class={actualKeyDown == 'KeyT' ? 'key-down' : ''}>T</span>
-				Thomas
+				<span class={actualKeyDown == 'KeyS' ? 'key-down' : ''}>S</span>
+				Ciao
+			</div>
+			<div
+				on:click={() => {
+					pause = !pause;
+				}}
+			>
+				<span class={actualKeyDown == 'KeyC' ? 'key-down' : ''}>C</span>
+				Clap
+			</div>
+			<div
+				on:click={() => {
+					pause = !pause;
+				}}
+			>
+				<span class={actualKeyDown == 'KeyL' ? 'key-down' : ''}>L</span>
+				Laugh
+			</div>
+			<div
+				on:click={() => {
+					pause = !pause;
+				}}
+			>
+				<span class={actualKeyDown == 'KeyH' ? 'key-down' : ''}>H</span>
+				Hey
 			</div>
 			<div
 				on:click={() => {
@@ -356,6 +471,10 @@
 				Previous
 			</div>
 		</div>
+
+		{#if displayGif}
+			<img class="gifFullScreen" src={gifUrl} alt="gif" /> 
+		{/if}
 	{/if}
 
 	<i
@@ -368,6 +487,15 @@
 </section>
 
 <style lang="scss">
+	.gifFullScreen{
+		z-index: 1000;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100dvw;
+		height: 100dvh;
+	}
+
 	.close-daily {
 		position: fixed;
 		top: 0;
@@ -610,53 +738,6 @@
 		font-weight: bold;
 		grid-area: 3 / 3 / 4 / 7;
 		text-align: center;
-	}
-
-	.thomastime {
-		margin-top: 4em;
-		font-size: 1.3em;
-		animation:
-			megaZoom 1s linear infinite,
-			arc-en-ciel 5s linear infinite;
-		color: var(--primary-400);
-		border-radius: 5px;
-
-		&.disabled {
-			display: none;
-		}
-	}
-
-	@keyframes megaZoom {
-		0% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(2);
-		}
-		100% {
-			transform: scale(1);
-		}
-	}
-
-	@keyframes arc-en-ciel {
-		0% {
-			border: red 1px solid;
-		}
-		20% {
-			border: orange 1px solid;
-		}
-		40% {
-			border: yellow 1px solid;
-		}
-		60% {
-			border: green 1px solid;
-		}
-		80% {
-			border: blue 1px solid;
-		}
-		100% {
-			border: purple 1px solid;
-		}
 	}
 
 	@keyframes zoom {
