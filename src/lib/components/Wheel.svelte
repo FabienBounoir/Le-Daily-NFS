@@ -31,9 +31,11 @@
 		e.stopPropagation();
 		if (!isSpinning) {
 			isSpinning = true;
-			let spinMin = Math.random() * 30 + 1;
 
-			const addedSpin = Math.random() * spinMin;
+
+			const turnWheel = Math.floor(Math.random() * (14 - 3 + 1)) + 3; 
+
+			const addedSpin = turnWheel + Math.random() * (0.9) + 0.1; 
 			spinDeg += addedSpin;
 
 			let userSpin = items.length * addedSpin;
