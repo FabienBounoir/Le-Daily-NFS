@@ -68,6 +68,7 @@
 		}
 
 		textToSpeech(names[i]);
+		animationSpeaker(names[i]);
 
 		let interval = setInterval(() => {
 			if (endDaily) return;
@@ -266,6 +267,7 @@
 
 	const newSpeaker = () => {
 		if (endDaily) return;
+		displayGif = false;
 		if (i + 1 >= names.length) {
 			endDaily = true;
 			timerHistory.set(names[i], actualTime);
@@ -279,21 +281,21 @@
 			actualTime = time;
 			timeSpeaker = timeResult.get(names[i]) || 0;
 			textToSpeech(names[i]);
-			animationSpeaker(names[i])
+			animationSpeaker(names[i]);
 		}
 	};
 
-	const animationSpeaker = (name) =>{
+	const animationSpeaker = (name) => {
 		if ($user?.animation && $user?.animation[name]) {
 			gifUrl = $user?.animation[name];
 			displayGif = true;
 
-			setTimeout(() =>{
+			setTimeout(() => {
 				displayGif = false;
-				gifUrl = ""
-			}, 2000)
+				gifUrl = '';
+			}, 2000);
 		}
-	}
+	};
 
 	const returnTimeSpeaker = () => {
 		const speakerInfo = Array.from(timeResult.entries()).sort((a, b) => b[1] - a[1]);
