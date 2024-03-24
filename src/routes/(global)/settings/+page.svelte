@@ -10,6 +10,9 @@
 	$: color && myshades({ primary: color });
 	$: timer && user.change({ ...$user, timer });
 
+	let addAnimationName = '';
+	let addAnimationValue = '';
+
 	let nicknames = new Map([...$user.speakers.map((name) => [name, name])]);
 
 	const updateElementMap = (map, key, value) => {
@@ -89,6 +92,58 @@
 		<p>Prenez le contrôle absolu du temps de parole de chaque intervenant selon vos préférences</p>
 		<input type="number" bind:value={timer} min="10" max="3600" step="5" />
 	</div>
+	<div class="container">
+		<h1>Animation de Speaker:</h1>
+		<div class="animation-container">
+			{#each Object.entries($user.animation) as [key, value]}
+				<span
+					>{key}<input
+						type="text"
+						bind:value
+						placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+					/>
+					<button
+						on:click={() => {
+							delete $user.animation[key];
+							user.change({
+								...$user,
+								animation: $user.animation
+							});
+						}}>X</button
+					>
+				</span>
+			{/each}
+		</div>
+		<div class="new-animation">
+			<select bind:value={addAnimationName}>
+				{#each $user.speakers as speaker}
+					<option value={speaker}>{speaker}</option>
+				{/each}
+			</select>
+			<input
+				type="text"
+				bind:value={addAnimationValue}
+				placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+			/>
+			<button
+				on:click={() => {
+					//check if addAnimationValue is link tenor
+					if (!addAnimationValue.includes('tenor.com')) return snacks.error('Lien non valide');
+
+					user.change({
+						...$user,
+						animation: {
+							...$user.animation,
+							[addAnimationName]: addAnimationValue
+						}
+					});
+
+					addAnimationName = '';
+					addAnimationValue = '';
+				}}>Ajouter</button
+			>
+		</div>
+	</div>
 
 	<!-- <div class="container">
 		<h1>Nicknames:</h1>
@@ -132,6 +187,39 @@
 </section>
 
 <style lang="scss">
+	.new-animation {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+		padding-top: 1em;
+		border-top: 1px solid var(--primary-100);
+
+		button {
+			width: min-content !important;
+		}
+
+		select {
+			width: min-content !important;
+		}
+	}
+	.animation-container {
+		margin-bottom: 0.5em;
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+
+		span {
+			display: flex;
+			gap: 1em;
+			align-items: center;
+			justify-content: center;
+		}
+
+		button {
+			width: min-content !important;
+		}
+	}
+
 	.participants {
 		display: flex;
 		flex-wrap: wrap;

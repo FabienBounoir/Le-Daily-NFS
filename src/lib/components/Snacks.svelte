@@ -9,7 +9,7 @@
 		{#each $snacks as snack (snack._id)}
 			<li in:slide={{ duration: 300 }} out:slide>
 				<div in:scale={{ delay: 150 }} out:scale class="delete">
-					<Icon name="ban" on:click={() => snacks.remove(snack)} />
+					<Icon name="chevron-down" on:click={() => snacks.remove(snack)} />
 				</div>
 				{snack.message}
 			</li>
