@@ -30,6 +30,7 @@
 
 	let displayGif = false;
 	let gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
+	let profilAnimation = '';
 
 	let pause = false;
 	let voiceSynthesis = true;
@@ -41,6 +42,10 @@
 	 * @type {number | null | undefined}
 	 */
 	let keydownInterval = null;
+	/**
+	 * @type {number | null | undefined}
+	 */
+	let animationProfilTimer = null
 	let totalTimer = 0;
 
 	const timerHistory = new Map();
@@ -96,6 +101,7 @@
 			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
+				profilAnimation = "";
 				if (i - 1 >= 0) {
 					timerHistory.set(names[i], actualTime);
 					timeResult.set(names[i], timeSpeaker);
@@ -103,6 +109,7 @@
 					actualTime = timerHistory.get(names[i]) || time;
 					timeSpeaker = timeResult.get(names[i]) || 0;
 					textToSpeech(names[i]);
+					animationSpeaker(names[i]);
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
@@ -268,6 +275,7 @@
 	const newSpeaker = () => {
 		if (endDaily) return;
 		displayGif = false;
+		profilAnimation = ""
 		if (i + 1 >= names.length) {
 			endDaily = true;
 			timerHistory.set(names[i], actualTime);
@@ -287,13 +295,15 @@
 
 	const animationSpeaker = (name) => {
 		if ($user?.animation && $user?.animation[name]) {
-			gifUrl = $user?.animation[name];
-			displayGif = true;
+			profilAnimation = $user?.animation[name];
 
-			setTimeout(() => {
-				displayGif = false;
-				gifUrl = '';
-			}, 2000);
+			if (animationProfilTimer) {
+				clearTimeout(animationProfilTimer);
+			}
+
+			animationProfilTimer = setTimeout(() => {
+				profilAnimation = '';
+			}, 4000);
 		}
 	};
 
@@ -530,6 +540,16 @@
 		{#if displayGif}
 			<img class="gifFullScreen" src={gifUrl} alt="gif" />
 		{/if}
+
+		{#if profilAnimation}
+			<div class="profilAnimation">
+				{#key profilAnimation}
+					
+				<img in:scale={{ duration: 500, opacity: 0 }} src={profilAnimation} alt="gif" />
+				{/key}
+			</div>
+
+		{/if}
 	{/if}
 
 	<i
@@ -549,6 +569,26 @@
 		left: 0;
 		width: 100dvw;
 		height: 100dvh;
+		pointer-events: none;
+	}
+
+	.profilAnimation{
+		z-index: -1;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100dvw;
+		height: 100dvh;
+		align-content: end;
+		display: flex;
+		text-align: center;
+		pointer-events: none;
+		justify-content: center;
+
+		img{
+			pointer-events: none;
+			opacity: 0.5;
+		}
 	}
 
 	.close-daily {
