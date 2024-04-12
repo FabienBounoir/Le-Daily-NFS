@@ -23,7 +23,7 @@
 		</div>
 	</div>
 {:catch error}
-	error: {error}
+	{error}
 {/await}
 
 <style lang="scss">
@@ -35,6 +35,7 @@
 		background-color: var(--primary-100);
 		padding: 0.5em 1em;
 		position: relative;
+		width: auto;
 
 		img {
 			width: 120px;

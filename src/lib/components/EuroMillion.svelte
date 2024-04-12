@@ -47,7 +47,7 @@
 		</div>
 	{/if}
 {:catch error}
-	error: {error}
+	{error}
 {/await}
 
 <style lang="scss">

@@ -408,7 +408,11 @@
 			</div>
 
 			<div class="weather2">
-				<Weather className="weather2" city="Montpellier" />
+				<Weather city="Montpellier" />
+			</div>
+
+			<div class="weather3">
+				<Weather city="Rennes" />
 			</div>
 
 			<div class="euromillion">
@@ -629,6 +633,10 @@
 			grid-area: 2 / 5 / 4 / 7;
 		}
 
+		.weather3{
+			grid-area: 3 / 5 / 4 / 7
+		}
+
 		.euromillion {
 			width: max-content;
 			grid-area: 3/1/6/4;
@@ -831,7 +839,7 @@
 		background: none !important;
 		animation: zoom 1s linear infinite;
 		font-weight: bold;
-		grid-area: 3 / 3 / 4 / 7;
+		grid-area: 3 / 3 / 4 / 5;
 		text-align: center;
 	}
 
