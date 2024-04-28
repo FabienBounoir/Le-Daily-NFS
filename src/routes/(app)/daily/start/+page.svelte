@@ -34,6 +34,7 @@
 
 	let pause = false;
 	let voiceSynthesis = true;
+	let animationSpeakers = true;
 
 	let actualKeyDown = '';
 	let stats = new Promise(() => {});
@@ -45,7 +46,7 @@
 	/**
 	 * @type {number | null | undefined}
 	 */
-	let animationProfilTimer = null
+	let animationProfilTimer = null;
 	let totalTimer = 0;
 
 	const timerHistory = new Map();
@@ -70,6 +71,11 @@
 		const voiceQuery = url.searchParams.get('voice');
 		if (voiceQuery) {
 			voiceSynthesis = voiceQuery === 'true';
+		}
+
+		const animationQuery = url.searchParams.get('animation');
+		if (animationQuery) {
+			animationSpeakers = animationQuery === 'true';
 		}
 
 		textToSpeech(names[i]);
@@ -101,7 +107,7 @@
 			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
-				profilAnimation = "";
+				profilAnimation = '';
 				if (i - 1 >= 0) {
 					timerHistory.set(names[i], actualTime);
 					timeResult.set(names[i], timeSpeaker);
@@ -275,7 +281,7 @@
 	const newSpeaker = () => {
 		if (endDaily) return;
 		displayGif = false;
-		profilAnimation = ""
+		profilAnimation = '';
 		if (i + 1 >= names.length) {
 			endDaily = true;
 			timerHistory.set(names[i], actualTime);
@@ -546,14 +552,12 @@
 			<img class="gifFullScreen" src={gifUrl} alt="gif" />
 		{/if}
 
-		{#if profilAnimation}
+		{#if profilAnimation && animationSpeakers}
 			<div class="profilAnimation">
 				{#key profilAnimation}
-					
-				<img in:scale={{ duration: 500, opacity: 0 }} src={profilAnimation} alt="gif" />
+					<img in:scale={{ duration: 500, opacity: 0 }} src={profilAnimation} alt="gif" />
 				{/key}
 			</div>
-
 		{/if}
 	{/if}
 
@@ -577,7 +581,7 @@
 		pointer-events: none;
 	}
 
-	.profilAnimation{
+	.profilAnimation {
 		z-index: -1;
 		position: fixed;
 		top: 0;
@@ -590,7 +594,7 @@
 		pointer-events: none;
 		justify-content: center;
 
-		img{
+		img {
 			pointer-events: none;
 			opacity: 0.5;
 		}
@@ -634,8 +638,8 @@
 			grid-area: 2 / 5 / 4 / 7;
 		}
 
-		.weather3{
-			grid-area: 3 / 5 / 4 / 7
+		.weather3 {
+			grid-area: 3 / 5 / 4 / 7;
 		}
 
 		.euromillion {
