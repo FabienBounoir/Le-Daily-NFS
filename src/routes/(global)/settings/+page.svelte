@@ -12,6 +12,8 @@
 
 	let addAnimationName = '';
 	let addAnimationValue = '';
+	let addNicknameName = '';
+	let addNicknameValue = '';
 
 	let nicknames = new Map([...$user.speakers.map((name) => [name, name])]);
 
@@ -89,79 +91,129 @@
 	</div>
 	<div class="container">
 		<h1>Temps par participant (en secondes):</h1>
-		<p>Prenez le contrôle absolu du temps de parole de chaque intervenant selon vos préférences</p>
+		<p>Prenez le contrôle absolu du temps de parole de chaque intervenant selon vos préférences:</p>
 		<input type="number" bind:value={timer} min="10" max="3600" step="5" />
 	</div>
 	<div class="container">
 		<h1>Animation de Speaker:</h1>
+		<p>Ajouter des animations pour chaque speaker:</p>
 		<div class="animation-container">
-			{#each Object.entries($user.animation) as [key, value]}
-				<span
-					>{key}<input
-						type="text"
-						bind:value
-						placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-					/>
-					<button
-						on:click={() => {
-							delete $user.animation[key];
-							user.change({
-								...$user,
-								animation: $user.animation
-							});
-						}}>X</button
-					>
-				</span>
-			{/each}
+			{#if $user?.animation}
+				{#each Object.entries($user?.animation) as [key, value]}
+					<span
+						>{key}<input
+							type="text"
+							bind:value
+							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+						/>
+						<button
+							on:click={() => {
+								delete $user.animation[key];
+								user.change({
+									...$user,
+									animation: $user.animation
+								});
+							}}>X</button
+						>
+					</span>
+				{/each}
+			{/if}
 		</div>
 		<div class="new-animation">
-			<select bind:value={addAnimationName}>
-				{#each $user.speakers as speaker}
-					<option value={speaker}>{speaker}</option>
-				{/each}
-			</select>
-			<input
-				type="text"
-				bind:value={addAnimationValue}
-				placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-			/>
-			<button
-				on:click={() => {
-					//check if addAnimationValue is link tenor
-					if (!addAnimationValue.includes('tenor.com')) return snacks.error('Lien non valide');
+			{#if $user?.speakers?.length > 0}
+				<select bind:value={addAnimationName}>
+					{#each $user.speakers as speaker}
+						<option value={speaker}>{speaker}</option>
+					{/each}
+				</select>
+				<input
+					type="text"
+					bind:value={addAnimationValue}
+					placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+				/>
+				<button
+					on:click={() => {
+						//check if addAnimationValue is link tenor
+						if (!addAnimationValue.includes('tenor.com')) return snacks.error('Lien non valide');
 
-					user.change({
-						...$user,
-						animation: {
-							...$user.animation,
-							[addAnimationName]: addAnimationValue
-						}
-					});
+						user.change({
+							...$user,
+							animation: {
+								...$user.animation,
+								[addAnimationName]: addAnimationValue
+							}
+						});
 
-					addAnimationName = '';
-					addAnimationValue = '';
-				}}>Ajouter</button
-			>
+						addAnimationName = '';
+						addAnimationValue = '';
+					}}>Ajouter</button
+				>
+			{:else}
+				<p>ℹ️ Ajouter des participants pour pouvoir mettre des animations de speakers.</p>
+			{/if}
 		</div>
 	</div>
 
-	<!-- <div class="container">
+	<div class="container">
 		<h1>Nicknames:</h1>
-		<p>Changez le nom de vos participants pour une expérience plus personnalisée</p>
-		{#each Array.from(nicknames, ([key, value]) => ({ key, value })) as { key, value }}
-			<div class="nickname">
-				<p>{key}</p>
+		<p>Changez le nom enoncé lors du changement de speaker:</p>
+
+		<div class="animation-container">
+			{#if $user?.nicknames}
+				{#each Object.entries($user?.nicknames) as [key, value]}
+					<span
+						>{key}<input
+							type="text"
+							bind:value
+							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+						/>
+						<button
+							on:click={() => {
+								delete $user.nicknames[key];
+								user.change({
+									...$user,
+									nicknames: $user.nicknames
+								});
+							}}>X</button
+						>
+					</span>
+				{/each}
+			{/if}
+		</div>
+
+		<div class="new-nickname">
+			{#if $user?.speakers?.length > 0}
+				<select bind:value={addNicknameName}>
+					{#each $user.speakers as speaker}
+						<option value={speaker}>{speaker}</option>
+					{/each}
+				</select>
 				<input
 					type="text"
-					value={nicknames.get(key)}
-					on:change={(e) => {
-						console.log('e', e);
-						// nicknames = updateElementMap(nicknames, key, '');
-					}}
+					bind:value={addNicknameValue}
+					placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
 				/>
-			</div>
-		{/each}
-	</div> -->
+				<button
+					on:click={() => {
+						if (!addNicknameValue) return snacks.error('Veuillez entrer un nickname');
+
+						user.change({
+							...$user,
+							nicknames: {
+								...$user.animation,
+								[addNicknameName]: addNicknameValue
+							}
+						});
+
+						addNicknameName = '';
+						addNicknameValue = '';
+					}}>Ajouter</button
+				>
+			{:else}
+				<p>ℹ️ Ajouter des participants pour pouvoir mettre des nicknames à vos speakers.</p>
+			{/if}
+		</div>
+	</div>
 
 	<button
 		on:click={async () => {
@@ -187,7 +239,8 @@
 </section>
 
 <style lang="scss">
-	.new-animation {
+	.new-animation,
+	.new-nickname {
 		display: flex;
 		gap: 1em;
 		align-items: center;
@@ -233,6 +286,28 @@
 			color: var(--color-white);
 			cursor: pointer;
 			transition: filter 0.2s;
+
+			&:hover {
+				animation: shake 0.5s ease infinite;
+			}
+
+			@keyframes shake {
+				0% {
+					transform: rotate(0deg);
+				}
+				25% {
+					transform: rotate(5deg);
+				}
+				50% {
+					transform: rotate(-5deg);
+				}
+				75% {
+					transform: rotate(5deg);
+				}
+				100% {
+					transform: rotate(-5deg);
+				}
+			}
 		}
 
 		p:hover,

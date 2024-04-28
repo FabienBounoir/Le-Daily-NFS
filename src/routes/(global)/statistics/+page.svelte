@@ -40,7 +40,10 @@
 				{/if}
 
 				{#each speakers as speaker, i}
-					<div in:slide={{ duration: 500, delay: i * 100 }} on:click={() => (window.location.href = `/statistics/${speaker.name}`)}>
+					<div
+						in:slide={{ duration: 500, delay: i * 100 }}
+						on:click={() => (window.location.href = `/statistics/${speaker.name}`)}
+					>
 						<h1>{speaker.name}</h1>
 						<p>
 							<i class="fa-solid fa-stopwatch-20"></i>
@@ -112,6 +115,10 @@
 						></i>
 					</div>
 				{/each}
+
+				{#if dailies.length === 0}
+					<p>Aucun daily pour le moment</p>
+				{/if}
 			{:catch error}
 				<h1>Oopsie... 🥸</h1>
 				<p>{error}</p>

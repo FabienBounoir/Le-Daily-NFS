@@ -467,6 +467,7 @@
 				`${startDailyDaily.getMonth() + 1}`.padStart(2, '0') +
 				'/' +
 				startDailyDaily.getFullYear()}
+			{displayGif ? '🎉' : ''}
 		</p>
 
 		<p class="actualTime">

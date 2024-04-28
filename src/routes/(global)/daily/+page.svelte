@@ -7,13 +7,14 @@
 	let timeByUser = $user.timer || 120;
 	let randomized = true;
 	let voiceSynthesis = true;
+	let animationSpeakers = true;
 
 	const start = async () => {
 		let randomisedNames = names;
 		if (randomized) randomisedNames.sort(() => Math.random() - 0.5);
 
 		await goto(
-			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}`
+			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}&animation=${animationSpeakers}`
 		);
 	};
 </script>
@@ -48,16 +49,32 @@
 	</div>
 
 	<div class="container">
-		<div class="toggler" on:click={() => (randomized = !randomized)}>
-			<p>{randomized ? 'Ordre des participants: aléatoire' : 'Ordre des participants: fixe'}</p>
-		</div>
-	</div>
-
-	<div class="container">
-		<div class="toggler" on:click={() => (voiceSynthesis = !voiceSynthesis)}>
-			<p>
-				{voiceSynthesis ? 'Synthèse vocale: activée' : 'Synthèse vocale: désactivée'}
-			</p>
+		<h1>Configuration:</h1>
+		<div style="display: flex; flex-direction: row; gap: 1em;">
+			<div
+				class={'toggler' + (randomized ? '' : ' disabled')}
+				on:click={() => (randomized = !randomized)}
+			>
+				<p>{randomized ? 'Ordre des participants: aléatoire' : 'Ordre des participants: fixe'}</p>
+			</div>
+			<div
+				class={'toggler' + (voiceSynthesis ? '' : ' disabled')}
+				on:click={() => (voiceSynthesis = !voiceSynthesis)}
+			>
+				<p>
+					{voiceSynthesis ? 'Synthèse vocale: activée' : 'Synthèse vocale: désactivée'}
+				</p>
+			</div>
+			<div
+				class={'toggler' + (animationSpeakers ? '' : ' disabled')}
+				on:click={() => (animationSpeakers = !animationSpeakers)}
+			>
+				<p>
+					{animationSpeakers
+						? 'Animation des participants: activée'
+						: 'Animation des participants: désactivée'}
+				</p>
+			</div>
 		</div>
 	</div>
 
@@ -88,6 +105,11 @@
 		user-select: none;
 	}
 
+	.toggler.disabled {
+		background-color: var(--primary-100);
+		color: var(--primary-600);
+	}
+
 	.participants {
 		display: flex;
 		flex-wrap: wrap;
@@ -95,17 +117,41 @@
 		user-select: none;
 
 		p {
+			text-decoration: none;
 			padding: 0.5em;
 			border-radius: 0.5em;
 			background-color: var(--primary-100);
 			color: var(--color-white);
 			cursor: pointer;
 			transition: filter 0.2s;
+
+			&:hover {
+				animation: shake 0.5s infinite;
+			}
+
+			@keyframes shake {
+				0% {
+					transform: rotate(0deg);
+				}
+				25% {
+					transform: rotate(5deg);
+				}
+				50% {
+					transform: rotate(-5deg);
+				}
+				75% {
+					transform: rotate(5deg);
+				}
+				100% {
+					transform: rotate(-5deg);
+				}
+			}
 		}
 
 		p:hover,
 		.active {
 			filter: grayscale(1);
+			text-decoration: line-through !important;
 		}
 
 		input {

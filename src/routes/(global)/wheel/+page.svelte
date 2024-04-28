@@ -2,7 +2,7 @@
 	import Wheel from '$lib/components/Wheel.svelte';
 	import { user } from '$lib/stores/user';
 
-	let items = [...$user.speakers].sort(() => Math.random() - 0.5);
+	let items = [...($user?.speakers || [])].sort(() => Math.random() - 0.5);
 
 	$: colors = [
 		document.documentElement.style.getPropertyValue('--primary-600'),
@@ -36,7 +36,11 @@
 			</p>
 		{/each}
 	</div>
-	<Wheel {items} {colors} />
+	{#if items?.length > 0}
+		<Wheel {items} {colors} />
+	{:else}
+		<p>Ajouter des personnes à la liste dans les paramètres</p>
+	{/if}
 </section>
 
 <style lang="scss">
@@ -45,6 +49,7 @@
 		flex-direction: row;
 		gap: 1em;
 		position: relative;
+		min-height: 50vh;
 		> div {
 			display: flex;
 			flex-direction: column;
