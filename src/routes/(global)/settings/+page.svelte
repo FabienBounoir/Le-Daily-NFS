@@ -200,7 +200,7 @@
 						user.change({
 							...$user,
 							nicknames: {
-								...$user.animation,
+								...$user.nicknames,
 								[addNicknameName]: addNicknameValue
 							}
 						});
