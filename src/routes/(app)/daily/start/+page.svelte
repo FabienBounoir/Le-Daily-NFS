@@ -795,6 +795,8 @@
 			top: -150px;
 			left: 50%;
 			transform: translate(-50%, 0%);
+			background-color: var(--primary-100);
+			border: 5px solid var(--primary-600);
 		}
 
 		div {
