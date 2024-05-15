@@ -439,8 +439,15 @@
 		{#if names.length > 0}
 			<div class="actualSpeaker">
 				{#if $user?.avatars && $user?.avatars[names[i]]}
-					<img in:blur={{ duration: 500, opacity: 0 }} src={"/avatar/"+$user?.avatars[names[i]]} alt="gif" />
-				{:else if $user?.username == "nfs"}
+					<img
+						in:blur={{ duration: 500, opacity: 0 }}
+						src={'/avatar/' + $user?.avatars[names[i]]}
+						alt="Jira Avatar"
+						on:error={() => {
+							$user.avatars[names[i]] = null;
+						}}
+					/>
+				{:else if $user?.username == 'nfs'}
 					<span>(Met un avatar pour Gwen STP)</span>
 				{/if}
 
@@ -458,7 +465,18 @@
 						</p>
 					{/key}
 				</div>
-				<p style="--couleur: {couleur}; --shake-amplitude: {actualTime < -60 ? 10 : actualTime < -40 ? 5 : actualTime < -20 ? 3 : actualTime < -20 ? 2 : 1}" class={'timer' + (actualTime <= 0 ? ' danger' : '')}>
+				<p
+					style="--couleur: {couleur}; --shake-amplitude: {actualTime < -60
+						? 10
+						: actualTime < -40
+							? 5
+							: actualTime < -20
+								? 3
+								: actualTime < -20
+									? 2
+									: 1}"
+					class={'timer' + (actualTime <= 0 ? ' danger' : '')}
+				>
 					{#if pause}
 						<Pause />
 					{:else}
@@ -556,7 +574,7 @@
 		</div>
 
 		{#if displayGif}
-			<img class="gifFullScreen" src={gifUrl} alt="gif" />
+			<img class="gifFullScreen" src={gifUrl} alt="Gif" />
 		{/if}
 
 		{#if profilAnimation && animationSpeakers}
@@ -768,7 +786,7 @@
 			color: var(--primary-600);
 		}
 
-		img{
+		img {
 			width: 100px;
 			height: 100px;
 			border-radius: 50%;
@@ -776,7 +794,7 @@
 			position: absolute;
 			top: -150px;
 			left: 50%;
-    		transform: translate(-50%, 0%);
+			transform: translate(-50%, 0%);
 		}
 
 		div {
@@ -879,17 +897,82 @@
 	}
 
 	@keyframes shake {
-		0% { transform: translate(calc(1px * var(--shake-amplitude, 1)),calc(1px * var(--shake-amplitude, 1))) rotate(calc(0deg * var(--shake-amplitude, 1))); }
-		10% { transform: translate(calc(-1px * var(--shake-amplitude, 1)),calc(-2px * var(--shake-amplitude, 1))) rotate(calc(-1deg * var(--shake-amplitude, 1))); }
-		20% { transform: translate(calc(-3px * var(--shake-amplitude, 1)),calc(0px * var(--shake-amplitude, 1))) rotate(calc(1deg * var(--shake-amplitude, 1))); }
-		30% { transform: translate(calc(3px * var(--shake-amplitude, 1)),calc(2px * var(--shake-amplitude, 1))) rotate(calc(0deg * var(--shake-amplitude, 1))); }
-		40% { transform: translate(calc(1px * var(--shake-amplitude, 1)),calc(-1px * var(--shake-amplitude, 1))) rotate(calc(1deg * var(--shake-amplitude, 1))); }	
-		50% { transform: translate(calc(-1px * var(--shake-amplitude, 1)),calc(2px * var(--shake-amplitude, 1))) rotate(calc(-1deg * var(--shake-amplitude, 1))); }
-		60% { transform: translate(calc(-3px * var(--shake-amplitude, 1)),calc(1px * var(--shake-amplitude, 1))) rotate(calc(0deg * var(--shake-amplitude, 1))); }
-		70% { transform: translate(calc(3px * var(--shake-amplitude, 1)),calc(1px * var(--shake-amplitude, 1))) rotate(calc(-1deg * var(--shake-amplitude, 1))); }
-		80% { transform: translate(calc(-1px * var(--shake-amplitude, 1)),calc(-1px * var(--shake-amplitude, 1))) rotate(calc(1deg * var(--shake-amplitude, 1))); }
-		90% { transform: translate(calc(1px * var(--shake-amplitude, 1)),calc(2px * var(--shake-amplitude, 1))) rotate(calc(0deg * var(--shake-amplitude, 1))); }
-		100% { transform: translate(calc(1px * var(--shake-amplitude, 1)),calc(-2px * var(--shake-amplitude, 1))) rotate(calc(-1deg * var(--shake-amplitude, 1))); }
+		0% {
+			transform: translate(
+					calc(1px * var(--shake-amplitude, 1)),
+					calc(1px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(0deg * var(--shake-amplitude, 1)));
+		}
+		10% {
+			transform: translate(
+					calc(-1px * var(--shake-amplitude, 1)),
+					calc(-2px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(-1deg * var(--shake-amplitude, 1)));
+		}
+		20% {
+			transform: translate(
+					calc(-3px * var(--shake-amplitude, 1)),
+					calc(0px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(1deg * var(--shake-amplitude, 1)));
+		}
+		30% {
+			transform: translate(
+					calc(3px * var(--shake-amplitude, 1)),
+					calc(2px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(0deg * var(--shake-amplitude, 1)));
+		}
+		40% {
+			transform: translate(
+					calc(1px * var(--shake-amplitude, 1)),
+					calc(-1px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(1deg * var(--shake-amplitude, 1)));
+		}
+		50% {
+			transform: translate(
+					calc(-1px * var(--shake-amplitude, 1)),
+					calc(2px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(-1deg * var(--shake-amplitude, 1)));
+		}
+		60% {
+			transform: translate(
+					calc(-3px * var(--shake-amplitude, 1)),
+					calc(1px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(0deg * var(--shake-amplitude, 1)));
+		}
+		70% {
+			transform: translate(
+					calc(3px * var(--shake-amplitude, 1)),
+					calc(1px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(-1deg * var(--shake-amplitude, 1)));
+		}
+		80% {
+			transform: translate(
+					calc(-1px * var(--shake-amplitude, 1)),
+					calc(-1px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(1deg * var(--shake-amplitude, 1)));
+		}
+		90% {
+			transform: translate(
+					calc(1px * var(--shake-amplitude, 1)),
+					calc(2px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(0deg * var(--shake-amplitude, 1)));
+		}
+		100% {
+			transform: translate(
+					calc(1px * var(--shake-amplitude, 1)),
+					calc(-2px * var(--shake-amplitude, 1))
+				)
+				rotate(calc(-1deg * var(--shake-amplitude, 1)));
+		}
 	}
-
 </style>
