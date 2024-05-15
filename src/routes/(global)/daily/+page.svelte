@@ -14,7 +14,7 @@
 		if (randomized) randomisedNames.sort(() => Math.random() - 0.5);
 
 		await goto(
-			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}&animation=${animationSpeakers}`
+			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}&animation=${animationSpeakers}&exclude=${$user.speakers.filter((n) => !names.includes(n)).join(',')}`
 		);
 	};
 </script>

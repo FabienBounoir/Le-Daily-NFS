@@ -9,11 +9,18 @@
 	import EuroMillion from '$lib/components/EuroMillion.svelte';
 	import { user } from '$lib/stores/user';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
+	import AddUser from '$lib/components/addUser.svelte';
 
 	/**
 	 * @type {string | any[]}
 	 */
 	let names = [];
+
+	/**
+	 * @type {string | any[]}
+	 */
+	let exclude = [];
+
 	/**
 	 * @type {number | null}
 	 */
@@ -27,6 +34,7 @@
 	let endDaily = false;
 
 	let audio = null;
+	let openMenu = false;
 
 	let displayGif = false;
 	let gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
@@ -78,6 +86,11 @@
 			animationSpeakers = animationQuery === 'true';
 		}
 
+		const excludeQuery = url.searchParams.get('exclude');
+		if (excludeQuery) {
+			exclude = excludeQuery.split(',');
+		}
+
 		textToSpeech(names[i]);
 		animationSpeaker(names[i]);
 
@@ -104,6 +117,20 @@
 
 			console.log('e.code', e.code);
 
+			if (e.code === 'Tab') {
+				if (displayGif) {
+					displayGif = false;
+					if (audio) {
+						audio.pause();
+					}
+					return;
+				}
+
+				openMenu = !openMenu;
+			}
+
+			if (openMenu) return;
+
 			if (e.code === 'Space' || e.code === 'ArrowRight') {
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
@@ -119,19 +146,6 @@
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
-			} else if (e.code === 'KeyS') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media1.tenor.com/m/rXBmuLxryLMAAAAd/ciao-squeezie.gif';
-				displayGif = true;
-
-				audioManager('ciao');
 			} else if (e.code === 'KeyC') {
 				if (displayGif) {
 					displayGif = false;
@@ -170,21 +184,6 @@
 				displayGif = true;
 
 				audioManager('laught');
-			} else if (e.code === 'KeyL') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif';
-				displayGif = true;
-
-				audioManager('laught');
-			} else if (e.code === 'KeyQ') {
-				audioManager('attends');
 			} else if (e.code === 'KeyK') {
 				if (audio) {
 					audio.pause();
@@ -253,6 +252,7 @@
 
 	const audioManager = (audioName) => {
 		audio = new Audio('/' + audioName + '.mp3');
+		audio.volume = 0.5;
 		audio.play();
 	};
 
@@ -506,14 +506,18 @@
 			{timeFormater(totalTimer)}
 		</p>
 
+		{#if openMenu}
+			<AddUser userExclude={exclude} bind:speaker={names} bind:openMenu />
+		{/if}
+
 		<div id="infoKeys">
 			<div
 				on:click={() => {
-					pause = !pause;
+					// pause = !pause;
 				}}
 			>
-				<span class={actualKeyDown == 'KeyS' ? 'key-down' : ''}>S</span>
-				Ciao
+				<span class={actualKeyDown == 'Tab' ? 'key-down' : ''}>Tab</span>
+				Add User
 			</div>
 			<div
 				on:click={() => {
