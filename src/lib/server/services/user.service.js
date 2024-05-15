@@ -18,6 +18,7 @@ class UserService {
 	 *  timer: number;
 	 *  nicknames: Map<string, string>;
 	 *  animation: Map<string, string>;
+	 *	avatars: string;
 	 * }>} collection
 	 */
 	constructor(collection) {
