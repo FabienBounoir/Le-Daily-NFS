@@ -78,16 +78,30 @@
 			vous semble, offrant ainsi à votre page une palette de couleurs aussi changeante que votre
 			humeur du moment !
 		</p>
-		<input
-			type="color"
-			bind:value={color}
-			on:change={() => {
-				user.change({
-					...$user,
-					color
-				});
-			}}
-		/>
+		{#if color !== 'random'}
+			<input
+				disabled={color === 'random'}
+				type="color"
+				bind:value={color}
+				on:change={() => {
+					user.change({
+						...$user,
+						color
+					});
+				}}
+			/>
+		{/if}
+		<button
+			on:click={() =>
+				(color =
+					color === 'random' ? `#${Math.floor(Math.random() * 16777215).toString(16)}` : 'random')}
+		>
+			{#if color === 'random'}
+				Arrêter le mode aléatoire
+			{:else}
+				Activer le mode aléatoire
+			{/if}
+		</button>
 	</div>
 	<div class="container">
 		<h1>Temps par participant (en secondes):</h1>

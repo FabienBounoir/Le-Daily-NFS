@@ -146,6 +146,10 @@
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
+			} else if (e.code === 'KeyQ') {
+				actualTime += 5;
+			} else if (e.code === 'KeyW') {
+				actualTime -= 5;
 			} else if (e.code === 'KeyC') {
 				if (displayGif) {
 					displayGif = false;
@@ -201,8 +205,6 @@
 				displayGif = true;
 
 				audioManager('merde');
-			} else if (e.code === 'KeyG') {
-				audioManager('greg');
 			} else if (e.code === 'KeyE') {
 				if (displayGif) {
 					displayGif = false;
@@ -447,8 +449,6 @@
 							$user.avatars[names[i]] = null;
 						}}
 					/>
-				{:else if $user?.username == 'nfs'}
-					<span>(Met un avatar pour Gwen STP)</span>
 				{/if}
 
 				<div>
@@ -519,29 +519,13 @@
 				<span class={actualKeyDown == 'Tab' ? 'key-down' : ''}>Tab</span>
 				Add User
 			</div>
-			<div
-				on:click={() => {
-					pause = !pause;
-				}}
-			>
-				<span class={actualKeyDown == 'KeyC' ? 'key-down' : ''}>C</span>
-				Clap
+			<div>
+				<span class={actualKeyDown == 'KeyQ' ? 'key-down' : ''}>A</span>
+				+5 sec
 			</div>
-			<div
-				on:click={() => {
-					pause = !pause;
-				}}
-			>
-				<span class={actualKeyDown == 'KeyL' ? 'key-down' : ''}>L</span>
-				Laugh
-			</div>
-			<div
-				on:click={() => {
-					pause = !pause;
-				}}
-			>
-				<span class={actualKeyDown == 'KeyH' ? 'key-down' : ''}>H</span>
-				Hey
+			<div>
+				<span class={actualKeyDown == 'KeyW' ? 'key-down' : ''}>Z</span>
+				-5 sec
 			</div>
 			<div
 				on:click={() => {
