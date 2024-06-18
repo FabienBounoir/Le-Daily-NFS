@@ -117,7 +117,7 @@
 
 			console.log('e.code', e.code);
 
-			if (e.code === 'Tab') {
+			if (e.code === 'Tab' || e.code === 'Escape') {
 				if (displayGif) {
 					displayGif = false;
 					if (audio) {
@@ -371,6 +371,17 @@
 			stats = api.get(`/daily/stats/${$user.teams[0]}`);
 		});
 	};
+
+	const shakeEffect = (actualTime) => {
+		const time = actualTime * -1;
+
+		const initialAmplitude = 1;
+		const decayRate = 0.05;
+
+		const amplitude = initialAmplitude * Math.exp(decayRate * time);
+
+		return amplitude > 100 ? 100 : amplitude;
+	};
 </script>
 
 <svelte:head>
@@ -466,15 +477,7 @@
 					{/key}
 				</div>
 				<p
-					style="--couleur: {couleur}; --shake-amplitude: {actualTime < -60
-						? 10
-						: actualTime < -40
-							? 5
-							: actualTime < -20
-								? 3
-								: actualTime < -20
-									? 2
-									: 1}"
+					style="--couleur: {couleur}; --shake-amplitude: {shakeEffect(actualTime)}"
 					class={'timer' + (actualTime <= 0 ? ' danger' : '')}
 				>
 					{#if pause}

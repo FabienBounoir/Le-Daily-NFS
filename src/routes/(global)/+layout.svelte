@@ -36,7 +36,7 @@
 		}
 	];
 
-	$: current = links.find((l) => l.href.includes($page.url.pathname));
+	$: current = links.find((l) => $page.url.pathname.includes(l.href));
 
 	const logout = async () => {
 		await user.logout();

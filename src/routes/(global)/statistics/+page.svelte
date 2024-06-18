@@ -4,6 +4,7 @@
 	import { scale, slide } from 'svelte/transition';
 	import { user } from '$lib/stores/user';
 	import { snacks } from '$lib/stores/snacks';
+	import { goto } from '$app/navigation';
 
 	/**
 	 * @type {any[]}
@@ -42,7 +43,7 @@
 				{#each speakers as speaker, i}
 					<div
 						in:slide={{ duration: 500, delay: i * 100 }}
-						on:click={() => (window.location.href = `/statistics/${speaker.name}`)}
+						on:click={() => goto(`/statistics/${speaker.name}`)}
 					>
 						<h1>{speaker.name}</h1>
 						<p>
