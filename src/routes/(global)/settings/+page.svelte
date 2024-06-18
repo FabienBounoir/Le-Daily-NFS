@@ -119,6 +119,7 @@
 							type="text"
 							bind:value
 							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+							disabled
 						/>
 						<button
 							on:click={() => {
@@ -180,6 +181,7 @@
 							type="text"
 							bind:value
 							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
+							disabled
 						/>
 						<button
 							on:click={() => {
@@ -269,6 +271,12 @@
 			width: min-content !important;
 		}
 	}
+
+	input:disabled {
+		background-color: var(--primary-100);
+		cursor: not-allowed;
+	}
+
 	.animation-container {
 		margin-bottom: 0.5em;
 		display: flex;
