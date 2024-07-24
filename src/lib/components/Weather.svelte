@@ -16,7 +16,7 @@
 			<span> </span>
 			<div class="weather-info">
 				<p><i class="fa-solid fa-wind"></i> {parseFloat(data.wind.speed || 0).toFixed(1)} km/h</p>
-				<p><i class="fa-solid fa-location-dot"></i> {data.name}</p>
+				<p><i class="fa-solid fa-location-dot"></i> {city}</p>
 			</div>
 			<img src="http://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png" alt="weather" />
 			<img src="http://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png" alt="weather" />
@@ -32,7 +32,7 @@
 		flex-direction: column;
 		width: fit-content;
 		border-radius: 1em;
-		background-color: var(--primary-100);
+		background-color: var(--primary-200);
 		padding: 0.5em 1em;
 		position: relative;
 		width: auto;

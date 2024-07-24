@@ -10,6 +10,13 @@
 	import { user } from '$lib/stores/user';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import AddUser from '$lib/components/addUser.svelte';
+	import GifDisplay from '$lib/components/GifDisplay.svelte';
+	import Keys from '$lib/components/Keys.svelte';
+	import DateStart from '$lib/components/DateStart.svelte';
+	import animationData from '$lib/animation.json';
+	import TopPlayers from '$lib/components/TopPlayers.svelte';
+	import Hyrox from '$lib/components/Hyrox.svelte';
+	import Qwertee from '$lib/components/Qwertee.svelte';
 
 	/**
 	 * @type {string | any[]}
@@ -47,6 +54,8 @@
 	let actualKeyDown = '';
 	let stats = new Promise(() => {});
 
+	let alreadySave = false;
+
 	/**
 	 * @type {number | null | undefined}
 	 */
@@ -62,6 +71,77 @@
 
 	let couleur = 'rgb(255, 0, 0)';
 	$: couleur = `hsl(${(120 * actualTime) / time}deg 71.85% 42.47%)`;
+
+	/**
+	 * @typedef {Object} KeyAction
+	 * @property {string} actionName - The name of the action associated with the key.
+	 * @property {string} key - The key code of the action.
+	 * @property {string} keyName - The display name of the key.
+	 * @property {function} action - The function to be executed when the key is pressed.
+	 */
+
+	/**
+	 * An array of key actions.
+	 * @type {KeyAction[]}
+	 */
+	let keysArray = [
+		{
+			actionName: 'Add User',
+			key: 'Tab',
+			keyName: 'Tab',
+			action: () => {
+				openMenu = !openMenu;
+			}
+		},
+		{
+			actionName: '+5 sec',
+			key: 'KeyQ',
+			keyName: 'A',
+			action: () => {
+				actualTime += 5;
+			}
+		},
+		{
+			actionName: '-5 sec',
+			key: 'KeyW',
+			keyName: 'Z',
+			action: () => {
+				actualTime -= 5;
+			}
+		},
+		{
+			actionName: 'Pause',
+			key: 'KeyP',
+			keyName: 'P',
+			action: () => {
+				pause = !pause;
+			}
+		},
+		{
+			actionName: 'Next',
+			key: 'Space',
+			keyName: 'Space',
+			action: () => {
+				newSpeaker();
+			}
+		},
+		{
+			actionName: 'Previous',
+			key: 'ArrowLeft',
+			keyName: '←',
+			action: () => {
+				if (i - 1 < 0) {
+					return;
+				} else {
+					timerHistory.set(names[i], actualTime);
+					i--;
+					actualTime = timerHistory.get(names[i]) || time;
+					timeSpeaker = timeResult.get(names[i]) || 0;
+					textToSpeech(names[i]);
+				}
+			}
+		}
+	];
 
 	onMount(async () => {
 		const url = new URL(window.location.href);
@@ -104,8 +184,16 @@
 			timeSpeaker++;
 		}, 1000);
 
+		const audioManager = (audioName) => {
+			audio = new Audio('/' + audioName + '.mp3');
+			audio.volume = 0.5;
+			audio.play();
+		};
+
 		document.addEventListener('keydown', (e) => {
 			actualKeyDown = e.code;
+
+			if (endDaily) return;
 
 			if (keydownInterval) {
 				clearTimeout(keydownInterval);
@@ -114,8 +202,6 @@
 			keydownInterval = setTimeout(() => {
 				actualKeyDown = '';
 			}, 300);
-
-			console.log('e.code', e.code);
 
 			if (e.code === 'Tab' || e.code === 'Escape') {
 				if (displayGif) {
@@ -150,49 +236,14 @@
 				actualTime += 5;
 			} else if (e.code === 'KeyW') {
 				actualTime -= 5;
-			} else if (e.code === 'KeyC') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media.tenor.com/wY5SYwnbO24AAAAM/wolf.gif';
-				displayGif = true;
-
-				audioManager('clapping');
-			} else if (e.code === 'KeyH') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
-				displayGif = true;
-				audioManager('coucou');
-			} else if (e.code === 'KeyL') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media.tenor.com/iOA7eiHbtLMAAAAi/dancing-laugh-rofl.gif';
-				displayGif = true;
-
-				audioManager('laught');
 			} else if (e.code === 'KeyK') {
 				if (audio) {
 					audio.pause();
 				}
-			} else if (e.code === 'Semicolon') {
+			}
+
+			// @ts-ignore
+			if (animationData[e.code]) {
 				if (displayGif) {
 					displayGif = false;
 					if (audio) {
@@ -201,49 +252,12 @@
 					return;
 				}
 
-				gifUrl = 'https://media.tenor.com/RU195QLMRgQAAAAj/what-the-fuck-alex-pall.gif';
+				// @ts-ignore
+				const { url, sound } = animationData[e.code];
+
+				gifUrl = url;
 				displayGif = true;
-
-				audioManager('merde');
-			} else if (e.code === 'KeyE') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media1.tenor.com/m/tg2CztUPUCgAAAAC/cest-honteux-honteux.gif';
-				displayGif = true;
-
-				audioManager('honteux');
-			} else if (e.code === 'KeyO') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media1.tenor.com/m/MIYCaMBClE8AAAAC/ok-lol.gif';
-				displayGif = true;
-
-				audioManager('ok');
-			} else if (e.code === 'KeyZ') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
-
-				gifUrl = 'https://media1.tenor.com/m/WF9ahkVEZZUAAAAC/eevee-eevee-wow.gif';
-				displayGif = true;
-
-				audioManager('wow');
+				audioManager(sound);
 			}
 		});
 
@@ -251,12 +265,6 @@
 			if (interval) clearInterval(interval);
 		};
 	});
-
-	const audioManager = (audioName) => {
-		audio = new Audio('/' + audioName + '.mp3');
-		audio.volume = 0.5;
-		audio.play();
-	};
 
 	const textToSpeech = (text) => {
 		if (!voiceSynthesis) return;
@@ -284,7 +292,7 @@
 		if (endDaily) return;
 		displayGif = false;
 		profilAnimation = '';
-		if (i + 1 >= names.length) {
+		if (i + 1 == names.length) {
 			endDaily = true;
 			timerHistory.set(names[i], actualTime);
 			timeResult.set(names[i], timeSpeaker);
@@ -356,6 +364,8 @@
 	}
 
 	const saveDaily = () => {
+		if (alreadySave) return;
+		alreadySave = true;
 		const daily = {
 			users: names,
 			team: $user.teams[0],
@@ -396,16 +406,20 @@
 	{#if endDaily}
 		<h1>Le daily est terminé</h1>
 
-		<div class="container-result">
-			<div class="participants">
-				<h1>Participants</h1>
-				<br />
-				{@html returnTimeSpeaker()}
-			</div>
-			<div class="informations">
-				<h1>Informations</h1>
-				<br />
+		<TopPlayers speakers={timeResult} />
 
+		<div class="separator-vertical">
+			<div></div>
+		</div>
+
+		<div class="container-result">
+			<div class="weather">
+				<Weather city="Sophia Antipolis" />
+				<Weather city="Montpellier" />
+				<Weather city="Rennes" />
+			</div>
+
+			<div class="informations">
 				{#await stats then data}
 					<p>
 						Le daily a commencé à <b>{startDailyDaily.toLocaleTimeString()}</b> il a duré
@@ -422,26 +436,12 @@
 					<p>En moyenne il y a <b>{fixeNumber(data.moyenPersonne)}</b> personnes dans un daily</p>
 				{/await}
 			</div>
-			<div class="weather1">
-				<Weather city="Sophia Antipolis" />
-			</div>
 
-			<div class="weather2">
-				<Weather city="Montpellier" />
-			</div>
+			<Qwertee />
 
-			<div class="weather3">
-				<Weather city="Rennes" />
-			</div>
-
-			<div class="euromillion">
+			<div class="weather">
 				<EuroMillion />
-			</div>
-
-			<div class="hyrox-info">
-				<p>
-					HYROX dans {Math.floor((new Date('2024-10-12') - new Date()) / (1000 * 60 * 60 * 24))} jours
-				</p>
+				<Hyrox />
 			</div>
 		</div>
 
@@ -489,20 +489,7 @@
 			</div>
 		{/if}
 
-		<p id="infoTimeDaily">
-			<i class="fa-solid fa-calendar-days"></i>
-			{`${startDailyDaily.getHours()}`.padStart(2, '0') +
-				':' +
-				`${startDailyDaily.getMinutes()}`.padStart(2, '0') +
-				':' +
-				`${startDailyDaily.getSeconds()}`.padStart(2, '0')} -
-			{`${startDailyDaily.getDate()}`.padStart(2, '0') +
-				'/' +
-				`${startDailyDaily.getMonth() + 1}`.padStart(2, '0') +
-				'/' +
-				startDailyDaily.getFullYear()}
-			{displayGif ? '🎉' : ''}
-		</p>
+		<DateStart {startDailyDaily} {displayGif} />
 
 		<p class="actualTime">
 			<i class="fa-regular fa-clock"></i>
@@ -513,60 +500,8 @@
 			<AddUser userExclude={exclude} bind:speaker={names} bind:openMenu />
 		{/if}
 
-		<div id="infoKeys">
-			<div
-				on:click={() => {
-					// pause = !pause;
-				}}
-			>
-				<span class={actualKeyDown == 'Tab' ? 'key-down' : ''}>Tab</span>
-				Add User
-			</div>
-			<div>
-				<span class={actualKeyDown == 'KeyQ' ? 'key-down' : ''}>A</span>
-				+5 sec
-			</div>
-			<div>
-				<span class={actualKeyDown == 'KeyW' ? 'key-down' : ''}>Z</span>
-				-5 sec
-			</div>
-			<div
-				on:click={() => {
-					pause = !pause;
-				}}
-			>
-				<span class={actualKeyDown == 'KeyP' ? 'key-down' : ''}>P</span>
-				{pause ? ' Play ' : 'Pause'}
-			</div>
-			<div
-				on:click={() => {
-					newSpeaker();
-				}}
-			>
-				<span class={actualKeyDown == 'Space' ? 'key-down' : ''}>Space</span>
-				Next
-			</div>
-			<div
-				on:click={() => {
-					if (i - 1 < 0) {
-						return;
-					} else {
-						timerHistory.set(names[i], actualTime);
-						i--;
-						actualTime = timerHistory.get(names[i]) || time;
-						timeSpeaker = timeResult.get(names[i]) || 0;
-						textToSpeech(names[i]);
-					}
-				}}
-			>
-				<span class={actualKeyDown == 'ArrowLeft' ? 'key-down' : ''}>←</span>
-				Previous
-			</div>
-		</div>
-
-		{#if displayGif}
-			<img class="gifFullScreen" src={gifUrl} alt="Gif" />
-		{/if}
+		<Keys {keysArray} {actualKeyDown} />
+		<GifDisplay {gifUrl} {displayGif} />
 
 		{#if profilAnimation && animationSpeakers}
 			<div class="profilAnimation">
@@ -632,30 +567,15 @@
 
 	.container-result {
 		gap: 1em;
-		display: grid;
-		grid-template-columns: repeat(6, 1fr);
-		grid-template-rows: repeat(3, 1fr);
-		grid-column-gap: 0px;
-		grid-row-gap: 0px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
 
-		.participants {
-			grid-area: 1 / 1 / 6 / 3;
-		}
-
-		.informations {
-			grid-area: 1 / 3 / 2 / 7;
-		}
-
-		.weather1 {
-			grid-area: 2 / 3 / 3 / 5;
-		}
-
-		.weather2 {
-			grid-area: 2 / 5 / 4 / 7;
-		}
-
-		.weather3 {
-			grid-area: 3 / 5 / 4 / 7;
+		.weather {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: 2em;
 		}
 
 		.euromillion {
@@ -680,18 +600,19 @@
 			}
 		}
 
+		.informations {
+			background-color: var(--primary-200);
+			padding: 1em;
+		}
+
 		div {
 			height: fit-content;
-			margin: 1em;
 			display: flex;
 			flex-direction: column;
 
-			padding: 1em;
 			border-radius: 5px;
 			color: var(--primary-600);
-			background-color: var(--primary-100);
 
-			padding: 0.8em 1em;
 			border-radius: 1em;
 			gap: 0.3em;
 
@@ -702,20 +623,28 @@
 	}
 
 	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-		gap: 8em;
-	}
+		padding: 5em 2em 0;
+		display: grid;
+		grid-template-columns: 1fr auto 2fr;
+		gap: 1em;
 
-	#infoTimeDaily {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		padding: 1em;
-		font-size: 1.2em;
+		& > h1 {
+			position: fixed;
+			top: 0;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+
+		.separator-vertical {
+			display: flex;
+			align-items: center;
+			div {
+				background-color: var(--primary-400);
+				height: 80vh;
+				width: 0.5em;
+				border-radius: 0.5em;
+			}
+		}
 	}
 
 	.actualTime {
@@ -728,36 +657,6 @@
 
 	.timer {
 		color: var(--couleur) !important;
-	}
-
-	#infoKeys {
-		position: fixed;
-		bottom: 0;
-		right: 0;
-		padding: 1em;
-		display: flex;
-		gap: 1em;
-
-		div {
-			min-width: 50px;
-			margin: 0;
-			padding: 0;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 0.5em;
-
-			span {
-				padding: 0.25em 0.5em;
-				border: 1px solid var(--primary-600);
-				border-radius: 0.25em;
-			}
-
-			span.key-down {
-				background-color: var(--primary-600);
-				color: white;
-			}
-		}
 	}
 
 	h1 {
@@ -867,26 +766,6 @@
 	.return:hover {
 		background-color: var(--primary-hover);
 		cursor: pointer;
-	}
-
-	.hyrox-info {
-		background: none !important;
-		animation: zoom 1s linear infinite;
-		font-weight: bold;
-		grid-area: 3 / 3 / 4 / 5;
-		text-align: center;
-	}
-
-	@keyframes zoom {
-		0% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.1);
-		}
-		100% {
-			transform: scale(1);
-		}
 	}
 
 	@keyframes shake {

@@ -5,12 +5,12 @@
 	let result = getResultEuromillion();
 </script>
 
-{#await result}
-	<p>Le dernier tirage de l'euromillion:</p>
-	<p>Récupération des données...</p>
-{:then data}
-	{#if data && data.length > 0}
-		<div class="euromillion">
+<div class="euromillion">
+	{#await result}
+		<p>Le dernier tirage de l'euromillion:</p>
+		<p>Récupération des données...</p>
+	{:then data}
+		{#if data && data.length > 0}
 			<p>
 				Tirage Euromillion du {new Date(data[data.length - 1].date).toLocaleDateString('fr-FR', {
 					weekday: 'long',
@@ -44,11 +44,11 @@
 					</p>
 				{/each}
 			</div>
-		</div>
-	{/if}
-{:catch error}
-	{error}
-{/await}
+		{/if}
+	{:catch error}
+		{error}
+	{/await}
+</div>
 
 <style lang="scss">
 	.number {
@@ -65,6 +65,9 @@
 	}
 
 	.euromillion {
+		background-color: var(--primary-200);
+		padding: 1em;
+		border-radius: 0.5em;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5em;

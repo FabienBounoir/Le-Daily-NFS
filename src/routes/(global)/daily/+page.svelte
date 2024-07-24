@@ -11,11 +11,32 @@
 
 	const start = async () => {
 		let randomisedNames = names;
-		if (randomized) randomisedNames.sort(() => Math.random() - 0.5);
+		if (randomized) randomisedNames = randomizedArray(names);
 
 		await goto(
 			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}&animation=${animationSpeakers}&exclude=${$user.speakers.filter((n) => !names.includes(n)).join(',')}`
 		);
+	};
+
+	/**
+	 *
+	 * @param {string[]} array
+	 */
+	const randomizedArray = (array) => {
+		let currentIndex = array.length,
+			temporaryValue,
+			randomIndex;
+
+		while (0 !== currentIndex) {
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex -= 1;
+
+			temporaryValue = array[currentIndex];
+			array[currentIndex] = array[randomIndex];
+			array[randomIndex] = temporaryValue;
+		}
+
+		return array;
 	};
 </script>
 
