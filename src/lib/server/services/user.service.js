@@ -63,9 +63,10 @@ class UserService {
 				throw new Error("Invalid JWT");
 			}
 
+			//dont send password back
 			return await this.#collection.findOne({
 				_id: new ObjectId(decoded)
-			});
+			}).then(({ password, ...user }) => user);
 		} catch (error) {
 			return {
 				_id: "-1",
