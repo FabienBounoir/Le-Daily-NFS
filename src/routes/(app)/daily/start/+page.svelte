@@ -336,17 +336,17 @@
 	};
 
 	const timeFormater = (time) => {
-		const hours = Math.floor(time / 3600);
+		const days = Math.floor(time / 86400); // 1 jour = 86400 secondes
+		const hours = Math.floor((time % 86400) / 3600);
 		const minutes = Math.floor((time % 3600) / 60);
 		const seconds = time % 60;
 
-		const formattedHours =
-			hours > 0 ? (hours % 1 !== 0 ? hours.toFixed(1) : Math.floor(hours)) + 'h' : '';
-		const formattedMinutes =
-			minutes > 0 ? (minutes % 1 !== 0 ? minutes.toFixed(1) : Math.floor(minutes)) + 'm' : '';
+		const formattedDays = days > 0 ? days + 'j ' : ''; // Format des jours
+		const formattedHours = hours > 0 ? (hours % 1 !== 0 ? hours.toFixed(1) : Math.floor(hours)) + 'h ' : '';
+		const formattedMinutes = minutes > 0 ? (minutes % 1 !== 0 ? minutes.toFixed(1) : Math.floor(minutes)) + 'm ' : '';
 		const formattedSeconds = (seconds % 1 !== 0 ? seconds.toFixed(1) : Math.floor(seconds)) + 's';
 
-		return `${formattedHours} ${formattedMinutes} ${formattedSeconds}`;
+		return `${formattedDays}${formattedHours}${formattedMinutes}${formattedSeconds}`.trim(); // Utilisez trim pour enlever les espaces inutiles
 	};
 
 	/**
