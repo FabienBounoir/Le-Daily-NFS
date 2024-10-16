@@ -1,6 +1,6 @@
 <div class="hyrox-info">
-	<p>Hyrox Nice</p>
-	<p class="date">en 2025 🤞</p>
+	<p>Prom'Classic 🏃</p>
+	<p class="date">dans {Math.floor((new Date('2025-01-05') - new Date()) / (1000 * 60 * 60 * 24))} jours </p>
 </div>
 
 <style lang="scss">
