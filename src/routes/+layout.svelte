@@ -19,6 +19,8 @@
 				}
 			}
 
+			console.log('primary', primary);
+
 			myshades({
 				primary
 			});

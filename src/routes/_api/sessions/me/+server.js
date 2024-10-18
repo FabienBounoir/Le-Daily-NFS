@@ -25,7 +25,7 @@ export const PUT = async ({ request }) => {
 	}
 
 	const { color, timer, speakers, nicknames, animation } = await request.json();
-	const newUser = await userService.update(user._id, { color, timer, speakers, nicknames, animation });
+	const newUser = await userService.update(user._id, { color, timer, speakers, nicknames, animation, users });
 
 	return json(newUser);
 };

@@ -50,7 +50,8 @@ function init() {
 			teams: [],
 			color: "#FF7900",
 			time: 0,
-			speakers: []
+			speakers: [],
+			users: []
 		});
 
 		myshades({

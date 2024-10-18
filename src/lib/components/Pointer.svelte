@@ -4,6 +4,7 @@
 </script>
 
 <svg
+	id="pointer"
 	class="pointer"
 	width={pointerSize}
 	height={pointerSize}

@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/user';
 
-	let names = $user.speakers;
+	let users = $user.users;
 
 	let timeByUser = $user.timer || 120;
 	let randomized = true;
@@ -10,12 +10,21 @@
 	let animationSpeakers = true;
 
 	const start = async () => {
-		let randomisedNames = names;
-		if (randomized) randomisedNames = randomizedArray(names);
+		let randomisedNames = users;
+		if (randomized) randomisedNames = randomizedArray(users);
 
-		await goto(
-			`/daily/start?names=${randomisedNames.join(',')}&time=${timeByUser}&voice=${voiceSynthesis}&animation=${animationSpeakers}&exclude=${$user.speakers.filter((n) => !names.includes(n)).join(',')}`
+		window.localStorage.setItem(
+			'daily',
+			JSON.stringify({
+				users: randomisedNames,
+				voice: voiceSynthesis,
+				animation: animationSpeakers,
+				time: timeByUser,
+				exclude: $user.users.filter((n) => !randomisedNames.some((u) => u.name === n.name))
+			})
 		);
+
+		await goto(`/daily/start`);
 	};
 
 	/**
@@ -49,21 +58,21 @@
 	<div class="container">
 		<h1>Participants:</h1>
 		<div class="participants">
-			{#if !$user.speakers || $user.speakers.length === 0}
+			{#if !$user.users || $user.speakers.length === 0}
 				<p>Pas encore de speaker ! Tu peux en ajouter dans les paramètres.</p>
 			{/if}
-			{#each $user.speakers || [] as name}
+			{#each $user.users || [] as user}
 				<p
-					class={names.includes(name) ? '' : 'active'}
+					class={users.some((userObj) => userObj.name === user.name) ? '' : 'active'}
 					on:click={() => {
-						if (names.includes(name)) {
-							names = names.filter((n) => n !== name);
+						if (users.some((userObj) => userObj.name === user.name)) {
+							users = users.filter((n) => n.name !== user.name);
 						} else {
-							names = [...names, name];
+							users = [...users, user];
 						}
 					}}
 				>
-					{name}
+					{user.name}
 				</p>
 			{/each}
 		</div>
@@ -104,7 +113,7 @@
 		<input type="number" bind:value={timeByUser} min="30" max="300" step="30" />
 	</div>
 
-	<button on:click={() => start()} disabled={names?.length === 0 || !timeByUser || !$user.speakers}
+	<button on:click={() => start()} disabled={users?.length === 0 || !timeByUser || !$user.speakers}
 		>Démarrer le daily</button
 	>
 </section>

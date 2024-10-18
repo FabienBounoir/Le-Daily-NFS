@@ -19,6 +19,7 @@ class UserService {
 	 *  nicknames: Map<string, string>;
 	 *  animation: Map<string, string>;
 	 *	avatars: string;
+	 *  users: object[];
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -89,7 +90,8 @@ class UserService {
 			speakers: [],
 			timer: 120,
 			nicknames: new Map(),
-			color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+			color: "#" + Math.floor(Math.random() * 16777215).toString(16),
+			users: [],
 		});
 	}
 
