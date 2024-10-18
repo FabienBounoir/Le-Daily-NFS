@@ -2,7 +2,7 @@
 	import Wheel from '$lib/components/Wheel.svelte';
 	import { user } from '$lib/stores/user';
 
-	let items = [...($user?.speakers || [])].sort(() => Math.random() - 0.5);
+	let items = [...($user?.users?.map?.((u) => u.name) || [])].sort(() => Math.random() - 0.5);
 
 	$: colors = [
 		document.documentElement.style.getPropertyValue('--primary-600'),
@@ -21,18 +21,18 @@
 
 <section>
 	<div>
-		{#each $user?.speakers as item}
+		{#each $user?.users as user}
 			<p
-				class={items.includes(item) ? 'active' : ''}
+				class={items.includes(user.name) ? 'active' : ''}
 				on:click={() => {
-					if (!items.includes(item)) {
-						items = [...items, item].sort(() => Math.random() - 0.5);
+					if (!items.includes(user.name)) {
+						items = [...items, user.name].sort(() => Math.random() - 0.5);
 					} else {
-						items = items.filter((i) => i !== item);
+						items = items.filter((i) => i !== user.name);
 					}
 				}}
 			>
-				{item}
+				{user.name}
 			</p>
 		{/each}
 	</div>

@@ -1,10 +1,19 @@
 <script>
 	export let displayGif;
 	export let gifUrl;
+	export let toggleGif;
 </script>
 
 {#if displayGif}
-	<img class="gifFullScreen" src={gifUrl} alt="Gif" />
+	<img
+		on:click={() => {
+			console.log('click');
+			toggleGif();
+		}}
+		class="gifFullScreen"
+		src={gifUrl}
+		alt="Gif"
+	/>
 {/if}
 
 <style>
@@ -15,6 +24,6 @@
 		left: 0;
 		width: 100vw;
 		height: 100vh;
-		pointer-events: none;
+		cursor: pointer;
 	}
 </style>

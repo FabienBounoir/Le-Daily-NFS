@@ -28,40 +28,57 @@
 
 		if (query === '') return (searchElement = []);
 
-		for (let name of userExclude) {
-			if (name?.toLowerCase?.()?.includes?.(query?.toLowerCase?.())) {
-				searchElement.push(name);
+		for (const user of userExclude) {
+			if (user.name?.toLowerCase?.()?.includes?.(query?.toLowerCase?.())) {
+				searchElement.push(user);
 			}
 		}
 	};
 
-	const addUserToSpeaker = (name) => {
-		userExclude = [userExclude.filter((n) => n !== name)];
-		speaker = [...speaker, name];
+	const addUserToSpeaker = (user) => {
+		if (!user.timer) {
+			user.timer = 0;
+		}
+
+		userExclude = [...userExclude.filter((n) => n.name !== user.name)];
+		speaker = [...speaker, user];
 		openMenu = false;
 	};
 
 	const addNewUserToSpeaker = (name) => {
 		let valid = true;
 
-		for (let n of speaker) {
-			if (n?.toLowerCase?.() === name?.toLowerCase?.()) {
-				console.error(n?.toLowerCase?.(), name?.toLowerCase?.());
+		let newUsersObj = {
+			name: `${name[0].toUpperCase()}${name.slice(1)}`,
+			avatars: null,
+			timer: 0,
+			nickname: null,
+			animation: null
+		};
+
+		for (let user of speaker) {
+			if (user.name?.toLowerCase?.() === name?.toLowerCase?.()) {
 				valid = false;
 			}
 		}
 
 		if (!valid) return console.error('User already in speaker list');
 
-		speaker = [...speaker, name];
+		speaker = [...speaker, newUsersObj];
 		openMenu = false;
 	};
 
 	const includeName = (query) => {
 		if (query === '') return false;
 
-		for (let name of userExclude) {
-			if (name?.toLowerCase?.() == query?.toLowerCase?.()) {
+		for (let user of userExclude) {
+			if (user.name?.toLowerCase?.() == query?.toLowerCase?.()) {
+				return true;
+			}
+		}
+
+		for (let user of speaker) {
+			if (user.name?.toLowerCase?.() == query?.toLowerCase?.()) {
 				return true;
 			}
 		}
@@ -90,8 +107,19 @@
 	/>
 	{#if query !== ''}
 		<div class="user-list" in:slide={{ axis: 'y', duration: 100 }}>
-			{#each searchElement as name}
-				<p on:click={() => addUserToSpeaker(name)}>{name}</p>
+			{#each searchElement as user}
+				<p on:click={() => addUserToSpeaker(user)}>
+					{#if user.avatars}
+						<img
+							src={'/avatar/' + user.avatars}
+							alt="Jira Avatar"
+							on:error={() => {
+								user.avatars = null;
+							}}
+						/>
+					{/if}
+					{user.name}
+				</p>
 			{/each}
 
 			<button
@@ -143,9 +171,19 @@
 				cursor: pointer;
 				transition: background-color 0.2s;
 				border-radius: 0.5em;
+				display: flex;
+				flex-direction: row;
+				gap: 0.5em;
+				align-items: center;
 
 				&:hover {
-					background-color: var(--primary-100);
+					background-color: var(--primary-200);
+				}
+
+				img {
+					width: 25px;
+					height: 25px;
+					border-radius: 50%;
 				}
 			}
 

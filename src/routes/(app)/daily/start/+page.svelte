@@ -18,13 +18,7 @@
 	import Hyrox from '$lib/components/Hyrox.svelte';
 	import Qwertee from '$lib/components/Qwertee.svelte';
 
-	let i = 0;
-
-	// let actualTime = 120;
-	// let timeSpeaker = 0;
-
 	let startDailyDaily = new Date();
-	let endDaily = false;
 
 	let audio = null;
 	let openMenu = false;
@@ -45,7 +39,9 @@
 		voice: true,
 		animation: true,
 		time: 120,
-		exclude: []
+		exclude: [],
+		state: 'LOADING',
+		index: 0
 	};
 
 	/**
@@ -62,7 +58,16 @@
 	const timeResult = new Map();
 
 	let couleur = 'rgb(255, 0, 0)';
-	$: couleur = `hsl(${(120 * (dailyMng.time - dailyMng.users[i].timer)) / dailyMng.time}deg 71.85% 42.47%)`;
+	$: (couleur = `hsl(${(120 * (dailyMng.time - dailyMng.users[dailyMng.index].timer)) / dailyMng.time}deg 71.85% 42.47%)`),
+		updateDailyMngOnLocalStorage(dailyMng);
+
+	const updateDailyMngOnLocalStorage = (dailyMng) => {
+		if (!dailyMng || !dailyMng.users || dailyMng.users.length === 0 || dailyMng.state == 'LOADING')
+			return;
+
+		console.log('UPDATE LOCAL STORAGE', dailyMng);
+		window.localStorage.setItem('daily', JSON.stringify(dailyMng));
+	};
 
 	/**
 	 * @typedef {Object} KeyAction
@@ -90,8 +95,7 @@
 			key: 'KeyQ',
 			keyName: 'A',
 			action: () => {
-				// dailyMng.users[i].time += 5;
-				dailyMng.users[i].timer -= 5;
+				dailyMng.users[dailyMng.index].timer -= 5;
 			}
 		},
 		{
@@ -99,8 +103,7 @@
 			key: 'KeyW',
 			keyName: 'Z',
 			action: () => {
-				// dailyMng.users[i].time -= 5;
-				dailyMng.users[i].timer += 5;
+				dailyMng.users[dailyMng.index].timer += 5;
 			}
 		},
 		{
@@ -124,14 +127,13 @@
 			key: 'ArrowLeft',
 			keyName: '←',
 			action: () => {
-				if (i - 1 < 0) {
+				if (dailyMng.index - 1 < 0) {
 					return;
 				} else {
-					// timerHistory.set(dailyMng.users[i].name, actualTime);
-					i--;
-					// actualTime = timerHistory.get(dailyMng.users[i].name) || time;
-					// timeSpeaker = timeResult.get(dailyMng.users[i].name) || 0;
-					textToSpeech(dailyMng?.users?.[i]?.nickname || dailyMng?.users?.[i]?.name);
+					dailyMng.index--;
+					textToSpeech(
+						dailyMng?.users?.[dailyMng.index]?.nickname || dailyMng?.users?.[dailyMng.index]?.name
+					);
 				}
 			}
 		}
@@ -139,26 +141,29 @@
 
 	onMount(async () => {
 		let dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
-		// actualTime = dailyMng.time;
 
 		for (const user of dailyInfo.users) {
-			user.time = dailyInfo.time;
-			user.timer = 0;
+			if (!user.timer) {
+				user.timer = 0;
+			}
 		}
 
-		dailyMng = dailyInfo;
+		dailyMng = { ...dailyMng, ...dailyInfo };
 
-		textToSpeech(dailyMng.users[i].nickname || dailyMng.users[i].name);
-		animationSpeaker(dailyMng.users[i].animation);
+		if (dailyMng.state == 'LOADING') {
+			dailyMng.state = 'IN_PROGRESS';
+		}
+
+		textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
+		animationSpeaker(dailyMng.users[dailyMng.index].animation);
 
 		let interval = setInterval(() => {
-			if (endDaily) return;
+			if (dailyMng.state == 'ENDED') return;
 			if (!dailyMng.time) return;
 			totalTimer++;
 			if (pause) return;
 
-			// dailyMng.users[i].time--;
-			dailyMng.users[i].timer++;
+			dailyMng.users[dailyMng.index].timer++;
 		}, 1000);
 
 		const audioManager = (audioName) => {
@@ -170,7 +175,7 @@
 		document.addEventListener('keydown', (e) => {
 			actualKeyDown = e.code;
 
-			if (endDaily) return;
+			if (dailyMng.state == 'ENDED') return;
 
 			if (keydownInterval) {
 				clearTimeout(keydownInterval);
@@ -181,13 +186,7 @@
 			}, 300);
 
 			if (e.code === 'Tab' || e.code === 'Escape') {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
+				if (toggleGif()) return;
 
 				openMenu = !openMenu;
 			}
@@ -198,38 +197,41 @@
 				newSpeaker();
 			} else if (e.code === 'ArrowLeft') {
 				profilAnimation = '';
-				if (i - 1 >= 0) {
-					// timerHistory.set(dailyMng?.users[i].name, actualTime);
-					// timeResult.set(dailyMng?.users[i].name, timeSpeaker);
-					i--;
-					// actualTime = timerHistory.get(dailyMng?.users[i].name) || time;
-					// timeSpeaker = timeResult.get(dailyMng?.users[i].name) || 0;
-					textToSpeech(dailyMng.users[i].nickname || dailyMng.users[i].name);
-					animationSpeaker(dailyMng?.users[i].animation);
+				if (dailyMng.index - 1 >= 0) {
+					dailyMng.index--;
+					textToSpeech(
+						dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name
+					);
+					animationSpeaker(dailyMng?.users[dailyMng.index].animation);
 				}
 			} else if (e.code === 'KeyP') {
 				pause = !pause;
 			} else if (e.code === 'KeyQ') {
-				// dailyMng.users[i].time += 5;
-				dailyMng.users[i].timer -= 5;
+				dailyMng.users[dailyMng.index].timer -= 5;
 			} else if (e.code === 'KeyW') {
-				// dailyMng.users[i].time -= 5;
-				dailyMng.users[i].timer += 5;
+				dailyMng.users[dailyMng.index].timer += 5;
 			} else if (e.code === 'KeyK') {
 				if (audio) {
 					audio.pause();
 				}
 			}
+			//lors de l'appuie sur suppr
+			else if (e.code === 'KeyU') {
+				if (dailyMng.users.length > 1) {
+					let removeIndex = dailyMng.index;
+					dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];
+					console.log('i', dailyMng.index);
+					console.log('dailyMng.users.length', dailyMng.users.length);
+					if (dailyMng.index >= dailyMng.users.length - 1) {
+						dailyMng.index--;
+					}
+					dailyMng.users.splice(removeIndex, 1);
+				}
+			}
 
 			// @ts-ignore
 			if (animationData[e.code]) {
-				if (displayGif) {
-					displayGif = false;
-					if (audio) {
-						audio.pause();
-					}
-					return;
-				}
+				if (toggleGif()) return;
 
 				// @ts-ignore
 				const { url, sound } = animationData[e.code];
@@ -245,9 +247,20 @@
 		};
 	});
 
+	const toggleGif = () => {
+		if (displayGif) {
+			displayGif = false;
+			if (audio) {
+				audio.pause();
+			}
+			return true;
+		}
+		return false;
+	};
+
 	const textToSpeech = (text) => {
 		if (!dailyMng.voice) return;
-		if (endDaily) return;
+		if (dailyMng.state == 'ENDED') return;
 
 		if ('speechSynthesis' in window) {
 			if (window.speechSynthesis.speaking) {
@@ -260,23 +273,17 @@
 	};
 
 	const newSpeaker = () => {
-		if (endDaily) return;
+		if (dailyMng.state == 'ENDED') return;
 		displayGif = false;
 		profilAnimation = '';
-		if (i + 1 == dailyMng?.users.length) {
-			endDaily = true;
-			// timerHistory.set(dailyMng?.users[i].name, actualTime);
-			// timeResult.set(dailyMng?.users[i].name, timeSpeaker);
-			i = 0;
+		if (dailyMng.index + 1 == dailyMng?.users.length) {
+			dailyMng.state = 'ENDED';
+			dailyMng.index = 0;
 			saveDaily();
 		} else {
-			// timerHistory.set(dailyMng?.users[i].name, actualTime);
-			// timeResult.set(dailyMng?.users[i].name, timeSpeaker);
-			i++;
-			// actualTime = dailyMng.time;
-			// timeSpeaker = timeResult.get(dailyMng?.users[i].name) || 0;
-			textToSpeech(dailyMng.users[i].nickname || dailyMng.users[i].name);
-			animationSpeaker(dailyMng?.users[i].animation);
+			dailyMng.index++;
+			textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
+			animationSpeaker(dailyMng?.users[dailyMng.index].animation);
 		}
 	};
 
@@ -344,7 +351,6 @@
 	};
 
 	const shakeEffect = (timeUser) => {
-		console.log(timeUser);
 		const time = timeUser * -1;
 
 		const initialAmplitude = 1;
@@ -365,10 +371,10 @@
 </svelte:head>
 
 <section>
-	{#if endDaily}
+	{#if dailyMng.state == 'ENDED'}
 		<h1>Le daily est terminé</h1>
 
-		<TopPlayers speakers={timeResult} />
+		<TopPlayers speakers={dailyMng.users} />
 
 		<div class="separator-vertical">
 			<div></div>
@@ -415,42 +421,46 @@
 
 		{#if dailyMng?.users?.length > 0}
 			<div class="actualSpeaker">
-				{#if dailyMng?.users && dailyMng?.users[i].avatars}
-					<img
-						in:blur={{ duration: 500, opacity: 0 }}
-						src={'/avatar/' + dailyMng?.users?.[i]?.avatars}
-						alt="Jira Avatar"
-						on:error={() => {
-							dailyMng.users[i].avatars = null;
-						}}
-					/>
+				{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatars}
+					{#key dailyMng.index}
+						<img
+							in:blur={{ duration: 500, opacity: 0 }}
+							src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatars}
+							alt="Jira Avatar"
+							on:error={() => {
+								dailyMng.users[dailyMng.index].avatars = null;
+							}}
+						/>
+					{/key}
 				{/if}
 
 				<div>
-					{#key dailyMng.users[i].name}
+					{#key dailyMng.users[dailyMng.index].name}
 						<p in:fly={{ duration: 300, x: 20, y: 0, opacity: 0 }}>
-							{i > 0 ? dailyMng.users[i - 1].name : ''}
+							{dailyMng.index > 0 ? dailyMng.users[dailyMng.index - 1].name : ''}
 						</p>
 
 						<p in:scale={{ duration: 300, opacity: 0 }}>
-							{dailyMng.users[i].name}
+							{dailyMng.users[dailyMng.index].name}
 						</p>
 						<p in:fly={{ duration: 300, x: 20, y: 0, opacity: 0 }}>
-							{i + 1 < dailyMng.users.length ? dailyMng.users[i + 1].name : ''}
+							{dailyMng.index + 1 < dailyMng.users.length
+								? dailyMng.users[dailyMng.index + 1].name
+								: ''}
 						</p>
 					{/key}
 				</div>
 				<p
 					style="--couleur: {couleur}; --shake-amplitude: {shakeEffect(
-						dailyMng.time - dailyMng.users[i].timer
+						dailyMng.time - dailyMng.users[dailyMng.index].timer
 					)}"
 					class={'timer' +
-						(dailyMng.time - dailyMng.users[i].timer <= 0 && !pause ? ' danger' : '')}
+						(dailyMng.time - dailyMng.users[dailyMng.index].timer <= 0 && !pause ? ' danger' : '')}
 				>
 					{#if pause}
 						<Pause />
 					{:else}
-						{dailyMng.time - dailyMng.users[i].timer}
+						{dailyMng.time - dailyMng.users[dailyMng.index].timer}
 					{/if}
 				</p>
 			</div>
@@ -464,11 +474,11 @@
 		</p>
 
 		{#if openMenu}
-			<AddUser userExclude={dailyMng.exclude} bind:speaker={dailyMng.users} bind:openMenu />
+			<AddUser bind:userExclude={dailyMng.exclude} bind:speaker={dailyMng.users} bind:openMenu />
 		{/if}
 
 		<Keys {keysArray} {actualKeyDown} />
-		<GifDisplay {gifUrl} {displayGif} />
+		<GifDisplay {gifUrl} {displayGif} {toggleGif} />
 
 		{#if profilAnimation && dailyMng.animation}
 			<div class="profilAnimation">
@@ -481,10 +491,11 @@
 
 	<i
 		on:click={() => {
+			window.localStorage.removeItem('daily');
 			goto('/daily');
 		}}
 		class="fa-solid fa-rectangle-xmark close-daily"
-		style={endDaily ? 'cursor: pointer;' : ''}
+		style={dailyMng.state == 'ENDED' ? 'cursor: pointer;' : ''}
 	></i>
 </section>
 

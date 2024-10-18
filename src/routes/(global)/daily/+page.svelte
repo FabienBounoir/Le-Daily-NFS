@@ -1,6 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/stores/user';
+	import { onMount } from 'svelte';
 
 	let users = $user.users;
 
@@ -8,6 +9,14 @@
 	let randomized = true;
 	let voiceSynthesis = true;
 	let animationSpeakers = true;
+
+	let dailyExists = false;
+
+	onMount(() => {
+		if (window.localStorage.getItem('daily')) {
+			dailyExists = true;
+		}
+	});
 
 	const start = async () => {
 		let randomisedNames = users;
@@ -55,6 +64,19 @@
 </svelte:head>
 
 <section>
+	{#if dailyExists}
+		<div>
+			<p>On dirait que tu as déjà un daily en cours ! 👀</p>
+			<button
+				on:click={() => {
+					goto('/daily/start');
+				}}
+			>
+				Continuer le daily en cours
+			</button>
+		</div>
+	{/if}
+
 	<div class="container">
 		<h1>Participants:</h1>
 		<div class="participants">

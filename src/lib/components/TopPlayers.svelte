@@ -2,7 +2,7 @@
 	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
 
-	export let speakers = new Map();
+	export let speakers = [];
 
 	let speakersArraySort = [];
 
@@ -11,7 +11,7 @@
 	let otherSpeakers = [];
 
 	onMount(() => {
-		speakersArraySort = [...speakers.entries()].sort((a, b) => b[1] - a[1]);
+		speakersArraySort = speakers.sort((a, b) => b.timer - a.timer);
 
 		console.log(speakersArraySort);
 
@@ -31,47 +31,59 @@
 
 <div class="topPlayerContainer">
 	<div class="topThreePlayers">
-		{#each top3_Speakers as [name, score], i}
+		{#each top3_Speakers as user, i}
 			<div class="player">
-				<p>{name}</p>
+				<p>{user.name}</p>
 				<div class="information top-{i}">
-					{#if $user?.avatars && $user?.avatars[name]}
+					{#if user.avatars}
 						<img
-							src={'/avatar/' + $user?.avatars[name]}
+							src={'/avatar/' + user.avatars}
 							alt="Jira Avatar"
 							on:error={() => {
-								$user.avatars[name] = null;
+								user.avatars = null;
 							}}
 						/>
 					{:else}
-						<p class="emptyImage"></p>
+						<img
+							src={'https://api.dicebear.com/9.x/adventurer/svg?seed=' + user.name}
+							alt="Avatar"
+							on:error={() => {
+								user.avatars = null;
+							}}
+						/>
 					{/if}
 
-					<p>{score} secondes</p>
+					<p>{user.timer} secondes</p>
 				</div>
 			</div>
 		{/each}
 	</div>
 
 	<div class="otherPlayers">
-		{#each otherSpeakers as [name, score], i}
+		{#each otherSpeakers as user, i}
 			<div class="player">
 				<div>
-					{#if $user?.avatars && $user?.avatars[name]}
+					{#if user.avatars}
 						<img
-							src={'/avatar/' + $user?.avatars[name]}
+							src={'/avatar/' + user.avatars}
 							alt="Jira Avatar"
 							on:error={() => {
-								$user.avatars[name] = null;
+								user.avatars = null;
 							}}
 						/>
 					{:else}
-						<p class="emptyImage"></p>
+						<img
+							src={'https://api.dicebear.com/9.x/adventurer/svg?seed=' + user.name}
+							alt="Avatar"
+							on:error={() => {
+								user.avatars = null;
+							}}
+						/>
 					{/if}
-					<p>{name}</p>
+					<p>{user.name}</p>
 				</div>
 
-				<p>{score} secondes</p>
+				<p>{user.timer} secondes</p>
 			</div>
 		{/each}
 	</div>
