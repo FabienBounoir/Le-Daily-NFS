@@ -7,7 +7,6 @@
 {#if displayGif}
 	<img
 		on:click={() => {
-			console.log('click');
 			toggleGif();
 		}}
 		class="gifFullScreen"

@@ -65,15 +65,18 @@
 
 <section>
 	{#if dailyExists}
-		<div>
-			<p>On dirait que tu as déjà un daily en cours ! 👀</p>
+		<div class="container">
+			<h1 style="text-align: center;">On dirait que tu as déjà un daily en cours ! 👀</h1>
 			<button
+				class="continue"
 				on:click={() => {
 					goto('/daily/start');
 				}}
 			>
 				Continuer le daily en cours
 			</button>
+
+			<p class="separator"></p>
 		</div>
 	{/if}
 
@@ -136,11 +139,39 @@
 	</div>
 
 	<button on:click={() => start()} disabled={users?.length === 0 || !timeByUser || !$user.speakers}
-		>Démarrer le daily</button
+		>{dailyExists ? 'Démarrer un nouveau daily' : 'Démarrer le daily'}</button
 	>
 </section>
 
 <style lang="scss">
+	button.continue {
+		animation: backgroundChange 1s infinite;
+	}
+
+	@keyframes backgroundChange {
+		0% {
+			background-color: var(--primary-600);
+		}
+		25% {
+			background-color: var(--primary-700);
+		}
+		50% {
+			background-color: var(--primary-800);
+		}
+		75% {
+			background-color: var(--primary-900);
+		}
+		100% {
+			background-color: var(--primary-600);
+		}
+	}
+
+	.separator {
+		margin: 1em 0;
+		border-bottom: 3px solid var(--primary-100);
+		width: 100%;
+	}
+
 	section {
 		display: flex;
 		flex-direction: column;

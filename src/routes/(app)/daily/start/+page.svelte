@@ -65,7 +65,6 @@
 		if (!dailyMng || !dailyMng.users || dailyMng.users.length === 0 || dailyMng.state == 'LOADING')
 			return;
 
-		console.log('UPDATE LOCAL STORAGE', dailyMng);
 		window.localStorage.setItem('daily', JSON.stringify(dailyMng));
 	};
 
@@ -220,8 +219,7 @@
 				if (dailyMng.users.length > 1) {
 					let removeIndex = dailyMng.index;
 					dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];
-					console.log('i', dailyMng.index);
-					console.log('dailyMng.users.length', dailyMng.users.length);
+
 					if (dailyMng.index >= dailyMng.users.length - 1) {
 						dailyMng.index--;
 					}
@@ -334,18 +332,8 @@
 	const saveDaily = () => {
 		if (alreadySave) return;
 		alreadySave = true;
-		const daily = {
-			users: dailyMng?.users,
-			team: $user.teams[0],
-			totalTime: totalTimer,
-			userTime: time,
-			speakerTime: Array.from(timeResult.entries()).map(([name, time]) => ({
-				name,
-				time
-			}))
-		};
 
-		api.post('/daily', daily).then((res) => {
+		api.post('/daily', { team: $user.teams[0], ...dailyMng }).then((res) => {
 			stats = api.get(`/daily/stats/${$user.teams[0]}`);
 		});
 	};
@@ -363,7 +351,11 @@
 </script>
 
 <svelte:head>
-	<title>Daily en cours...</title>
+	<title>
+		{dailyMng.state == 'ENDED'
+			? 'Daily terminé !'
+			: `Daily en cours - ${dailyMng.users[dailyMng.index]?.name}`}
+	</title>
 	<meta
 		name="description"
 		content="Attention c'est l'heure du daily fait attention c'est bientôt à toi"
@@ -416,8 +408,6 @@
 		<div class="widget-euromillion"></div>
 	{:else}
 		<h1>Le daily {$user?.username || 'NFS'}</h1>
-
-		<pre>{JSON.stringify(dailyMng, null, 2)}</pre>
 
 		{#if dailyMng?.users?.length > 0}
 			<div class="actualSpeaker">

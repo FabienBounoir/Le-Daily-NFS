@@ -13,7 +13,6 @@
 
 	speakers = api.get(`/daily/stats/${$user.teams[0]}/speakers/${data.speaker}`).then((res) => {
 		speakers = res;
-		console.log(speakers);
 
 		histo = speakers.history.map((speaker, i) => {
 			return {

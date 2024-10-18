@@ -13,8 +13,6 @@
 	onMount(() => {
 		speakersArraySort = speakers.sort((a, b) => b.timer - a.timer);
 
-		console.log(speakersArraySort);
-
 		if (speakersArraySort.length >= 3) {
 			top3_Speakers = [speakersArraySort[2]];
 		}

@@ -26,7 +26,7 @@ export const POST = async ({ request }) => {
 	}
 
 	const existingTeam = await userService.getByTeam(team);
-	console.log("existingTeam", existingTeam);
+
 	if (existingTeam && existingTeam.length > 0) {
 		throw error(400, "Team already exists");
 	}

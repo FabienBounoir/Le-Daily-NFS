@@ -12,7 +12,7 @@ export const GET = async ({ request, params }) => {
 	try {
 		// @ts-ignore
 		const token = request.headers.get("authorization").split(" ")[1];
-		console.log("params",params)
+
 		const team = params.team;
 
 		if (!team || !params.speaker) {

@@ -34,9 +34,9 @@ export const GET = async ({ request }) => {
  */
 export const POST = async ({ request }) => {
 	try {
-		const { users, team, totalTime, userTime, speakerTime } = await request.json();
+		const { users, time, team } = await request.json();
 
-		if (!users || !team || !totalTime || !userTime) {
+		if (!users || users.length === 0 || !time) {
 			throw error(404, { id: "request.invalid", message: "Invalid request" });
 		}
 
@@ -53,13 +53,12 @@ export const POST = async ({ request }) => {
 			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
-		const daily = await dailyService.create(users, team, totalTime, userTime);
+		const daily = await dailyService.create(users, team, time);
 
-
-		if (speakerTime && speakerTime.length > 0) {
+		if (users && users.length > 0) {
 			let promises = [];
-			for (let speaker of speakerTime) {
-				promises.push(speakerService.addSpeakerTime(speaker.name, team, speaker.time, daily.insertedId.toString()));
+			for (let user of users) {
+				promises.push(speakerService.addSpeakerTime(user.name, team, user.timer, daily.insertedId.toString()));
 			}
 
 			await Promise.all(promises);

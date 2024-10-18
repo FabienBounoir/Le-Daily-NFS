@@ -83,7 +83,6 @@
 			.append('text')
 			.text((_, i) => items[i])
 			.attr('transform', (d) => {
-				console.log('arcGenerator', arcGenerator);
 				const [x, y] = arcGenerator.centroid(d);
 				const rotateAngle = ((d.startAngle + d.endAngle) / 2) * (180 / Math.PI);
 
