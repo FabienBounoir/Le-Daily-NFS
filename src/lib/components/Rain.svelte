@@ -1,49 +1,14 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let frontDrops = '';
-	let backDrops = '';
-
 	let arrayRandom = [];
-
-	function makeItRain() {
-		// Clear out everything
-		frontDrops = '';
-		backDrops = '';
-
-		let increment = 0;
-
-		while (increment < 100) {
-			// Random numbers for various randomizations
-			let randoHundo = Math.floor(Math.random() * 98) + 1;
-			let randoFiver = Math.floor(Math.random() * 4) + 2;
-
-			// Increment
-			increment += randoFiver;
-
-			// Create new raindrop with random CSS properties
-			frontDrops += `
-        <div class="drop" style="position: absolute; 		bottom: 100%; 		width: 15px; 		height: 120px; 		pointer-events: none; 		animation: drop 0.5s linear infinite; left: ${increment}%; bottom: ${Math.floor(Math.random() * 4) + 2 + Math.floor(Math.random() * 4) + 2 - 1 + 100}%; animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;">
-          <div class="stem" style="animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;"></div>
-          <div class="splat" style="animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;"></div>
-        </div>
-      `;
-			backDrops += `
-        <div class="drop" style="right: ${increment}%; bottom: ${randoFiver + randoFiver - 1 + 100}%; animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;">
-          <div class="stem" style="animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;"></div>
-          <div class="splat" style="animation-delay: 0.${Math.floor(Math.random() * 98) + 1}s; animation-duration: 0.5${Math.floor(Math.random() * 98) + 1}s;"></div>
-        </div>
-      `;
-		}
-	}
+	let sadEmojis = ['😢', '😔', '😞', '😟', '😭', '😿', '😕', '😫', '🙁', '🥺'];
 
 	onMount(() => {
-		// makeItRain();
-
 		for (let i = 0; i < 100; i++) {
 			arrayRandom = [
 				...arrayRandom,
-				[Math.floor(Math.random() * 98) + 1, Math.floor(Math.random() * 4) + 2]
+				[Math.floor(Math.random() * 98) + 1, Math.floor(Math.random() * 2.5) + 1.5]
 			];
 		}
 	});
@@ -57,21 +22,16 @@
 				style="left: {i + 1}%; bottom: {value[0] +
 					value[1] -
 					1 +
-					100}%; animation-delay: 0.{value[0]}s; animation-duration: 1.5{value[0]}s;"
+					100}%; animation-delay: {value[0] / 2}.{value[1]}s; animation-duration: 8.5{value[0]}s;"
 			>
 				<div
 					class="stem"
-					style="animation-delay: 0.${value[0]}s; animation-duration: 0.5${value[0]}s;"
-				></div>
-				<div
-					class="splat"
-					style="animation-delay: 0.${value[0]}s; animation-duration: 1.5${value[0]}s;"
-				></div>
+					style="animation-delay: 0.${value[0]}s; animation-duration: 1000${value[0]}s; font-size: {value[1]}rem;"
+				>
+					{sadEmojis[Math.floor(Math.random() * sadEmojis.length)]}
+				</div>
 			</div>
 		{/each}
-	</div>
-	<div class="rain back-row">
-		<!-- {@html backDrops} -->
 	</div>
 </main>
 
@@ -121,34 +81,15 @@
 			transform: translateY(0vh);
 		}
 		75% {
-			transform: translateY(90vh);
+			transform: translateY(150vh);
 		}
 		100% {
-			transform: translateY(100vh);
+			transform: translateY(200vh);
 		}
 	}
 
 	.stem {
-		width: 1px;
-		height: 60%;
-		margin-left: 7px;
-		background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25));
-		animation: stem 0.5s linear infinite;
-	}
-
-	@keyframes stem {
-		0% {
-			opacity: 1;
-		}
-		65% {
-			opacity: 1;
-		}
-		90% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-		}
+		font-size: 1.5rem;
 	}
 
 	.splat {

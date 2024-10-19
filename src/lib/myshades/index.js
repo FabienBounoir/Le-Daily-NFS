@@ -3,7 +3,7 @@
 import generateTailwindColorFamily from "./generateTailwindColorFamily";
 import tailwindColors3 from "./tailwind3";
 
-const generate = (hex = chroma.random(), referenceColors = tailwindColors3) =>
+const generate = (hex = "#ffffff", referenceColors = tailwindColors3) =>
     generateTailwindColorFamily(hex, referenceColors);
 
 /**
