@@ -141,7 +141,7 @@
 		</ul>
 
 		<div class="footer">
-			<i class="fa-solid fa-gear" on:click={() => goto('/settings')} />
+			<i class="fa-solid fa-gear settings" on:click={() => goto('/settings')} />
 			<i class="fa-solid fa-right-from-bracket" on:click={logout} />
 		</div>
 	</nav>
@@ -228,6 +228,11 @@
 					border-radius: 0.5rem;
 					transition-property: scale;
 
+					&:hover {
+						transform: scale(1.1);
+						background-color: var(--primary-50);
+					}
+
 					i {
 						color: var(--primary-600) !important;
 					}
@@ -272,6 +277,13 @@
 				margin-top: auto;
 				display: flex;
 				gap: 1rem;
+
+				.settings {
+					transition: transform 0.3s linear;
+					&:hover {
+						transform: rotate(45deg);
+					}
+				}
 
 				i {
 					cursor: pointer;

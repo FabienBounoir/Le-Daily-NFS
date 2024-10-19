@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { blur, fly, scale } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/utils/api';
@@ -139,6 +139,13 @@
 			}
 		}
 	];
+
+	onDestroy(() => {
+		if (interval) {
+			clearInterval(interval);
+		}
+		document.body.style.removeProperty('background-color');
+	});
 
 	onMount(async () => {
 		let dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
@@ -284,6 +291,7 @@
 			dailyMng.state = 'ENDED';
 			dailyMng.index = 0;
 			saveDaily();
+			document.body.style.removeProperty('background-color');
 
 			if (interval) {
 				clearInterval(interval);
