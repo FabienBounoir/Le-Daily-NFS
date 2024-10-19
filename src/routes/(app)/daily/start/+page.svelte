@@ -20,6 +20,7 @@
 	import PartyHat from '$lib/components/PartyHat.svelte';
 	import { Confetti } from 'svelte-confetti';
 	import Bouns from '$lib/components/Bouns.svelte';
+	import Rain from '$lib/components/Rain.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -383,23 +384,15 @@
 	};
 
 	const checkLastDayOnProject = (date) => {
-		if (!date) {
-			document.body.style.removeProperty('background-color');
-
-			return;
-		}
+		if (!date) return false;
 
 		const actualDate = new Date();
-
 		const birthdayDate = new Date(date);
 
-		if (
+		return (
 			birthdayDate.getDay() === actualDate.getDay() &&
 			birthdayDate.getMonth() === actualDate.getMonth()
-		) {
-			//changer la couleur du backgorund
-			document.body.style.setProperty('background-color', '#111119');
-		}
+		);
 	};
 </script>
 
@@ -459,6 +452,10 @@
 		</div>
 	{:else}
 		<h1>Le daily {$user?.username || 'NFS'}</h1>
+
+		{#if checkLastDayOnProject(dailyMng?.users[dailyMng.index].lastDayOnProject)}
+			<Rain />
+		{/if}
 
 		{#if dailyMng?.users?.length > 0}
 			{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
