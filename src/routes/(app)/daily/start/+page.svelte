@@ -19,6 +19,7 @@
 	import Qwertee from '$lib/components/Qwertee.svelte';
 	import PartyHat from '$lib/components/PartyHat.svelte';
 	import { Confetti } from 'svelte-confetti';
+	import Bouns from '$lib/components/Bouns.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -482,14 +483,18 @@
 				{#key dailyMng.index}
 					<div class="avatars-container">
 						{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatar}
-							<img
-								in:blur={{ duration: 500, opacity: 0 }}
-								src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatar}
-								alt="Jira Avatar"
-								on:error={() => {
-									dailyMng.users[dailyMng.index].avatar = null;
-								}}
-							/>
+							{#if dailyMng?.users[dailyMng.index].avatar == 'bouns.svelte'}
+								<Bouns />
+							{:else}
+								<img
+									in:blur={{ duration: 500, opacity: 0 }}
+									src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatar}
+									alt="Jira Avatar"
+									on:error={() => {
+										dailyMng.users[dailyMng.index].avatar = null;
+									}}
+								/>
+							{/if}
 						{:else}
 							<img
 								in:blur={{ duration: 500, opacity: 0 }}

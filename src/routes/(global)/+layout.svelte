@@ -227,6 +227,7 @@
 					justify-content: center;
 					border-radius: 0.5rem;
 					transition-property: scale;
+					transition: 0.3s linear;
 
 					&:hover {
 						transform: scale(1.1);

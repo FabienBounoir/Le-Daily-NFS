@@ -1,5 +1,4 @@
 <script>
-	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
 
 	export let speakers = [];
@@ -34,13 +33,23 @@
 				<p>{user.name}</p>
 				<div class="information top-{i}">
 					{#if user.avatar}
-						<img
-							src={'/avatar/' + user.avatar}
-							alt="Jira Avatar"
-							on:error={() => {
-								user.avatar = null;
-							}}
-						/>
+						{#if user.avatar == 'bouns.svelte'}
+							<img
+								src={'/avatar/bouns.png'}
+								alt="Jira Avatar"
+								on:error={() => {
+									user.avatar = null;
+								}}
+							/>
+						{:else}
+							<img
+								src={'/avatar/' + user.avatar}
+								alt="Jira Avatar"
+								on:error={() => {
+									user.avatar = null;
+								}}
+							/>
+						{/if}
 					{:else}
 						<img
 							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
@@ -62,13 +71,23 @@
 			<div class="player">
 				<div>
 					{#if user.avatar}
-						<img
-							src={'/avatar/' + user.avatar}
-							alt="Jira Avatar"
-							on:error={() => {
-								user.avatar = null;
-							}}
-						/>
+						{#if user.avatar == 'bouns.svelte'}
+							<img
+								src={'/avatar/bouns.png'}
+								alt="Jira Avatar"
+								on:error={() => {
+									user.avatar = null;
+								}}
+							/>
+						{:else}
+							<img
+								src={'/avatar/' + user.avatar}
+								alt="Jira Avatar"
+								on:error={() => {
+									user.avatar = null;
+								}}
+							/>
+						{/if}
 					{:else}
 						<img
 							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
@@ -114,10 +133,19 @@
 				& > div {
 					display: flex;
 					gap: 0.5em;
+					* {
+						width: 25px;
+						height: 25px;
+					}
 					img {
 						width: 25px;
 						height: 25px;
 						border-radius: 50%;
+					}
+
+					svg {
+						width: 25px;
+						height: 25px;
 					}
 
 					.emptyImage {
@@ -164,6 +192,14 @@
 					padding: 1em 0;
 
 					img {
+						width: 50px;
+						height: 50px;
+						border-radius: 50%;
+						border: 1px solid var(--primary-600);
+						background-color: var(--primary-600);
+					}
+
+					svg {
 						width: 50px;
 						height: 50px;
 						border-radius: 50%;
