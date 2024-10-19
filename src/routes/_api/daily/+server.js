@@ -34,9 +34,9 @@ export const GET = async ({ request }) => {
  */
 export const POST = async ({ request }) => {
 	try {
-		const { users, time, team } = await request.json();
+		const { users, time, team, totalTimer } = await request.json();
 
-		if (!users || users.length === 0 || !time) {
+		if (!users || users.length === 0 || !time || !totalTimer) {
 			throw error(404, { id: "request.invalid", message: "Invalid request" });
 		}
 
@@ -53,7 +53,7 @@ export const POST = async ({ request }) => {
 			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
-		const daily = await dailyService.create(users, team, time);
+		const daily = await dailyService.create(users, team, time, totalTimer);
 
 		if (users && users.length > 0) {
 			let promises = [];

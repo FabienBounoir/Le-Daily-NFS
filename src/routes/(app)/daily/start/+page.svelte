@@ -17,8 +17,8 @@
 	import TopPlayers from '$lib/components/TopPlayers.svelte';
 	import Hyrox from '$lib/components/Hyrox.svelte';
 	import Qwertee from '$lib/components/Qwertee.svelte';
-
-	let startDailyDaily = new Date();
+	import PartyHat from '$lib/components/PartyHat.svelte';
+	import { Confetti } from 'svelte-confetti';
 
 	let audio = null;
 	let openMenu = false;
@@ -34,6 +34,8 @@
 
 	let alreadySave = false;
 
+	let interval = null;
+
 	let dailyMng = {
 		users: [{}],
 		voice: true,
@@ -41,7 +43,9 @@
 		time: 120,
 		exclude: [],
 		state: 'LOADING',
-		index: 0
+		index: 0,
+		totalTimer: 0,
+		startDailyDate: new Date()
 	};
 
 	/**
@@ -52,10 +56,6 @@
 	 * @type {number | null | undefined}
 	 */
 	let animationProfilTimer = null;
-	let totalTimer = 0;
-
-	const timerHistory = new Map();
-	const timeResult = new Map();
 
 	let couleur = 'rgb(255, 0, 0)';
 	$: (couleur = `hsl(${(120 * (dailyMng.time - dailyMng.users[dailyMng.index].timer)) / dailyMng.time}deg 71.85% 42.47%)`),
@@ -64,6 +64,8 @@
 	const updateDailyMngOnLocalStorage = (dailyMng) => {
 		if (!dailyMng || !dailyMng.users || dailyMng.users.length === 0 || dailyMng.state == 'LOADING')
 			return;
+
+		checkLastDayOnProject(dailyMng.users[dailyMng.index].lastDayOnProject);
 
 		window.localStorage.setItem('daily', JSON.stringify(dailyMng));
 	};
@@ -149,6 +151,10 @@
 
 		dailyMng = { ...dailyMng, ...dailyInfo };
 
+		if (dailyInfo.startDailyDate) {
+			dailyMng.startDailyDate = new Date(dailyInfo.startDailyDate);
+		}
+
 		if (dailyMng.state == 'LOADING') {
 			dailyMng.state = 'IN_PROGRESS';
 		}
@@ -156,10 +162,10 @@
 		textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
 		animationSpeaker(dailyMng.users[dailyMng.index].animation);
 
-		let interval = setInterval(() => {
+		interval = setInterval(() => {
 			if (dailyMng.state == 'ENDED') return;
 			if (!dailyMng.time) return;
-			totalTimer++;
+			dailyMng.totalTimer++;
 			if (pause) return;
 
 			dailyMng.users[dailyMng.index].timer++;
@@ -278,6 +284,11 @@
 			dailyMng.state = 'ENDED';
 			dailyMng.index = 0;
 			saveDaily();
+
+			if (interval) {
+				clearInterval(interval);
+				interval = null;
+			}
 		} else {
 			dailyMng.index++;
 			textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
@@ -348,6 +359,39 @@
 
 		return amplitude > 7 ? 7 : amplitude;
 	};
+
+	const checkBirthdayToday = (birthday) => {
+		if (!birthday) return false;
+
+		const actualDate = new Date();
+
+		const birthdayDate = new Date(birthday);
+
+		return (
+			birthdayDate.getDay() === actualDate.getDay() &&
+			birthdayDate.getMonth() === actualDate.getMonth()
+		);
+	};
+
+	const checkLastDayOnProject = (date) => {
+		if (!date) {
+			document.body.style.removeProperty('background-color');
+
+			return;
+		}
+
+		const actualDate = new Date();
+
+		const birthdayDate = new Date(date);
+
+		if (
+			birthdayDate.getDay() === actualDate.getDay() &&
+			birthdayDate.getMonth() === actualDate.getMonth()
+		) {
+			//changer la couleur du backgorund
+			document.body.style.setProperty('background-color', '#111119');
+		}
+	};
 </script>
 
 <svelte:head>
@@ -382,11 +426,11 @@
 			<div class="informations">
 				{#await stats then data}
 					<p>
-						Le daily a commencé à <b>{startDailyDaily.toLocaleTimeString()}</b> il a duré
-						<b>{timeFormater(totalTimer)}</b>
+						Le daily a commencé à <b>{dailyMng.startDailyDate.toLocaleTimeString()}</b> il a duré
+						<b>{timeFormater(dailyMng.totalTimer)}</b>
 						c'est
-						<u class={totalTimer > data.moyen ? 'warning' : 'success'}
-							>{totalTimer > data.moyen ? 'plus' : 'moins'}</u
+						<u class={dailyMng.totalTimer > data.moyen ? 'warning' : 'success'}
+							>{dailyMng.totalTimer > data.moyen ? 'plus' : 'moins'}</u
 						>
 						long que la moyenne qui est à
 						<b>{timeFormater(data.moyen)}</b>
@@ -404,25 +448,56 @@
 				<Hyrox />
 			</div>
 		</div>
-
-		<div class="widget-euromillion"></div>
 	{:else}
 		<h1>Le daily {$user?.username || 'NFS'}</h1>
 
 		{#if dailyMng?.users?.length > 0}
+			{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
+				<div
+					style="position: fixed; top: -50px;left: 0;height: 100vh;width: 100vw;display: flex;justify-content: center;overflow: hidden;pointer-events: none;"
+				>
+					<Confetti
+						x={[-5, 5]}
+						y={[0, 0.1]}
+						delay={[1000, 3000]}
+						infinite
+						size={15}
+						duration={5000}
+						amount={150}
+						fallDistance="100vh"
+						colorArray={['var(--primary-400)', 'var(--primary-600)', 'var(--primary-950)']}
+					/>
+				</div>
+			{/if}
+
 			<div class="actualSpeaker">
-				{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatars}
-					{#key dailyMng.index}
-						<img
-							in:blur={{ duration: 500, opacity: 0 }}
-							src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatars}
-							alt="Jira Avatar"
-							on:error={() => {
-								dailyMng.users[dailyMng.index].avatars = null;
-							}}
-						/>
-					{/key}
-				{/if}
+				{#key dailyMng.index}
+					<div class="avatars-container">
+						{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatars}
+							<img
+								in:blur={{ duration: 500, opacity: 0 }}
+								src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatars}
+								alt="Jira Avatar"
+								on:error={() => {
+									dailyMng.users[dailyMng.index].avatars = null;
+								}}
+							/>
+						{:else}
+							<img
+								in:blur={{ duration: 500, opacity: 0 }}
+								src={'https://api.dicebear.com/9.x/personas/svg?seed=' +
+									dailyMng?.users?.[dailyMng.index]?.name}
+								alt="Avatar"
+								on:error={() => {
+									dailyMng.users[dailyMng.index].avatars = null;
+								}}
+							/>
+						{/if}
+						{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
+							<PartyHat />
+						{/if}
+					</div>
+				{/key}
 
 				<div>
 					{#key dailyMng.users[dailyMng.index].name}
@@ -431,7 +506,24 @@
 						</p>
 
 						<p in:scale={{ duration: 300, opacity: 0 }}>
-							{dailyMng.users[dailyMng.index].name}
+							{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
+								<Confetti
+									cone
+									x={[-0.5, -2.5]}
+									y={[-0.1, 0.75]}
+									colorArray={['var(--primary-500)', 'var(--primary-950)']}
+								/>
+							{/if}
+
+							<span>{dailyMng.users[dailyMng.index].name}</span>
+							{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
+								<Confetti
+									cone
+									x={[0.5, 2.5]}
+									y={[-0.1, 0.75]}
+									colorArray={['var(--primary-500)', 'var(--primary-950)']}
+								/>
+							{/if}
 						</p>
 						<p in:fly={{ duration: 300, x: 20, y: 0, opacity: 0 }}>
 							{dailyMng.index + 1 < dailyMng.users.length
@@ -456,11 +548,11 @@
 			</div>
 		{/if}
 
-		<DateStart {startDailyDaily} {displayGif} />
+		<DateStart startDailyDate={dailyMng.startDailyDate} {displayGif} />
 
 		<p class="actualTime">
 			<i class="fa-regular fa-clock"></i>
-			{timeFormater(totalTimer)}
+			{timeFormater(dailyMng.totalTimer)}
 		</p>
 
 		{#if openMenu}
@@ -468,6 +560,7 @@
 		{/if}
 
 		<Keys {keysArray} {actualKeyDown} />
+
 		<GifDisplay {gifUrl} {displayGif} {toggleGif} />
 
 		{#if profilAnimation && dailyMng.animation}
@@ -481,6 +574,10 @@
 
 	<i
 		on:click={() => {
+			if (interval) {
+				clearInterval(interval);
+			}
+
 			window.localStorage.removeItem('daily');
 			goto('/daily');
 		}}
@@ -644,45 +741,91 @@
 			color: var(--primary-600);
 		}
 
+		.avatars-container {
+			width: 100px;
+			height: 100px;
+			border-radius: 50%;
+
+			position: absolute;
+			top: -12dvh;
+			left: 50%;
+			transform: translate(-50%, 0%);
+			position: relative;
+
+			svg {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+		}
+
 		img {
 			width: 100px;
 			height: 100px;
 			border-radius: 50%;
 
 			position: absolute;
-			top: -150px;
+			top: 50%;
 			left: 50%;
-			transform: translate(-50%, 0%);
+			transform: translate(-50%, -50%);
 			background-color: var(--primary-100);
 			border: 5px solid var(--primary-600);
 		}
 
+		@media screen and (max-height: 500px) {
+			.avatars-container {
+				display: none;
+			}
+		}
+
 		div {
-			display: flex;
-			justify-content: center;
-			align-items: end;
-			gap: 1em;
-			position: relative;
+			// display: flex;
+			// justify-content: center;
+			// align-items: end;
+			// gap: 1em;
+			// position: relative;
+
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			align-items: baseline;
+			width: 95vw;
 
 			p {
 				opacity: 0.3;
 			}
 
 			p:nth-child(1) {
-				position: absolute;
-				bottom: 0;
-				left: -7em;
+				scale: 0.7;
 			}
 
 			p:nth-child(2) {
 				font-size: 5em;
 				opacity: 1;
+				display: flex;
+				flex-direction: row;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 			}
 
 			p:nth-child(3) {
-				position: absolute;
-				bottom: 0;
-				right: -7em;
+				scale: 0.7;
+			}
+		}
+
+		@media screen and (max-width: 1080px) {
+			div {
+				grid-template-columns: 1fr;
+
+				p:nth-child(1) {
+					display: none;
+				}
+
+				p:nth-child(3) {
+					display: none;
+				}
 			}
 		}
 	}

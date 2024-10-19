@@ -40,8 +40,10 @@
 	--on-primary-900: var(--primary-100);
 
 	color: var(--primary-600);
+}
 
-	// background-color: #fafafa;
+body {
+	transition: background-color 3s ease 0s !important;
 }
 
 *,
@@ -165,16 +167,11 @@ a.cover {
 	animation: fa-spin 800ms ease infinite;
 }
 
-// button {
-// 	cursor: pointer;
-// 	font: inherit;
-// 	border: none;
-// 	color: rgb(var(--secondary));
-// 	background-color: var(--primary);
-// 	width: 100%;
+// .lastDay-active {
+// 	height: 100dvh;
+// 	background: linear-gradient(to bottom, #202020, #111119);
 
-// 	text-transform: lowercase;
-// 	text-align: center;
-// 	padding: 0.25em 0.5em;
-// 	border-radius: 0.25em;
+// 	p {
+// 		color: white !important;
+// 	}
 // }

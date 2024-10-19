@@ -14,7 +14,10 @@
 
 	onMount(() => {
 		if (window.localStorage.getItem('daily')) {
-			dailyExists = true;
+			const daily = JSON.parse(window.localStorage.getItem('daily'));
+			if (daily.state === 'IN_PROGRESS') {
+				dailyExists = true;
+			}
 		}
 	});
 

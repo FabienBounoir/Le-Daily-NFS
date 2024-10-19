@@ -27,6 +27,17 @@
 
 		return map;
 	};
+
+	const updateElementWithIndex = (valeur, index, key) => {
+		let usersElement = $user.users;
+
+		usersElement[index][key] = valeur;
+
+		user.change({
+			...$user,
+			users: usersElement
+		});
+	};
 </script>
 
 <section>
@@ -37,18 +48,20 @@
 			pour une flexibilité optimale et des débuts de journée toujours bien orchestrés !
 		</p>
 		<div class="participants">
-			{#each $user.speakers as speaker}
-				<p
-					on:click={() => {
-						user.change({
-							...$user,
-							speakers: $user.speakers.filter((n) => n !== speaker)
-						});
-					}}
-				>
-					{speaker}
-				</p>
-			{/each}
+			{#key $user.users}
+				{#each $user.users as speaker}
+					<p
+						on:click={() => {
+							user.change({
+								...$user,
+								users: $user.users.filter((n) => n.name !== speaker.name)
+							});
+						}}
+					>
+						{speaker.name}
+					</p>
+				{/each}
+			{/key}
 			<input
 				type="text"
 				placeholder="Ajouter un participant"
@@ -108,6 +121,52 @@
 		<p>Prenez le contrôle absolu du temps de parole de chaque intervenant selon vos préférences:</p>
 		<input type="number" bind:value={timer} min="10" max="3600" step="5" />
 	</div>
+	<div class="container speaker">
+		<h1>Speaker Information:</h1>
+
+		{#if $user?.users}
+			{#each $user?.users as user, index}
+				<div class="speaker-information">
+					<label>Nom:</label>
+					<input
+						type="text"
+						bind:value={user.name}
+						on:change={() => {
+							updateElementWithIndex(user.name, index, 'name');
+						}}
+					/>
+
+					<label>Nickname:</label>
+					<input
+						type="text"
+						bind:value={user.nickname}
+						on:change={() => {
+							updateElementMap(nicknames, user.name, nicknames.get(user.name));
+						}}
+					/>
+
+					<label>Animation:</label>
+					<input
+						type="text"
+						bind:value={user.animation}
+						on:change={() => {
+							updateElementWithIndex(user.animation, index, 'animation');
+						}}
+					/>
+
+					<label>Avatar:</label>
+					<input
+						type="text"
+						bind:value={user.avatars}
+						on:change={() => {
+							updateElementWithIndex(user.avatars, index, 'avatars');
+						}}
+					/>
+				</div>
+			{/each}
+		{/if}
+	</div>
+
 	<div class="container">
 		<h1>Animation de Speaker:</h1>
 		<p>Ajouter des animations pour chaque speaker:</p>
@@ -371,6 +430,18 @@
 	.container {
 		display: flex;
 		flex-direction: column;
+
+		&.speaker {
+			display: flex;
+			flex-direction: column;
+			gap: 1em;
+
+			.speaker-information {
+				background-color: var(--primary-200);
+				padding: 0.5em;
+				border-radius: 0.5em;
+			}
+		}
 
 		h1 {
 			user-select: none;

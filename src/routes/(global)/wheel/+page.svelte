@@ -1,18 +1,30 @@
 <script>
 	import Wheel from '$lib/components/Wheel.svelte';
 	import { user } from '$lib/stores/user';
+	import { onMount } from 'svelte';
 
 	let items = [...($user?.users?.map?.((u) => u.name) || [])].sort(() => Math.random() - 0.5);
 
-	$: colors = [
-		document.documentElement.style.getPropertyValue('--primary-600'),
-		document.documentElement.style.getPropertyValue('--primary-300'),
-		document.documentElement.style.getPropertyValue('--primary-700'),
-		document.documentElement.style.getPropertyValue('--primary-500'),
-		document.documentElement.style.getPropertyValue('--primary-800')
-	];
+	let colors = [];
 
 	$: name = '';
+	let mounted = false;
+
+	onMount(() => {
+		setTimeout(() => {
+			colors = [
+				document.documentElement.style.getPropertyValue('--primary-600'),
+				document.documentElement.style.getPropertyValue('--primary-300'),
+				document.documentElement.style.getPropertyValue('--primary-700'),
+				document.documentElement.style.getPropertyValue('--primary-500'),
+				document.documentElement.style.getPropertyValue('--primary-800')
+			];
+
+			console.log('colors', colors);
+
+			mounted = true;
+		}, 100);
+	});
 
 	const addName = () => {
 		items = [...items, name];
@@ -21,6 +33,7 @@
 
 <section>
 	<div>
+		<h1>Participants:</h1>
 		{#each $user?.users as user}
 			<p
 				class={items.includes(user.name) ? 'active' : ''}
@@ -37,7 +50,9 @@
 		{/each}
 	</div>
 	{#if items?.length > 0}
-		<Wheel {items} {colors} />
+		{#if mounted}
+			<Wheel {items} {colors} />
+		{/if}
 	{:else}
 		<p>Ajouter des personnes à la liste dans les paramètres</p>
 	{/if}

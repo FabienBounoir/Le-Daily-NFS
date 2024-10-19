@@ -2,9 +2,11 @@
 	import Pointer from './Pointer.svelte';
 	import { onMount, beforeUpdate, afterUpdate } from 'svelte';
 	import { select, arc, pie } from 'd3';
+	import { Confetti } from 'svelte-confetti';
 
 	let isSpinning = false;
 	let spinDeg = Math.random() * 360;
+	let firstSpin = true;
 
 	const generateColors = () =>
 		`rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(
@@ -31,6 +33,7 @@
 		e.stopPropagation();
 		if (!isSpinning) {
 			isSpinning = true;
+			firstSpin = false;
 
 			const turnWheel = Math.floor(Math.random() * (14 - 3 + 1)) + 3;
 
@@ -101,7 +104,25 @@
 	<button
 		class={`spin-button ${isSpinning ? 'disabled' : ''}`}
 		on:click={spinWheel}
-		color={pointerTextColor}><span></span></button
+		color={pointerTextColor}
+		><span
+			>{#if isSpinning == false && firstSpin == false}
+				{#key isSpinning}
+					<Confetti
+						delay={[0, 1500]}
+						colorArray={['var(--primary-400)', 'var(--primary-600)', 'var(--primary-950)']}
+						x={[-3, 3]}
+						y={[-3, 3]}
+						amount={400}
+						xSpread={0.4}
+						size={20}
+						rounded
+						noGravity
+						fallDistance="320px"
+					/>
+				{/key}
+			{/if}</span
+		></button
 	>
 </div>
 

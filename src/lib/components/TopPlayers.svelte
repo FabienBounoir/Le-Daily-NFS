@@ -43,7 +43,7 @@
 						/>
 					{:else}
 						<img
-							src={'https://api.dicebear.com/9.x/adventurer/svg?seed=' + user.name}
+							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
 							alt="Avatar"
 							on:error={() => {
 								user.avatars = null;
@@ -71,7 +71,7 @@
 						/>
 					{:else}
 						<img
-							src={'https://api.dicebear.com/9.x/adventurer/svg?seed=' + user.name}
+							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
 							alt="Avatar"
 							on:error={() => {
 								user.avatars = null;

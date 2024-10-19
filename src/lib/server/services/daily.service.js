@@ -106,10 +106,10 @@ class DailyService {
 	/**
 	 * @param {string[]} users
 	 * @param {string} team
-	 * @param {string} totalTime
-	 * @param {string} userTime
+	 * @param {string} timer
+	 * @param {string} totalTimer
 	 */
-	async create(users, team, timer) {
+	async create(users, team, timer, totalTimer) {
 
 		let names = []
 
@@ -119,19 +119,15 @@ class DailyService {
 			if (user.name) {
 				names.push(user.name);
 			}
-
-			if (user.time) {
-				totalTime += parseInt(`${user.time}`) || 0;
-			}
 		}
 
 
 		return await this.#collection.insertOne({
 			users: users.map(user => user.name),
 			team,
-			totalTime: parseInt(`${totalTime}`),
+			totalTime: parseInt(`${totalTimer}`),
 			userTime: parseInt(`${timer}`),
-			date: new Date(new Date().getTime() - (parseInt(`${totalTime}`) * 1000))
+			date: new Date(new Date().getTime() - (parseInt(`${totalTimer}`) * 1000))
 		});
 	}
 
