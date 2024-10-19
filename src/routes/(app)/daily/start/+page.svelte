@@ -481,13 +481,13 @@
 			<div class="actualSpeaker">
 				{#key dailyMng.index}
 					<div class="avatars-container">
-						{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatars}
+						{#if dailyMng?.users && dailyMng?.users[dailyMng.index].avatar}
 							<img
 								in:blur={{ duration: 500, opacity: 0 }}
-								src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatars}
+								src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatar}
 								alt="Jira Avatar"
 								on:error={() => {
-									dailyMng.users[dailyMng.index].avatars = null;
+									dailyMng.users[dailyMng.index].avatar = null;
 								}}
 							/>
 						{:else}
@@ -497,7 +497,7 @@
 									dailyMng?.users?.[dailyMng.index]?.name}
 								alt="Avatar"
 								on:error={() => {
-									dailyMng.users[dailyMng.index].avatars = null;
+									dailyMng.users[dailyMng.index].avatar = null;
 								}}
 							/>
 						{/if}

@@ -157,9 +157,9 @@
 					<label>Avatar:</label>
 					<input
 						type="text"
-						bind:value={user.avatars}
+						bind:value={user.avatar}
 						on:change={() => {
-							updateElementWithIndex(user.avatars, index, 'avatars');
+							updateElementWithIndex(user.avatar, index, 'avatar');
 						}}
 					/>
 				</div>

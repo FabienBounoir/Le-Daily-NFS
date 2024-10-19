@@ -50,7 +50,7 @@
 
 		let newUsersObj = {
 			name: `${name[0].toUpperCase()}${name.slice(1)}`,
-			avatars: null,
+			avatar: null,
 			timer: 0,
 			nickname: null,
 			animation: null
@@ -109,12 +109,12 @@
 		<div class="user-list" in:slide={{ axis: 'y', duration: 100 }}>
 			{#each searchElement as user}
 				<p on:click={() => addUserToSpeaker(user)}>
-					{#if user.avatars}
+					{#if user.avatar}
 						<img
-							src={'/avatar/' + user.avatars}
+							src={'/avatar/' + user.avatar}
 							alt="Jira Avatar"
 							on:error={() => {
-								user.avatars = null;
+								user.avatar = null;
 							}}
 						/>
 					{/if}

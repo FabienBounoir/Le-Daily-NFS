@@ -33,12 +33,12 @@
 			<div class="player">
 				<p>{user.name}</p>
 				<div class="information top-{i}">
-					{#if user.avatars}
+					{#if user.avatar}
 						<img
-							src={'/avatar/' + user.avatars}
+							src={'/avatar/' + user.avatar}
 							alt="Jira Avatar"
 							on:error={() => {
-								user.avatars = null;
+								user.avatar = null;
 							}}
 						/>
 					{:else}
@@ -46,7 +46,7 @@
 							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
 							alt="Avatar"
 							on:error={() => {
-								user.avatars = null;
+								user.avatar = null;
 							}}
 						/>
 					{/if}
@@ -61,12 +61,12 @@
 		{#each otherSpeakers as user, i}
 			<div class="player">
 				<div>
-					{#if user.avatars}
+					{#if user.avatar}
 						<img
-							src={'/avatar/' + user.avatars}
+							src={'/avatar/' + user.avatar}
 							alt="Jira Avatar"
 							on:error={() => {
-								user.avatars = null;
+								user.avatar = null;
 							}}
 						/>
 					{:else}
@@ -74,7 +74,7 @@
 							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
 							alt="Avatar"
 							on:error={() => {
-								user.avatars = null;
+								user.avatar = null;
 							}}
 						/>
 					{/if}
