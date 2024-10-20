@@ -21,6 +21,7 @@
 	import { Confetti } from 'svelte-confetti';
 	import Bouns from '$lib/components/Bouns.svelte';
 	import Rain from '$lib/components/Rain.svelte';
+	import TeamMood from '$lib/components/TeamMood.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -371,6 +372,7 @@
 	};
 
 	const checkBirthdayToday = (birthday) => {
+		console.log(birthday);
 		if (!birthday) return false;
 
 		const actualDate = new Date();
@@ -378,7 +380,7 @@
 		const birthdayDate = new Date(birthday);
 
 		return (
-			birthdayDate.getDay() === actualDate.getDay() &&
+			birthdayDate.getDate() === actualDate.getDate() &&
 			birthdayDate.getMonth() === actualDate.getMonth()
 		);
 	};
@@ -387,11 +389,12 @@
 		if (!date) return false;
 
 		const actualDate = new Date();
-		const birthdayDate = new Date(date);
+		const LastDayOnProjectDate = new Date(date);
 
 		return (
-			birthdayDate.getDay() === actualDate.getDay() &&
-			birthdayDate.getMonth() === actualDate.getMonth()
+			LastDayOnProjectDate.getDate() === actualDate.getDate() &&
+			LastDayOnProjectDate.getMonth() === actualDate.getMonth() &&
+			LastDayOnProjectDate.getFullYear() === actualDate.getFullYear()
 		);
 	};
 </script>
@@ -448,6 +451,7 @@
 			<div class="weather">
 				<EuroMillion />
 				<Hyrox />
+				<TeamMood />
 			</div>
 		</div>
 	{:else}
@@ -555,6 +559,14 @@
 						{dailyMng.time - dailyMng.users[dailyMng.index].timer}
 					{/if}
 				</p>
+
+				{#if new Date().getDay() === 3 && dailyMng.users[dailyMng.index].name === 'Guillaume'}
+					<span
+						><br /><br />YO la team faut remplir le team mood<br /><span style="font-weight: bold;"
+							>https://tinyurl.com/mood</span
+						></span
+					>
+				{/if}
 			</div>
 		{/if}
 
