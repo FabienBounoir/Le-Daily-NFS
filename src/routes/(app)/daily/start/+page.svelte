@@ -523,8 +523,9 @@
 							{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
 								<Confetti
 									cone
-									x={[-0.5, -2.5]}
+									x={[-2, -2.5]}
 									y={[-0.1, 0.75]}
+									delay={[80, 2000]}
 									colorArray={['var(--primary-500)', 'var(--primary-950)']}
 								/>
 							{/if}
@@ -533,8 +534,9 @@
 							{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
 								<Confetti
 									cone
-									x={[0.5, 2.5]}
+									x={[2, 2.5]}
 									y={[-0.1, 0.75]}
+									delay={[80, 2000]}
 									colorArray={['var(--primary-500)', 'var(--primary-950)']}
 								/>
 							{/if}
@@ -562,8 +564,8 @@
 
 				{#if new Date().getDay() === 3 && dailyMng.users[dailyMng.index].name === 'Guillaume'}
 					<span
-						><br /><br />YO la team faut remplir le team mood<br /><span style="font-weight: bold;"
-							>https://tinyurl.com/mood</span
+						><br /><br />Yo la team faut remplir le team mood<br /><span style="font-weight: bold;"
+							>https://team-mood-1129.apps.ocp4.innershift.sodigital.io/</span
 						></span
 					>
 				{/if}
