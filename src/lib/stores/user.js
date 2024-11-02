@@ -14,24 +14,6 @@ function init() {
 		const user = await api.get("/sessions/me");
 		set(user);
 
-		if (user && user.color) {
-			let primary = user.color;
-
-			if (user.color.toLowerCase() == 'random') {
-				primary = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-
-				if (primary.length < 7) {
-					primary = primary.padEnd(7, '0');
-				}
-			}
-
-			console.log('primary', primary);
-
-			myshades({
-				primary
-			});
-		}
-
 		return user;
 	}
 

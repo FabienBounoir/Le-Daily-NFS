@@ -125,18 +125,20 @@
 		<h1>Meteo</h1>
 		<p>Afficher la meteo de certaine ville à la fin de votre daily:</p>
 		<div class="participants">
-			{#each $user.weather as weather}
-				<p
-					on:click={() => {
-						user.change({
-							...$user,
-							weather: $user.weather.filter((w) => w !== weather)
-						});
-					}}
-				>
-					{weather}
-				</p>
-			{/each}
+			{#if $user.weather}
+				{#each $user.weather as weather}
+					<p
+						on:click={() => {
+							user.change({
+								...$user,
+								weather: $user.weather.filter((w) => w !== weather)
+							});
+						}}
+					>
+						{weather}
+					</p>
+				{/each}
+			{/if}
 			<input
 				placeholder="Ajouter une ville"
 				on:keydown={(e) => {
@@ -145,11 +147,11 @@
 						formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 
 						if ($user.users.some((user) => user.name === formatted))
-							return snacks.error('Ce ville existe déjà');
+							return snacks.error('Ce ville est déjà selectionné');
 
 						user.change({
 							...$user,
-							weather: [...$user.weather, formatted]
+							weather: [...($user.weather || []), formatted]
 						});
 
 						e.target.value = '';
