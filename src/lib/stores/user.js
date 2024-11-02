@@ -14,9 +14,23 @@ function init() {
 		const user = await api.get("/sessions/me");
 		set(user);
 
-		myshades({
-			primary: user.color
-		})
+		if (user && user.color) {
+			let primary = user.color;
+
+			if (user.color.toLowerCase() == 'random') {
+				primary = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
+				if (primary.length < 7) {
+					primary = primary.padEnd(7, '0');
+				}
+			}
+
+			console.log('primary', primary);
+
+			myshades({
+				primary
+			});
+		}
 
 		return user;
 	}
@@ -48,14 +62,14 @@ function init() {
 			profiles: ["anonymous"],
 			username: "",
 			teams: [],
-			color: "#FF7900",
+			color: "#725AC1",
 			time: 0,
 			speakers: [],
 			users: []
 		});
 
 		myshades({
-			primary: "#FF7900"
+			primary: "#725AC1"
 		});
 	}
 
