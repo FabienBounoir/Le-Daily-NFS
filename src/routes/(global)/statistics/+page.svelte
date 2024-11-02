@@ -44,6 +44,7 @@
 					<div
 						in:slide={{ duration: 500, delay: i * 100 }}
 						on:click={() => goto(`/statistics/${speaker.name}`)}
+						class:grayscale={speaker.removed}
 					>
 						<h1>{speaker.name}</h1>
 						<p>
@@ -152,6 +153,10 @@
 	}
 
 	.speakers {
+		.grayscale {
+			filter: grayscale(1);
+		}
+
 		& > div {
 			display: flex;
 			flex-direction: row;

@@ -62,8 +62,8 @@
 </script>
 
 <svelte:head>
-	<title>Configuration</title>
-	<meta name="description" content="Configure le daily NFS" />
+	<title>Configuration - {$user?.username || ''}</title>
+	<meta name="description" content="Configure le daily" />
 </svelte:head>
 
 <section>
@@ -86,7 +86,7 @@
 	<div class="container">
 		<h1>Participants:</h1>
 		<div class="participants">
-			{#if !$user.users || $user.speakers.length === 0}
+			{#if !$user.users || $user.users.length === 0}
 				<p>Pas encore de speaker ! Tu peux en ajouter dans les paramètres.</p>
 			{/if}
 			{#each $user.users || [] as user}
@@ -141,7 +141,7 @@
 		<input type="number" bind:value={timeByUser} min="30" max="300" step="30" />
 	</div>
 
-	<button on:click={() => start()} disabled={users?.length === 0 || !timeByUser || !$user.speakers}
+	<button on:click={() => start()} disabled={users?.length === 0 || !timeByUser || !$user.users}
 		>{dailyExists ? 'Démarrer un nouveau daily' : 'Démarrer le daily'}</button
 	>
 </section>

@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 <url>
-  <loc>https://ledailynfs.vercel.app//</loc>
+  <loc>https://ledaily.vercel.app/</loc>
+  <lastmod>2024-02-20T00:47:00+00:00</lastmod>
+  <priority>1</priority>
+</url>
+
+<url>
+  <loc>https://ledaily.vercel.app/daily</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 
 <url>
-  <loc>https://ledailynfs.vercel.app/daily</loc>
+  <loc>https://ledaily.vercel.app/lunch</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 
 <url>
-  <loc>https://ledailynfs.vercel.app/lunch</loc>
+  <loc>https://ledaily.vercel.app/burger</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 
 <url>
-  <loc>https://ledailynfs.vercel.app/burger</loc>
+  <loc>https://ledaily.vercel.app/quarkus</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 
 <url>
-  <loc>https://ledailynfs.vercel.app/quarkus</loc>
+  <loc>https://ledaily.vercel.app/statistics</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 
 <url>
-  <loc>https://ledailynfs.vercel.app/statistics</loc>
-  <lastmod>2024-02-20T00:47:00+00:00</lastmod>
-</url>
-
-<url>
-  <loc>https://ledailynfs.vercel.app/weather</loc>
+  <loc>https://ledaily.vercel.app/weather</loc>
   <lastmod>2024-02-20T00:47:00+00:00</lastmod>
 </url>
 </urlset>

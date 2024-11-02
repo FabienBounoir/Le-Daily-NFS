@@ -4,7 +4,6 @@
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/utils/api';
 	import Pause from '$lib/components/Pause.svelte';
-	import Return from '$lib/components/Return.svelte';
 	import Weather from '$lib/components/Weather.svelte';
 	import EuroMillion from '$lib/components/EuroMillion.svelte';
 	import { user } from '$lib/stores/user';
@@ -423,9 +422,9 @@
 
 		<div class="container-result">
 			<div class="weather">
-				<Weather city="Sophia Antipolis" />
-				<Weather city="Montpellier" />
-				<Weather city="Rennes" />
+				{#each $user.weather as city}
+					<Weather {city} />
+				{/each}
 			</div>
 
 			<div class="informations">
@@ -446,16 +445,19 @@
 				{/await}
 			</div>
 
-			<Qwertee />
+			{#if $user.qwertee}
+				<Qwertee />
+			{/if}
 
-			<div class="weather">
-				<EuroMillion />
-				<Hyrox />
-				<TeamMood />
-			</div>
+			{#if $user.username == 'nfs'}
+				<div class="weather">
+					<Hyrox />
+					<TeamMood />
+				</div>
+			{/if}
 		</div>
 	{:else}
-		<h1>Le daily {$user?.username || 'NFS'}</h1>
+		<h1>Le daily {$user?.username || ''}</h1>
 
 		{#if checkLastDayOnProject(dailyMng?.users[dailyMng.index].lastDayOnProject)}
 			<Rain />
@@ -562,7 +564,7 @@
 					{/if}
 				</p>
 
-				{#if new Date().getDay() === 3 && dailyMng.users[dailyMng.index].name === 'Guillaume'}
+				{#if new Date().getDay() === 3 && dailyMng.users[dailyMng.index].name === 'Guillaume' && $user.username == 'nfs'}
 					<span
 						><br /><br />Yo la team faut remplir le team mood<br /><span style="font-weight: bold;"
 							>https://team-mood-1129.apps.ocp4.innershift.sodigital.io/</span
@@ -658,7 +660,7 @@
 		gap: 1em;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-around;
+		justify-content: center;
 
 		.weather {
 			display: flex;
@@ -714,7 +716,7 @@
 	section {
 		padding: 5em 2em 0;
 		display: grid;
-		grid-template-columns: 1fr auto 2fr;
+		grid-template-columns: auto auto 2fr;
 		gap: 1em;
 
 		& > h1 {

@@ -1,32 +1,16 @@
 <script>
 	import { updated } from '$app/stores';
+	import Weather from '$lib/components/Weather.svelte';
 	import myshades from '$lib/myshades';
 	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
+	import { some } from 'd3';
 
 	let color = $user.color;
 	let timer = $user.timer;
 
 	$: color && myshades({ primary: color });
 	$: timer && user.change({ ...$user, timer });
-
-	let addAnimationName = '';
-	let addAnimationValue = '';
-	let addNicknameName = '';
-	let addNicknameValue = '';
-
-	let nicknames = new Map([...$user.speakers.map((name) => [name, name])]);
-
-	const updateElementMap = (map, key, value) => {
-		map.set(key, value);
-
-		user.change({
-			...$user,
-			nicknames: Object.fromEntries(map)
-		});
-
-		return map;
-	};
 
 	const updateElementWithIndex = (valeur, index, key) => {
 		let usersElement = $user.users;
@@ -70,12 +54,22 @@
 						let formatted = e.target.value.trim();
 						formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
 
-						if ($user.speakers.includes(formatted))
+						if ($user.users.some((user) => user.name === formatted))
 							return snacks.error('Ce participant est déjà dans la liste');
 
 						user.change({
 							...$user,
-							speakers: [...$user.speakers, formatted]
+							users: [
+								...$user.users,
+								{
+									name: formatted,
+									nickname: '',
+									animation: '',
+									avatar: '',
+									birthday: null,
+									lastDayOnProject: null
+								}
+							]
 						});
 
 						e.target.value = '';
@@ -121,8 +115,66 @@
 		<p>Prenez le contrôle absolu du temps de parole de chaque intervenant selon vos préférences:</p>
 		<input type="number" bind:value={timer} min="10" max="3600" step="5" />
 	</div>
+
+	<div class="container">
+		<h1>Meteo</h1>
+		<p>Afficher la meteo de certaine ville à la fin de votre daily:</p>
+		<div class="participants">
+			{#each $user.weather as weather}
+				<p
+					on:click={() => {
+						user.change({
+							...$user,
+							weather: $user.weather.filter((w) => w !== weather)
+						});
+					}}
+				>
+					{weather}
+				</p>
+			{/each}
+			<input
+				placeholder="Ajouter une ville"
+				on:keydown={(e) => {
+					if (e.key === 'Enter') {
+						let formatted = e.target.value.trim();
+						formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+
+						if ($user.users.some((user) => user.name === formatted))
+							return snacks.error('Ce ville existe déjà');
+
+						user.change({
+							...$user,
+							weather: [...$user.weather, formatted]
+						});
+
+						e.target.value = '';
+					}
+				}}
+			/>
+		</div>
+	</div>
+
+	<div class="container">
+		<h1>Qwertee</h1>
+		<p>Afficher les Tshirt du jour du site Qwertee:</p>
+		<button
+			on:click={() => user.change({ ...$user, qwertee: !$user.qwertee })}
+			class:disabled={!$user.qwertee}
+		>
+			{#if $user.qwertee}
+				Status: Activer
+			{:else}
+				Status: Désactiver
+			{/if}
+		</button>
+	</div>
+
 	<div class="container speaker">
 		<h1>Speaker Information:</h1>
+
+		{#if $user?.users?.length == 0}
+			<p>Aucun n'utilisateur configurer pour vos daily</p>
+		{/if}
 
 		{#if $user?.users}
 			{#each $user?.users as user, index}
@@ -131,7 +183,7 @@
 					<input
 						type="text"
 						bind:value={user.name}
-						on:change={() => {
+						on:keyup={(e) => {
 							updateElementWithIndex(user.name, index, 'name');
 						}}
 					/>
@@ -140,8 +192,8 @@
 					<input
 						type="text"
 						bind:value={user.nickname}
-						on:change={() => {
-							updateElementMap(nicknames, user.name, nicknames.get(user.name));
+						on:keyup={() => {
+							updateElementWithIndex(user.nickname, user.name, 'nickname');
 						}}
 					/>
 
@@ -149,7 +201,7 @@
 					<input
 						type="text"
 						bind:value={user.animation}
-						on:change={() => {
+						on:keyup={() => {
 							updateElementWithIndex(user.animation, index, 'animation');
 						}}
 					/>
@@ -158,7 +210,7 @@
 					<input
 						type="text"
 						bind:value={user.avatar}
-						on:change={() => {
+						on:keyup={() => {
 							updateElementWithIndex(user.avatar, index, 'avatar');
 						}}
 					/>
@@ -167,153 +219,49 @@
 		{/if}
 	</div>
 
-	<div class="container">
-		<h1>Animation de Speaker:</h1>
-		<p>Ajouter des animations pour chaque speaker:</p>
-		<div class="animation-container">
-			{#if $user?.animation}
-				{#each Object.entries($user?.animation) as [key, value]}
-					<span
-						>{key}<input
-							type="text"
-							bind:value
-							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-							disabled
-						/>
-						<button
-							on:click={() => {
-								delete $user.animation[key];
-								user.change({
-									...$user,
-									animation: $user.animation
-								});
-							}}>X</button
-						>
-					</span>
-				{/each}
-			{/if}
-		</div>
-		<div class="new-animation">
-			{#if $user?.speakers?.length > 0}
-				<select bind:value={addAnimationName}>
-					{#each $user.speakers as speaker}
-						<option value={speaker}>{speaker}</option>
-					{/each}
-				</select>
-				<input
-					type="text"
-					bind:value={addAnimationValue}
-					placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-				/>
-				<button
-					on:click={() => {
-						//check if addAnimationValue is link tenor
-						if (!addAnimationValue.includes('tenor.com')) return snacks.error('Lien non valide');
+	<div class="button-manager">
+		<button
+			style=" width: 80%;"
+			on:click={async () => {
+				try {
+					await user.save({
+						...$user,
+						timer
+					});
 
-						user.change({
-							...$user,
-							animation: {
-								...$user.animation,
-								[addAnimationName]: addAnimationValue
-							}
-						});
-
-						addAnimationName = '';
-						addAnimationValue = '';
-					}}>Ajouter</button
-				>
-			{:else}
-				<p>ℹ️ Ajouter des participants pour pouvoir mettre des animations de speakers.</p>
-			{/if}
-		</div>
+					snacks.success('Modifications enregistrées');
+				} catch (error) {
+					snacks.error(error.message);
+				}
+			}}
+		>
+			Enregistrer
+		</button>
 	</div>
 
-	<div class="container">
-		<h1>Nicknames:</h1>
-		<p>Changez le nom enoncé lors du changement de speaker:</p>
-
-		<div class="animation-container">
-			{#if $user?.nicknames}
-				{#each Object.entries($user?.nicknames) as [key, value]}
-					<span
-						>{key}<input
-							type="text"
-							bind:value
-							placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-							disabled
-						/>
-						<button
-							on:click={() => {
-								delete $user.nicknames[key];
-								user.change({
-									...$user,
-									nicknames: $user.nicknames
-								});
-							}}>X</button
-						>
-					</span>
-				{/each}
-			{/if}
-		</div>
-
-		<div class="new-nickname">
-			{#if $user?.speakers?.length > 0}
-				<select bind:value={addNicknameName}>
-					{#each $user.speakers as speaker}
-						<option value={speaker}>{speaker}</option>
-					{/each}
-				</select>
-				<input
-					type="text"
-					bind:value={addNicknameValue}
-					placeholder="https://media.tenor.com/_ZTkC0689ucAAAAi/rainbow-stars-stars.gif"
-				/>
-				<button
-					on:click={() => {
-						if (!addNicknameValue) return snacks.error('Veuillez entrer un nickname');
-
-						user.change({
-							...$user,
-							nicknames: {
-								...$user.nicknames,
-								[addNicknameName]: addNicknameValue
-							}
-						});
-
-						addNicknameName = '';
-						addNicknameValue = '';
-					}}>Ajouter</button
-				>
-			{:else}
-				<p>ℹ️ Ajouter des participants pour pouvoir mettre des nicknames à vos speakers.</p>
-			{/if}
-		</div>
-	</div>
-
-	<button
-		on:click={async () => {
-			try {
-				await user.save({
-					...$user,
-					timer
-				});
-
-				snacks.success('Modifications enregistrées');
-			} catch (error) {
-				snacks.error(error.message);
-			}
-		}}
-	>
-		Enregistrer
-	</button>
-
-	<div class="container">
+	<div class="container" style="display: none;">
 		<h1>Débogueur</h1>
-		<pre>{JSON.stringify($user, null, 2)}</pre>
+		{#key $user}
+			<pre>{JSON.stringify($user, null, 2)}</pre>
+		{/key}
 	</div>
 </section>
 
 <style lang="scss">
+	.disabled {
+		background-color: var(--primary-100);
+		color: var(--color-white);
+	}
+
+	.button-manager {
+		display: flex;
+		justify-content: center;
+		position: sticky;
+		bottom: 0;
+		text-align: center;
+		backdrop-filter: blur(5px);
+		padding: 1em;
+	}
 	.new-animation,
 	.new-nickname {
 		display: flex;
@@ -441,6 +389,10 @@
 				padding: 0.5em;
 				border-radius: 0.5em;
 			}
+		}
+
+		button {
+			width: max-content;
 		}
 
 		h1 {

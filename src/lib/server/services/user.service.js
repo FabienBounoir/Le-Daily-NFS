@@ -13,13 +13,10 @@ class UserService {
 	 *  username: string;
 	 *  password: string;
 	 *  teams: string[];
-	 * 	speakers: string[];
 	 *  color: string;
 	 *  timer: number;
-	 *  nicknames: Map<string, string>;
-	 *  animation: Map<string, string>;
-	 *	avatars: string;
 	 *  users: object[];
+	 *  weather: string[]
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -87,11 +84,10 @@ class UserService {
 			password: await crypter.hash(password),
 			profiles,
 			teams,
-			speakers: [],
 			timer: 120,
-			nicknames: new Map(),
 			color: "#" + Math.floor(Math.random() * 16777215).toString(16),
 			users: [],
+			weather: []
 		});
 	}
 

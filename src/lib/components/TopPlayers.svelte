@@ -26,92 +26,103 @@
 	});
 </script>
 
-<div class="topPlayerContainer">
-	<div class="topThreePlayers">
-		{#each top3_Speakers as user, i}
-			<div class="player">
-				<p>{user.name}</p>
-				<div class="information top-{i}">
-					{#if user.avatar}
-						{#if user.avatar == 'bouns.svelte'}
-							<img
-								src={'/avatar/bouns.png'}
-								alt="Jira Avatar"
-								on:error={() => {
-									user.avatar = null;
-								}}
-							/>
+<div class="containerTop">
+	<div class="topPlayerContainer">
+		<div class="topThreePlayers">
+			{#each top3_Speakers as user, i}
+				<div class="player">
+					<p>{user.name}</p>
+					<div class="information top-{i}">
+						{#if user.avatar}
+							{#if user.avatar == 'bouns.svelte'}
+								<img
+									src={'/avatar/bouns.png'}
+									alt="Jira Avatar"
+									on:error={() => {
+										user.avatar = null;
+									}}
+								/>
+							{:else}
+								<img
+									src={'/avatar/' + user.avatar}
+									alt="Jira Avatar"
+									on:error={() => {
+										user.avatar = null;
+									}}
+								/>
+							{/if}
 						{:else}
 							<img
-								src={'/avatar/' + user.avatar}
-								alt="Jira Avatar"
+								src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
+								alt="Avatar"
 								on:error={() => {
 									user.avatar = null;
 								}}
 							/>
 						{/if}
-					{:else}
-						<img
-							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
-							alt="Avatar"
-							on:error={() => {
-								user.avatar = null;
-							}}
-						/>
-					{/if}
+
+						<p>{user.timer} secondes</p>
+					</div>
+				</div>
+			{/each}
+		</div>
+
+		<div class="otherPlayers">
+			{#each otherSpeakers as user, i}
+				<div class="player">
+					<div>
+						{#if user.avatar}
+							{#if user.avatar == 'bouns.svelte'}
+								<img
+									src={'/avatar/bouns.png'}
+									alt="Jira Avatar"
+									on:error={() => {
+										user.avatar = null;
+									}}
+								/>
+							{:else}
+								<img
+									src={'/avatar/' + user.avatar}
+									alt="Jira Avatar"
+									on:error={() => {
+										user.avatar = null;
+									}}
+								/>
+							{/if}
+						{:else}
+							<img
+								src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
+								alt="Avatar"
+								on:error={() => {
+									user.avatar = null;
+								}}
+							/>
+						{/if}
+						<p>{user.name}</p>
+					</div>
 
 					<p>{user.timer} secondes</p>
 				</div>
-			</div>
-		{/each}
-	</div>
-
-	<div class="otherPlayers">
-		{#each otherSpeakers as user, i}
-			<div class="player">
-				<div>
-					{#if user.avatar}
-						{#if user.avatar == 'bouns.svelte'}
-							<img
-								src={'/avatar/bouns.png'}
-								alt="Jira Avatar"
-								on:error={() => {
-									user.avatar = null;
-								}}
-							/>
-						{:else}
-							<img
-								src={'/avatar/' + user.avatar}
-								alt="Jira Avatar"
-								on:error={() => {
-									user.avatar = null;
-								}}
-							/>
-						{/if}
-					{:else}
-						<img
-							src={'https://api.dicebear.com/9.x/personas/svg?seed=' + user.name}
-							alt="Avatar"
-							on:error={() => {
-								user.avatar = null;
-							}}
-						/>
-					{/if}
-					<p>{user.name}</p>
-				</div>
-
-				<p>{user.timer} secondes</p>
-			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 </div>
 
 <style lang="scss">
+	.containerTop {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		max-height: 93vh;
+		overflow-x: auto;
+	}
+
 	.topPlayerContainer {
 		user-select: none;
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
+		justify-content: center;
 
 		.otherPlayers {
 			display: flex;

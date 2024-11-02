@@ -1,7 +1,10 @@
+<script>
+	import { user } from '$lib/stores/user';
+</script>
+
 {#if new Date().getDay() === 3}
 	<div class="teammood">
 		<h2>Remplir le team Mood</h2>
-		<p class="link" style="    font-weight: bold;">tinyurl.com/nfsmood</p>
 	</div>
 {/if}
 

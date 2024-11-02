@@ -1,7 +1,5 @@
 <script>
 	import { getResultEuromillion } from '$lib/euroMillion';
-	import { getWeather } from '$lib/weather';
-
 	let result = getResultEuromillion();
 </script>
 
