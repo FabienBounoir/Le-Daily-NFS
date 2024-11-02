@@ -63,7 +63,7 @@
 
 <svelte:head>
 	<title>Configuration - {$user?.username || ''}</title>
-	<meta name="description" content="Configure le daily" />
+	<meta name="description" content="Lancer un daily" />
 </svelte:head>
 
 <section>

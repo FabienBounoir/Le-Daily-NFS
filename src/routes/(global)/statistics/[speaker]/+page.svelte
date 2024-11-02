@@ -23,6 +23,11 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Statistics user {data?.speaker}</title>
+	<meta name="description" content="Statistics d'un utilisateur" />
+</svelte:head>
+
 <section>
 	<h1>
 		<p on:click={() => goto('/statistics')}>❮</p>

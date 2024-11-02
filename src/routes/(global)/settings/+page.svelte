@@ -24,6 +24,11 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Settings - {$user?.username || ''}</title>
+	<meta name="description" content="Page de configuration pour vos daily" />
+</svelte:head>
+
 <section>
 	<div class="container">
 		<h1>Participants:</h1>

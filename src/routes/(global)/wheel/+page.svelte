@@ -31,6 +31,14 @@
 	};
 </script>
 
+<svelte:head>
+	<title>MEP wheel - {$user?.username || ''}</title>
+	<meta
+		name="description"
+		content="La roue permettant de definir la personne devant realisé la Mise en production"
+	/>
+</svelte:head>
+
 <section>
 	<div>
 		<h1>Participants:</h1>

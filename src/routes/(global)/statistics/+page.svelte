@@ -29,6 +29,11 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Statistics - {$user?.username || ''}</title>
+	<meta name="description" content="Voici le statistique des daily passé" />
+</svelte:head>
+
 <main>
 	<section class="speakers">
 		<h2>❖ Les Statistiques par speakers</h2>
