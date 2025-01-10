@@ -1,7 +1,16 @@
+<script>
+  const targetDate = new Date('2025-02-23');
+  const today = new Date();
+  const diffDays = Math.floor((targetDate - today) / (1000 * 60 * 60 * 24));
+  const isDatePassed = diffDays < 0;
+</script>
+
+{#if !isDatePassed}
 <div class="hyrox-info">
-	<p>Prom'Classic 🏃</p>
-	<p class="date">dans {Math.floor((new Date('2025-01-05') - new Date()) / (1000 * 60 * 60 * 24))} jours </p>
+	<p>🏃🏃🏃🏃🏃</p>
+	<p class="date">dans {diffDays} jours </p>
 </div>
+{/if}
 
 <style lang="scss">
 	.hyrox-info {
