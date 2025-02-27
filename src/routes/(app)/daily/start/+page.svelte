@@ -21,6 +21,7 @@
 	import Bouns from '$lib/components/Bouns.svelte';
 	import Rain from '$lib/components/Rain.svelte';
 	import TeamMood from '$lib/components/TeamMood.svelte';
+	import ProgrammedDate from '$lib/components/ProgrammedDate.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -453,6 +454,7 @@
 				<div class="weather">
 					<Hyrox />
 					<TeamMood />
+					<ProgrammedDate dateModule={$user?.date} />
 				</div>
 			{/if}
 		</div>
