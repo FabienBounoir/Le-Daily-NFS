@@ -2,7 +2,7 @@
 	import { user } from '$lib/stores/user';
 </script>
 
-{#if new Date().getDay() === 3}
+{#if new Date().getDay() === 2}
 	<div class="teammood">
 		<h2>Remplir le team Mood</h2>
 	</div>

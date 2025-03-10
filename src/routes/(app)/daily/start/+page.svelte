@@ -566,7 +566,7 @@
 					{/if}
 				</p>
 
-				{#if new Date().getDay() === 3 && dailyMng.users[dailyMng.index].name === 'Guillaume' && $user.username == 'nfs'}
+				{#if new Date().getDay() === 2 && dailyMng.users[dailyMng.index].name === 'Guillaume' && $user.username == 'nfs'}
 					<span
 						><br /><br />Yo la team faut remplir le team mood<br /><span style="font-weight: bold;"
 							>https://team-mood-1129.apps.ocp4.innershift.sodigital.io/</span
