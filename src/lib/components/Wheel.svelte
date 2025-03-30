@@ -135,7 +135,7 @@
 		width: max-content;
 		transform: translate(-50%, -50%);
 		top: 50%;
-		left: 50%;
+		left: 60%;
 	}
 
 	.disabled {

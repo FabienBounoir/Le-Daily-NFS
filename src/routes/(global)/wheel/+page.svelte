@@ -6,9 +6,9 @@
 	let items = [...($user?.users?.map?.((u) => u.name) || [])].sort(() => Math.random() - 0.5);
 
 	let colors = [];
-
-	$: name = '';
 	let mounted = false;
+
+	let userMap = new Map();
 
 	onMount(() => {
 		setTimeout(() => {
@@ -24,10 +24,28 @@
 
 			mounted = true;
 		}, 100);
+
+		console.log($user?.users);
+
+		for (const userItem of $user?.users) {
+			console.log('userItem', userItem);
+			userMap.set(userItem.name, 1);
+			userMap = new Map(userMap);
+		}
 	});
 
-	const addName = () => {
-		items = [...items, name];
+	$: generateItems(userMap);
+
+	const generateItems = (userMap) => {
+		items = [];
+		for (const [name, count] of userMap) {
+			if (count > 0) {
+				for (let i = 0; i < count; i++) {
+					items.push(name);
+				}
+			}
+		}
+		items = items.sort(() => Math.random() - 0.5);
 	};
 </script>
 
@@ -42,19 +60,44 @@
 <section>
 	<div>
 		<h1>Participants:</h1>
-		{#each $user?.users as user}
-			<p
-				class={items.includes(user.name) ? 'active' : ''}
-				on:click={() => {
-					if (!items.includes(user.name)) {
-						items = [...items, user.name].sort(() => Math.random() - 0.5);
-					} else {
-						items = items.filter((i) => i !== user.name);
-					}
-				}}
-			>
-				{user.name}
-			</p>
+
+		{#each Array.from(userMap) as [name, count]}
+			<div class="user">
+				<button
+					on:click={() => {
+						if (count > 1) {
+							userMap.set(name, count - 1);
+						} else {
+							userMap.set(name, 0);
+						}
+						userMap = new Map(userMap);
+					}}>-</button
+				>
+				<p>{count}</p>
+				<button
+					on:click={() => {
+						if (count > 4) {
+							return;
+						}
+						userMap.set(name, count + 1);
+						userMap = new Map(userMap);
+					}}>+</button
+				>
+				<p
+					class={items.includes(name) ? 'active' : ''}
+					on:click={() => {
+						if (!items.includes(name)) {
+							userMap.set(name, 1);
+							userMap = new Map(userMap);
+						} else {
+							userMap.set(name, 0);
+							userMap = new Map(userMap);
+						}
+					}}
+				>
+					{name}
+				</p>
+			</div>
 		{/each}
 	</div>
 	{#if items?.length > 0}
@@ -77,6 +120,19 @@
 			display: flex;
 			flex-direction: column;
 			gap: 0.5em;
+
+			.user {
+				display: flex;
+				flex-direction: row;
+				gap: 0.5em;
+				align-items: center;
+				justify-content: left;
+				width: 100%;
+
+				button {
+					width: min-content;
+				}
+			}
 			p {
 				user-select: none;
 				cursor: pointer;
