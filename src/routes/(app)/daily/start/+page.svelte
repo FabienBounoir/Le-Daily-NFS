@@ -503,7 +503,7 @@
 						{:else}
 							<img
 								in:blur={{ duration: 500, opacity: 0 }}
-								src={'https://api.dicebear.com/9.x/personas/svg?seed=' +
+								src={'https://api.dicebear.com/9.x/dylan/svg?seed=' +
 									dailyMng?.users?.[dailyMng.index]?.name}
 								alt="Avatar"
 								on:error={() => {
