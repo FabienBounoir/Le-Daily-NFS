@@ -95,6 +95,22 @@
 			}
 		},
 		{
+			actionName: 'Remove User',
+			key: 'KeyD',
+			keyName: 'D',
+			action: () => {
+				if (dailyMng.users.length > 1) {
+					let removeIndex = dailyMng.index;
+					dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];
+
+					if (dailyMng.index >= dailyMng.users.length - 1) {
+						dailyMng.index--;
+					}
+					dailyMng.users.splice(removeIndex, 1);
+				}
+			}
+		},
+		{
 			actionName: '+5 sec',
 			key: 'KeyQ',
 			keyName: 'A',
@@ -118,6 +134,7 @@
 				pause = !pause;
 			}
 		},
+
 		{
 			actionName: 'Next',
 			key: 'Space',
@@ -229,9 +246,7 @@
 				if (audio) {
 					audio.pause();
 				}
-			}
-			//lors de l'appuie sur suppr
-			else if (e.code === 'KeyU') {
+			} else if (e.code === 'KeyD') {
 				if (dailyMng.users.length > 1) {
 					let removeIndex = dailyMng.index;
 					dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];

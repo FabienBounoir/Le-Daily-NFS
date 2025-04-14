@@ -20,11 +20,19 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 0.5em;
+		cursor: pointer;
+
+		&:hover span {
+			background-color: var(--primary-600);
+			color: white;
+			translate: 0em 0.1em;
+		}
 
 		span {
 			padding: 0.25em 0.5em;
 			border: 1px solid var(--primary-600);
 			border-radius: 0.25em;
+			transition: all 0.2s ease-in-out;
 		}
 
 		span.key-down {
