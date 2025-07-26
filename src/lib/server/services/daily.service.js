@@ -24,10 +24,16 @@ class DailyService {
 	/**
 	 * @param {string[]} teams
 	 */
-	getAll(teams) {
-		return this.#collection.find({
+	async getAll(teams, size = 50, page = 0) {
+		const dailies = await this.#collection.find({
 			team: { $in: teams }
-		}).toArray();
+		}).sort({ date: -1 }).skip(page * size).limit(size).toArray();
+
+		const count = await this.#collection.countDocuments({
+			team: { $in: teams }
+		});
+
+		return { dailies, count };
 	}
 
 	/**

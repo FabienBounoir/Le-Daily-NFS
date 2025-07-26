@@ -26,6 +26,13 @@ class SpeakerService {
 	getAll(team) {
 		return this.#collection.find({
 			team
+		}, {
+			projection: {
+				history: 0,
+				team: 0
+			}
+		}).sort({
+			removed: 1
 		}).toArray();
 	}
 
@@ -45,7 +52,7 @@ class SpeakerService {
 	 * @returns 
 	 */
 	getByName(team, name) {
-		return this.#collection.findOne({team, name});
+		return this.#collection.findOne({ team, name });
 	}
 
 	/**

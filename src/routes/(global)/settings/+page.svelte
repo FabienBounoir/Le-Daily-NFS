@@ -37,20 +37,25 @@
 			pour une flexibilité optimale et des débuts de journée toujours bien orchestrés !
 		</p>
 		<div class="participants">
-			{#key $user.users}
-				{#each $user.users as speaker}
-					<p
-						on:click={() => {
-							user.change({
-								...$user,
-								users: $user.users.filter((n) => n.name !== speaker.name)
-							});
-						}}
-					>
-						{speaker.name}
-					</p>
-				{/each}
-			{/key}
+			{#if $user?.users?.length === 0}
+				<p>Aucun participant configuré pour vos daily</p>
+			{/if}
+			{#if $user?.users?.length > 0}
+				{#key $user?.users}
+					{#each $user?.users as speaker}
+						<p
+							on:click={() => {
+								user.change({
+									...$user,
+									users: $user.users.filter((n) => n.name !== speaker.name)
+								});
+							}}
+						>
+							{speaker.name}
+						</p>
+					{/each}
+				{/key}
+			{/if}
 			<input
 				type="text"
 				placeholder="Ajouter un participant"
@@ -58,6 +63,24 @@
 					if (e.key === 'Enter') {
 						let formatted = e.target.value.trim();
 						formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+
+						if (!$user?.users) {
+							user.change({
+								...$user,
+								users: [
+									{
+										name: formatted,
+										nickname: '',
+										animation: '',
+										avatar: '',
+										birthday: null,
+										lastDayOnProject: null
+									}
+								]
+							});
+							e.target.value = '';
+							return;
+						}
 
 						if ($user.users.some((user) => user.name === formatted))
 							return snacks.error('Ce participant est déjà dans la liste');

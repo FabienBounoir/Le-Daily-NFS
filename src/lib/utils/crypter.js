@@ -35,4 +35,4 @@ class Crypter {
 
 export const crypter = new Crypter("°");
 
-crypter.hash("password").then(console.log);
+crypter.hash("password")

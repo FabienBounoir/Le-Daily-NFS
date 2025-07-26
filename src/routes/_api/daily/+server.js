@@ -7,7 +7,7 @@ import { error, json } from "@sveltejs/kit";
 /**
  * @type {import("./$types").RequestHandler}
  */
-export const GET = async ({ request }) => {
+export const GET = async ({ request, url }) => {
 	await connection;
 	try {
 		// @ts-ignore
@@ -20,9 +20,12 @@ export const GET = async ({ request }) => {
 			throw error(404, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
-		const dailies = await dailyService.getAll(user.teams);
+		const page = parseInt(url.searchParams.get("page") || "0");
+		const size = parseInt(url.searchParams.get("size") || "50");
 
-		return json(dailies.reverse());
+		const dailies = await dailyService.getAll(user.teams, size, page);
+
+		return json(dailies);
 	}
 	catch (e) {
 		return json({ error: e.message }, { status: 500 });

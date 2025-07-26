@@ -26,11 +26,26 @@ export const GET = async ({ request, params }) => {
 			throw error(403, { id: "user.unauthorized", message: "Unauthorized" });
 		}
 
-		const dailies = await speakerService.getAll(team)
+		const dailySpeakers = await speakerService.getAll(team)
 
 
-		const ordered = dailies.sort((a, b) => {
-			return b.moyenTime - a.moyenTime;
+
+		const ordered = dailySpeakers.sort((a, b) => {
+			// D'abord trier par statut removed (non-removed en premier)
+			const aRemoved = a.removed === true;
+			const bRemoved = b.removed === true;
+
+			if (aRemoved !== bRemoved) {
+				return aRemoved ? 1 : -1; // removed=true à la fin
+			}
+
+			// Ensuite trier par moyenTime décroissant
+			if (a.moyenTime !== b.moyenTime) {
+				return b.moyenTime - a.moyenTime;
+			}
+
+			// En cas d'égalité de moyenTime, trier par totalDaily décroissant
+			return b.totalDaily - a.totalDaily;
 		})
 
 		return json(ordered);

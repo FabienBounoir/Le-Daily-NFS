@@ -12,6 +12,8 @@
 
 	let dailyExists = false;
 
+	let fullScreen = true;
+
 	onMount(() => {
 		if (window.localStorage.getItem('daily')) {
 			const daily = JSON.parse(window.localStorage.getItem('daily'));
@@ -31,6 +33,7 @@
 				users: randomisedNames,
 				voice: voiceSynthesis,
 				animation: animationSpeakers,
+				fullScreen: fullScreen,
 				time: timeByUser,
 				exclude: $user.users.filter((n) => !randomisedNames.some((u) => u.name === n.name))
 			})
@@ -131,6 +134,15 @@
 					{animationSpeakers
 						? 'Animation des participants: activée'
 						: 'Animation des participants: désactivée'}
+				</p>
+			</div>
+
+			<div
+				class={'toggler' + (fullScreen ? '' : ' disabled')}
+				on:click={() => (fullScreen = !fullScreen)}
+			>
+				<p>
+					{fullScreen ? 'Plein écran: activé' : 'Plein écran: désactivé'}
 				</p>
 			</div>
 		</div>

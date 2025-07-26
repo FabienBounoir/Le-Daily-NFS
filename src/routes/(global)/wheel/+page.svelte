@@ -20,15 +20,10 @@
 				document.documentElement.style.getPropertyValue('--primary-800')
 			];
 
-			console.log('colors', colors);
-
 			mounted = true;
 		}, 100);
 
-		console.log($user?.users);
-
 		for (const userItem of $user?.users) {
-			console.log('userItem', userItem);
 			userMap.set(userItem.name, 1);
 			userMap = new Map(userMap);
 		}

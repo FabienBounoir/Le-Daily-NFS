@@ -5,14 +5,83 @@
 	import { user } from '$lib/stores/user';
 	import { snacks } from '$lib/stores/snacks';
 	import { goto } from '$app/navigation';
+	import { onMount, onDestroy } from 'svelte';
 
 	/**
 	 * @type {any[]}
 	 */
-	let dailies = [];
+	let data = [];
 	let speakers = [];
+	let dailies = [];
+	let totalCount = 0;
+	let isLoading = false;
+	let hasMoreData = true;
 
-	dailies = api.get('/daily');
+	let displayUserRemoved = false;
+
+	let page = 0;
+	const pageSize = 20;
+
+	// Load initial data
+	const loadInitialData = async () => {
+		try {
+			const response = await api.get(`/daily?page=${page}&size=${pageSize}`);
+			dailies = response.dailies;
+			totalCount = response.count;
+			hasMoreData = dailies.length < totalCount;
+		} catch (error) {
+			console.error('Error loading initial data:', error);
+		}
+	};
+
+	// Load more data for pagination
+	const loadMoreData = async () => {
+		if (isLoading || !hasMoreData) return;
+
+		isLoading = true;
+		page++;
+
+		try {
+			const response = await api.get(`/daily?page=${page}&size=${pageSize}`);
+			dailies = [...dailies, ...response.dailies];
+			hasMoreData = dailies.length < totalCount;
+		} catch (error) {
+			console.error('Error loading more data:', error);
+			page--; // Revert page increment on error
+		} finally {
+			isLoading = false;
+		}
+	};
+
+	// Intersection observer for infinite scroll
+	let lastElement;
+	let observer;
+
+	const setupObserver = () => {
+		if (observer) observer.disconnect();
+
+		if (lastElement && hasMoreData) {
+			observer = new IntersectionObserver(
+				(entries) => {
+					if (entries[0].isIntersecting) {
+						loadMoreData();
+					}
+				},
+				{ threshold: 0.1 }
+			);
+			observer.observe(lastElement);
+		}
+	};
+
+	$: if (lastElement) {
+		setupObserver();
+	}
+
+	onDestroy(() => {
+		if (observer) observer.disconnect();
+	});
+
+	data = loadInitialData();
 	speakers = api.get(`/daily/stats/${$user.teams[0]}/speakers`);
 
 	const timeFormater = (time) => {
@@ -43,22 +112,38 @@
 			{:then speakers}
 				{#if speakers.length === 0}
 					<p>Lancer un daily pour voir les statistiques</p>
-				{/if}
+				{:else}
+					{#key displayUserRemoved}
+						{#each speakers as speaker, i (speaker._id)}
+							{#if !speaker.removed || displayUserRemoved}
+								<div
+									out:slide={{ duration: 300 }}
+									on:click={() => goto(`/statistics/${speaker.name}`)}
+									class:grayscale={speaker.removed}
+								>
+									<h1>{speaker.name}</h1>
+									<p>
+										<i class="fa-solid fa-stopwatch-20"></i>
+										~{formatNumber(speaker.moyenTime)} secondes
+									</p>
+									<p><i class="fa-solid fa-hashtag"></i> {speaker.totalDaily} dailies</p>
+								</div>
+							{/if}
+						{/each}
+					{/key}
 
-				{#each speakers as speaker, i}
-					<div
-						in:slide={{ duration: 500, delay: i * 100 }}
-						on:click={() => goto(`/statistics/${speaker.name}`)}
-						class:grayscale={speaker.removed}
-					>
-						<h1>{speaker.name}</h1>
-						<p>
-							<i class="fa-solid fa-stopwatch-20"></i>
-							~{formatNumber(speaker.moyenTime)} secondes
-						</p>
-						<p><i class="fa-solid fa-hashtag"></i> {speaker.totalDaily} dailies</p>
-					</div>
-				{/each}
+					{#if speakers.some((s) => s.removed)}
+						<button
+							on:click={() => {
+								displayUserRemoved = !displayUserRemoved;
+							}}
+						>
+							{displayUserRemoved
+								? 'Cacher les utilisateurs supprimés'
+								: 'Afficher les utilisateurs supprimés'}
+						</button>
+					{/if}
+				{/if}
 			{:catch error}
 				<p>{error}</p>
 			{/await}
@@ -68,7 +153,7 @@
 	<section class="dailies">
 		<h2>❖ Historique des dailies</h2>
 		<div>
-			{#await dailies}
+			{#await data}
 				{#each Array(Math.floor(Math.random() * 5) + 3).fill(0) as _}
 					<div class="daily-squeleton">
 						<p><span>➜ Daily team</span></p>
@@ -79,7 +164,7 @@
 						<i class="fa-solid fa-trash"></i>
 					</div>
 				{/each}
-			{:then dailies}
+			{:then _}
 				{#each dailies as daily, i}
 					<div
 						class="daily"
@@ -92,7 +177,7 @@
 							e.fromElement.style.filter = 'grayscale(0)';
 						}}
 					>
-						<p>➜ Daily {daily.team} n°{dailies.length - i}</p>
+						<p>➜ Daily {daily.team} n°{totalCount - i}</p>
 						<span class="spacer"></span>
 						<p>{timeFormater(daily.totalTime)} <i class="fa-solid fa-clock"></i></p>
 
@@ -114,6 +199,7 @@
 								try {
 									await api.delete(`/daily/${daily._id}`);
 									dailies = dailies.filter((_, index) => index !== i);
+									totalCount--;
 								} catch (e) {
 									snacks.error(e.message);
 								}
@@ -121,10 +207,34 @@
 							class="fa-solid fa-trash"
 						></i>
 					</div>
+
+					<!-- Intersection observer target for the last few items -->
+					{#if i === dailies.length - 3 && hasMoreData}
+						<div bind:this={lastElement} style="height: 1px;"></div>
+					{/if}
 				{/each}
 
-				{#if dailies.length === 0}
+				{#if isLoading}
+					{#each Array(3).fill(0) as _}
+						<div class="daily-squeleton">
+							<p><span>➜ Daily team</span></p>
+							<span class="spacer"></span>
+							<p><span>00:00:00</span> <i class="fa-solid fa-clock"></i></p>
+							<p><span>0</span> <i class="fa-solid fa-user" /></p>
+							<p><span>00:00 - 00/00/0000</span> <i class="fa-solid fa-calendar-days"></i></p>
+							<i class="fa-solid fa-trash"></i>
+						</div>
+					{/each}
+				{/if}
+
+				{#if dailies.length === 0 && !isLoading}
 					<p>Aucun daily pour le moment</p>
+				{/if}
+
+				{#if !hasMoreData && dailies.length > 0}
+					<p style="text-align: center; color: var(--primary-400); margin-top: 2em;">
+						Fin de la liste - {totalCount} dailies au total
+					</p>
 				{/if}
 			{:catch error}
 				<h1>Oopsie... 🥸</h1>

@@ -48,7 +48,8 @@
 		state: 'LOADING',
 		index: 0,
 		totalTimer: 0,
-		startDailyDate: new Date()
+		startDailyDate: new Date(),
+		fullScreen: true
 	};
 
 	/**
@@ -167,7 +168,7 @@
 		document.body.style.removeProperty('background-color');
 	});
 
-	onMount(async () => {
+	onMount(() => {
 		let dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
 
 		for (const user of dailyInfo.users) {
@@ -177,6 +178,14 @@
 		}
 
 		dailyMng = { ...dailyMng, ...dailyInfo };
+
+		if (dailyInfo?.fullScreen && !document.fullscreenElement) {
+			try {
+				document.documentElement.requestFullscreen();
+			} catch (e) {
+				console.error('Error requesting fullscreen:', e);
+			}
+		}
 
 		if (dailyInfo.startDailyDate) {
 			dailyMng.startDailyDate = new Date(dailyInfo.startDailyDate);
@@ -387,7 +396,6 @@
 	};
 
 	const checkBirthdayToday = (birthday) => {
-		console.log(birthday);
 		if (!birthday) return false;
 
 		const actualDate = new Date();
@@ -438,9 +446,11 @@
 
 		<div class="container-result">
 			<div class="weather">
-				{#each $user.weather as city}
-					<Weather {city} />
-				{/each}
+				{#if $user.weather && $user.weather.length > 0}
+					{#each $user.weather as city}
+						<Weather {city} />
+					{/each}
+				{/if}
 			</div>
 
 			<div class="informations">
@@ -622,6 +632,9 @@
 			}
 
 			window.localStorage.removeItem('daily');
+			if (document.fullscreenElement) {
+				document.exitFullscreen();
+			}
 			goto('/daily');
 		}}
 		class="fa-solid fa-rectangle-xmark close-daily"
