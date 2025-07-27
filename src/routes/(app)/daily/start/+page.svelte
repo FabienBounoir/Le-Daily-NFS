@@ -161,17 +161,103 @@
 		}
 	];
 
+	const audioManager = (audioName) => {
+			audio = new Audio('/' + audioName + '.mp3');
+			audio.volume = 0.5;
+			audio.play();
+		};
+
+	function keydownHandler(e) {
+		actualKeyDown = e.code;
+
+		if (dailyMng.state == 'ENDED') return;
+
+		if (keydownInterval) {
+			clearTimeout(keydownInterval);
+		}
+
+		keydownInterval = setTimeout(() => {
+			actualKeyDown = '';
+		}, 300);
+
+		if (e.code === 'Tab' || e.code === 'Escape') {
+			if (toggleGif()) return;
+
+			openMenu = !openMenu;
+		}
+
+		if (openMenu) return;
+
+		if (e.code === 'Space' || e.code === 'ArrowRight') {
+			newSpeaker();
+		} else if (e.code === 'ArrowLeft') {
+			profilAnimation = '';
+			if (dailyMng.index - 1 >= 0) {
+				dailyMng.index--;
+				textToSpeech(
+					dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name
+				);
+				animationSpeaker(dailyMng?.users[dailyMng.index].animation);
+			}
+		} else if (e.code === 'KeyP') {
+			pause = !pause;
+		} else if (e.code === 'KeyQ') {
+			dailyMng.users[dailyMng.index].timer -= 5;
+		} else if (e.code === 'KeyW') {
+			dailyMng.users[dailyMng.index].timer += 5;
+		} else if (e.code === 'KeyK') {
+			if (audio) {
+				audio.pause();
+			}
+		} else if (e.code === 'KeyD') {
+			if (dailyMng.users.length > 1) {
+				let removeIndex = dailyMng.index;
+				dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];
+
+				if (dailyMng.index >= dailyMng.users.length - 1) {
+					dailyMng.index--;
+				}
+				dailyMng.users.splice(removeIndex, 1);
+			}
+		}
+
+		// @ts-ignore
+		if (animationData[e.code]) {
+			if (toggleGif()) return;
+
+			// @ts-ignore
+			const { url, sound } = animationData[e.code];
+
+			gifUrl = url;
+			displayGif = true;
+			audioManager(sound);
+		}
+	}
+
+
 	onDestroy(() => {
 		if (interval) {
 			clearInterval(interval);
 		}
+		document.removeEventListener('keydown', keydownHandler);
 		document.body.style.removeProperty('background-color');
 	});
 
 	onMount(() => {
-		let dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
+		let dailyInfo = null;
 
-		for (const user of dailyInfo.users) {
+		try{
+			dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
+		} catch (e) {
+			console.error('Error parsing daily data from localStorage:', e);
+		}
+
+		if (!dailyInfo || !dailyInfo.users || dailyInfo.users.length === 0) {
+			goto('/daily');
+			return;
+		}
+
+		for (const user of dailyInfo?.users) {
 			if (!user.timer) {
 				user.timer = 0;
 			}
@@ -213,72 +299,9 @@
 			audio.play();
 		};
 
-		document.addEventListener('keydown', (e) => {
-			actualKeyDown = e.code;
 
-			if (dailyMng.state == 'ENDED') return;
 
-			if (keydownInterval) {
-				clearTimeout(keydownInterval);
-			}
-
-			keydownInterval = setTimeout(() => {
-				actualKeyDown = '';
-			}, 300);
-
-			if (e.code === 'Tab' || e.code === 'Escape') {
-				if (toggleGif()) return;
-
-				openMenu = !openMenu;
-			}
-
-			if (openMenu) return;
-
-			if (e.code === 'Space' || e.code === 'ArrowRight') {
-				newSpeaker();
-			} else if (e.code === 'ArrowLeft') {
-				profilAnimation = '';
-				if (dailyMng.index - 1 >= 0) {
-					dailyMng.index--;
-					textToSpeech(
-						dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name
-					);
-					animationSpeaker(dailyMng?.users[dailyMng.index].animation);
-				}
-			} else if (e.code === 'KeyP') {
-				pause = !pause;
-			} else if (e.code === 'KeyQ') {
-				dailyMng.users[dailyMng.index].timer -= 5;
-			} else if (e.code === 'KeyW') {
-				dailyMng.users[dailyMng.index].timer += 5;
-			} else if (e.code === 'KeyK') {
-				if (audio) {
-					audio.pause();
-				}
-			} else if (e.code === 'KeyD') {
-				if (dailyMng.users.length > 1) {
-					let removeIndex = dailyMng.index;
-					dailyMng.exclude = [...dailyMng.exclude, dailyMng.users[dailyMng.index]];
-
-					if (dailyMng.index >= dailyMng.users.length - 1) {
-						dailyMng.index--;
-					}
-					dailyMng.users.splice(removeIndex, 1);
-				}
-			}
-
-			// @ts-ignore
-			if (animationData[e.code]) {
-				if (toggleGif()) return;
-
-				// @ts-ignore
-				const { url, sound } = animationData[e.code];
-
-				gifUrl = url;
-				displayGif = true;
-				audioManager(sound);
-			}
-		});
+	document.addEventListener('keydown', keydownHandler);
 
 		return () => {
 			if (interval) clearInterval(interval);
