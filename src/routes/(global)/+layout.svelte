@@ -20,6 +20,11 @@
 			label: 'Statistiques'
 		},
 		{
+			href: '/recap',
+			icon: 'fa-medal',
+			label: 'Récap'
+		},
+		{
 			href: '/wheel',
 			icon: 'fa-dharmachakra',
 			label: 'La roue de la MEP'

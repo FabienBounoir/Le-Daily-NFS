@@ -29,11 +29,15 @@
 </svelte:head>
 
 <section>
-	<h1>
-		<p on:click={() => goto('/statistics')}>❮</p>
-		{data.speaker} voici tes statistiques
-	</h1>
-
+	<div class="header-section">
+		<h1>
+			<p on:click={() => goto('/statistics')}>❮</p>
+			{data.speaker} voici tes statistiques
+		</h1>
+		<a href="/recap?speaker={encodeURIComponent(data.speaker)}" class="recap-button">
+			🎯 Générer ton récap personnel
+		</a>
+	</div>
 	{#if histo.length > 0}
 		<SvelteHeatmap
 			allowOverflow={true}
@@ -60,6 +64,41 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
+	}
+
+	.header-section {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 2em;
+
+		@media (max-width: 768px) {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 1em;
+		}
+	}
+
+	.recap-button {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		text-decoration: none;
+		padding: 0.8em 1.5em;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 0.9em;
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
+		white-space: nowrap;
+
+		&:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+		}
 	}
 
 	h1 {

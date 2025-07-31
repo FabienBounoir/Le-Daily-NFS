@@ -105,7 +105,10 @@
 
 <main>
 	<section class="speakers">
-		<h2>❖ Les Statistiques par speakers</h2>
+		<div class="section-header">
+			<h2>❖ Les Statistiques par speakers</h2>
+			<a href="/recap" class="recap-button"> 🎯 Générer un récap </a>
+		</div>
 		<div>
 			{#await speakers}
 				<p>loading...</p>
@@ -265,6 +268,34 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1em;
+
+		.recap-button {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			text-decoration: none;
+			padding: 0.8em 1.5em;
+			border-radius: 12px;
+			font-weight: 600;
+			font-size: 0.9em;
+			display: flex;
+			align-items: center;
+			gap: 0.5em;
+			transition:
+				transform 0.2s,
+				box-shadow 0.2s;
+
+			&:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+			}
+		}
 	}
 
 	.speakers {
