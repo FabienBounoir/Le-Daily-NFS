@@ -164,14 +164,24 @@ class RecapService {
         // Régularité basée sur les jours ouvrés dans la période
         // Compter les jours DISTINCTS où des dailies ont eu lieu, pas le nombre total de dailies
         const uniqueDailyDates = new Set();
+        console.log('Dailies:', dailies.length);
         dailies.forEach(daily => {
             const dailyDate = new Date(daily.date);
             const dateKey = `${dailyDate.getFullYear()}-${dailyDate.getMonth()}-${dailyDate.getDate()}`;
             uniqueDailyDates.add(dateKey);
         });
 
-        const workdaysInPeriod = this.getWorkdaysInPeriod(new Date(startDate), new Date(endDate));
-        const regularity = workdaysInPeriod > 0 ? Math.round((uniqueDailyDates.size / workdaysInPeriod) * 100) : 0;
+        console.log('Unique Daily Dates:', uniqueDailyDates.size);
+
+        // Régularité basée sur le nombre total de dailies sur la période
+        // Au lieu des jours ouvrés, on utilise le nombre total de dailies de l'équipe
+        const totalTeamDailies = allDailies.length;
+        const userDailies = dailies.length;
+
+        console.log('Total Team Dailies:', totalTeamDailies);
+        console.log('User/Speaker Dailies:', userDailies);
+
+        const regularity = totalTeamDailies > 0 ? Math.round((userDailies / totalTeamDailies) * 100) : 0; console.log('Regularity:', regularity);
 
         // Stats sociales
         let socialStats = {};
@@ -193,9 +203,33 @@ class RecapService {
             const bestBuddy = Object.keys(colleagues).length > 0 ?
                 Object.keys(colleagues).reduce((a, b) => colleagues[a] > colleagues[b] ? a : b) : '';
 
+            // Analyser les statistiques de position de prise de parole
+            let firstSpeakerCount = 0;
+            let lastSpeakerCount = 0;
+
+            speakerSessions.forEach(session => {
+                // Trouver le daily correspondant pour connaître les participants
+                const correspondingDaily = allDailies.find(daily => daily._id.toString() === session.dailyId);
+                if (correspondingDaily && correspondingDaily.users && correspondingDaily.users.length > 1) {
+                    const speakerIndex = correspondingDaily.users.indexOf(speakerName);
+                    const totalUsers = correspondingDaily.users.length;
+
+                    // Premier à parler (index 0)
+                    if (speakerIndex === 0) {
+                        firstSpeakerCount++;
+                    }
+                    // Dernier à parler (dernier index)
+                    if (speakerIndex === totalUsers - 1) {
+                        lastSpeakerCount++;
+                    }
+                }
+            });
+
             socialStats = {
                 participationRate,
-                bestBuddy
+                bestBuddy,
+                firstSpeakerCount,
+                lastSpeakerCount
             };
         } else {
             // Pour l'équipe
@@ -217,10 +251,18 @@ class RecapService {
             const averageTeamSize = dailies.reduce((sum, d) => sum + (d.users ? d.users.length : 0), 0) / dailies.length;
             const smallestDaily = Math.min(...dailies.map(d => d.users ? d.users.length : 0));
 
+            // Statistiques sur les dailies les plus longs/courts
+            const longestDailyData = dailies.reduce((max, daily) =>
+                (daily.totalTime || 0) > (max.totalTime || 0) ? daily : max, dailies[0]);
+            const shortestDailyData = dailies.reduce((min, daily) =>
+                (daily.totalTime || 0) < (min.totalTime || 0) ? daily : min, dailies[0]);
+
             socialStats = {
                 mostActive,
                 averageTeamSize,
-                smallestDaily
+                smallestDaily,
+                longestDailyTime: longestDailyData ? longestDailyData.totalTime : 0,
+                shortestDailyTime: shortestDailyData ? shortestDailyData.totalTime : 0
             };
         }
 

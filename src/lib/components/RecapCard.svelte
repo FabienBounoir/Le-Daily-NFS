@@ -171,10 +171,17 @@
 								</div>
 							{/if}
 							<div class="social-item">
-								<span class="social-icon">🧘</span>
+								<span class="social-icon">🥇</span>
 								<div>
-									<div class="social-value">{recap.socialStats.soloDaily}</div>
-									<div class="social-label">Dailies solo</div>
+									<div class="social-value">{recap.socialStats.firstSpeakerCount}</div>
+									<div class="social-label">Fois en premier</div>
+								</div>
+							</div>
+							<div class="social-item">
+								<span class="social-icon">🔚</span>
+								<div>
+									<div class="social-value">{recap.socialStats.lastSpeakerCount}</div>
+									<div class="social-label">Fois en dernier</div>
 								</div>
 							</div>
 						{:else}
@@ -193,10 +200,17 @@
 								</div>
 							</div>
 							<div class="social-item">
-								<span class="social-icon">👤</span>
+								<span class="social-icon">🏆</span>
 								<div>
-									<div class="social-value">{recap.socialStats.smallestDaily}</div>
-									<div class="social-label">Plus petit daily</div>
+									<div class="social-value">{formatTime(recap.socialStats.longestDailyTime)}</div>
+									<div class="social-label">Daily le plus long</div>
+								</div>
+							</div>
+							<div class="social-item">
+								<span class="social-icon">⚡</span>
+								<div>
+									<div class="social-value">{formatTime(recap.socialStats.shortestDailyTime)}</div>
+									<div class="social-label">Daily le plus court</div>
 								</div>
 							</div>
 						{/if}
