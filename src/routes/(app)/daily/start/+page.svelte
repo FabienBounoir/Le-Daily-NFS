@@ -22,6 +22,7 @@
 	import Rain from '$lib/components/Rain.svelte';
 	import TeamMood from '$lib/components/TeamMood.svelte';
 	import ProgrammedDate from '$lib/components/ProgrammedDate.svelte';
+	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -162,10 +163,10 @@
 	];
 
 	const audioManager = (audioName) => {
-			audio = new Audio('/' + audioName + '.mp3');
-			audio.volume = 0.5;
-			audio.play();
-		};
+		audio = new Audio('/' + audioName + '.mp3');
+		audio.volume = 0.5;
+		audio.play();
+	};
 
 	function keydownHandler(e) {
 		actualKeyDown = e.code;
@@ -234,7 +235,6 @@
 		}
 	}
 
-
 	onDestroy(() => {
 		if (interval) {
 			clearInterval(interval);
@@ -246,7 +246,7 @@
 	onMount(() => {
 		let dailyInfo = null;
 
-		try{
+		try {
 			dailyInfo = JSON.parse(window.localStorage.getItem('daily'));
 		} catch (e) {
 			console.error('Error parsing daily data from localStorage:', e);
@@ -299,9 +299,7 @@
 			audio.play();
 		};
 
-
-
-	document.addEventListener('keydown', keydownHandler);
+		document.addEventListener('keydown', keydownHandler);
 
 		return () => {
 			if (interval) clearInterval(interval);
@@ -561,6 +559,12 @@
 						{/if}
 						{#if checkBirthdayToday(dailyMng?.users[dailyMng.index].birthday)}
 							<PartyHat />
+						{/if}
+						{#if dailyMng?.users?.[dailyMng.index]?.decoration}
+							<AvatarDecoration
+								decoration={dailyMng.users[dailyMng.index].decoration}
+								avatarSize={110}
+							/>
 						{/if}
 					</div>
 				{/key}

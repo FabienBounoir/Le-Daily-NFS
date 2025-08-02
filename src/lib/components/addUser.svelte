@@ -53,7 +53,8 @@
 			avatar: null,
 			timer: 0,
 			nickname: null,
-			animation: null
+			animation: null,
+			decoration: null
 		};
 
 		for (let user of speaker) {

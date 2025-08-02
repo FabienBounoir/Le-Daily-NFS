@@ -118,6 +118,11 @@
 		</ul>
 
 		<div class="footer">
+			<i
+				class="fa-solid fa-palette decorations"
+				on:click={() => goto('/decorations')}
+				title="Décorations d'avatar"
+			/>
 			<i class="fa-solid fa-gear settings" on:click={() => goto('/settings')} />
 			<i class="fa-solid fa-right-from-bracket" on:click={logout} />
 		</div>
@@ -268,6 +273,13 @@
 					transition: transform 0.3s linear;
 					&:hover {
 						transform: rotate(45deg);
+					}
+				}
+
+				.decorations {
+					transition: transform 0.3s linear;
+					&:hover {
+						transform: scale(1.2);
 					}
 				}
 

@@ -5,6 +5,8 @@
 	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
 	import { some } from 'd3';
+	import DecorationSelector from '$lib/components/DecorationSelector.svelte';
+	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 
 	let color = $user.color;
 	let timer = $user.timer;
@@ -244,6 +246,37 @@
 							updateElementWithIndex(user.avatar, index, 'avatar');
 						}}
 					/>
+
+					<label>Décoration d'avatar:</label>
+					<div class="decoration-section">
+						<div class="avatar-preview-container">
+							{#if user.avatar}
+								<img
+									src={'/avatar/' + user.avatar}
+									alt="Avatar preview"
+									class="avatar-preview-img"
+									on:error={() => {
+										// Fallback to generated avatar
+									}}
+								/>
+							{:else}
+								<img
+									src={'https://api.dicebear.com/9.x/dylan/svg?seed=' + user.name}
+									alt="Avatar preview"
+									class="avatar-preview-img"
+								/>
+							{/if}
+							{#if user.decoration}
+								<AvatarDecoration decoration={user.decoration} avatarSize={73} />
+							{/if}
+						</div>
+						<DecorationSelector
+							selectedDecoration={user.decoration}
+							on:decorationSelected={(e) => {
+								updateElementWithIndex(e.detail, index, 'decoration');
+							}}
+						/>
+					</div>
 				</div>
 			{/each}
 		{/if}
@@ -429,5 +462,35 @@
 			user-select: none;
 			font-size: 1.5em;
 		}
+	}
+
+	.decoration-section {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		margin-top: 0.5em;
+		/* Ajouté un padding pour éviter que les décorations soient coupées */
+		padding: 10px 0;
+	}
+
+	.avatar-preview-container {
+		position: relative;
+		border-radius: 50%;
+		/* Enlevé overflow: hidden pour permettre aux décorations de dépasser */
+		border: 2px solid var(--primary-400);
+		/* Ajouté un padding pour laisser de l'espace aux décorations */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--primary-50);
+	}
+
+	.avatar-preview-img {
+		width: 60px;
+		height: 60px;
+		object-fit: cover;
+		border-radius: 50%;
+		position: relative;
+		z-index: 1;
 	}
 </style>

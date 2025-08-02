@@ -139,6 +139,27 @@ class UserService {
 	delete(_id) {
 		return this.#collection.deleteOne({ _id: new ObjectId(_id) });
 	}
+
+	/**
+	 * Update a user's decoration in the users array
+	 * @param {string} team 
+	 * @param {string} userId 
+	 * @param {string} decoration 
+	 */
+	async updateUserDecoration(team, userId, decoration) {
+		// Find users that have this person in their users array and update the decoration
+		const result = await this.#collection.updateMany(
+			{
+				teams: { $in: [team] },
+				"users.name": userId
+			},
+			{
+				$set: { "users.$.decoration": decoration }
+			}
+		);
+
+		return result;
+	}
 }
 
 export const userService = new UserService(db.collection("users"));
