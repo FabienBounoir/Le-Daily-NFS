@@ -7,7 +7,7 @@ export const getResultEuromillion = async () => {
 
 
     try {
-        const res = await fetch(`https://euromillions.api.pedromealha.dev/draws?year=${year}&dates=${year}-${`${month}`.padStart(2, '0')}-${`${day}`.padStart(2, '0')}`, {
+        const res = await fetch(`https://euromillions.api.pedromealha.dev/draws?year=${year}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'

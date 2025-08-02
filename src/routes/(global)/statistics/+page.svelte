@@ -213,7 +213,7 @@
 
 					<!-- Intersection observer target for the last few items -->
 					{#if i === dailies.length - 3 && hasMoreData}
-						<div bind:this={lastElement} style="height: 1px;"></div>
+						<div class="intersection-observer" bind:this={lastElement} style="height: 1px;"></div>
 					{/if}
 				{/each}
 
@@ -248,6 +248,10 @@
 </main>
 
 <style lang="scss">
+	.intersection-observer {
+		height: 1px;
+		visibility: hidden;
+	}
 	main {
 		user-select: none;
 		display: flex;

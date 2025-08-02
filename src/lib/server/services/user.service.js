@@ -17,6 +17,9 @@ class UserService {
 	 *  timer: number;
 	 *  users: object[];
 	 *  weather: string[]
+	 *  qwertee: boolean;
+	 *  euromillion: boolean;
+	 *  programmedDates: object[];
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -64,7 +67,24 @@ class UserService {
 			//dont send password back
 			return await this.#collection.findOne({
 				_id: new ObjectId(decoded)
-			}).then(({ password, ...user }) => user);
+			}).then(({ password, ...user }) => {
+				if (!user.programmedDates) {
+					user.programmedDates = [];
+				}
+				if (!user.weather) {
+					user.weather = [];
+				}
+				if (!user.users) {
+					user.users = [];
+				}
+				if (user.qwertee === undefined) {
+					user.qwertee = false;
+				}
+				if (user.euromillion === undefined) {
+					user.euromillion = false;
+				}
+				return user;
+			});
 		} catch (error) {
 			return {
 				_id: "-1",
@@ -87,7 +107,10 @@ class UserService {
 			timer: 120,
 			color: "#" + Math.floor(Math.random() * 16777215).toString(16),
 			users: [],
-			weather: []
+			weather: [],
+			qwertee: false,
+			euromillion: false,
+			programmedDates: []
 		});
 	}
 
@@ -128,6 +151,10 @@ class UserService {
 			if (alreadyUsed) {
 				throw error(409, { id: "user.name_taken", message: "Username already taken" });
 			}
+		}
+
+		if (body.programmedDates !== undefined && !Array.isArray(body.programmedDates)) {
+			body.programmedDates = [];
 		}
 
 		return this.#collection.updateOne({ _id: new ObjectId(_id) }, { $set: body });

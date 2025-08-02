@@ -102,10 +102,153 @@ class DailyService {
 			}
 		]).toArray();
 
+		// Équilibre de parole - calculer l'écart-type des temps de parole
+		const equilibre = await this.#collection.aggregate([
+			{
+				$match: { team }
+			},
+			{
+				$unwind: "$users"
+			},
+			{
+				$group: {
+					_id: "$_id",
+					userTimes: { $push: "$userTime" }
+				}
+			},
+			{
+				$project: {
+					variance: {
+						$divide: [
+							{
+								$sum: {
+									$map: {
+										input: "$userTimes",
+										as: "time",
+										in: {
+											$pow: [
+												{
+													$subtract: [
+														"$$time",
+														{ $avg: "$userTimes" }
+													]
+												},
+												2
+											]
+										}
+									}
+								}
+							},
+							{ $size: "$userTimes" }
+						]
+					}
+				}
+			},
+			{
+				$group: {
+					_id: null,
+					avgVariance: { $avg: "$variance" }
+				}
+			}
+		]).toArray();
+
+		// Score de ponctualité - pourcentage de dailys terminés en moins de X temps (par exemple 10 minutes = 600 secondes)
+		const ponctualite = await this.#collection.aggregate([
+			{
+				$match: { team }
+			},
+			{
+				$group: {
+					_id: null,
+					totalDailys: { $sum: 1 },
+					punctualDailys: {
+						$sum: {
+							$cond: [{ $lte: ["$totalTime", 600] }, 1, 0]
+						}
+					}
+				}
+			},
+			{
+				$project: {
+					score: {
+						$multiply: [
+							{ $divide: ["$punctualDailys", "$totalDailys"] },
+							100
+						]
+					}
+				}
+			}
+		]).toArray();
+
+		// Efficacité - Ratio participants/temps
+		const efficacite = await this.#collection.aggregate([
+			{
+				$match: { team }
+			},
+			{
+				$project: {
+					efficiency: {
+						$divide: [
+							{ $size: "$users" },
+							{ $add: ["$totalTime", 1] }
+						]
+					}
+				}
+			},
+			{
+				$group: {
+					_id: null,
+					avgEfficiency: { $avg: "$efficiency" }
+				}
+			}
+		]).toArray();
+
+		const recent = await this.#collection.find({ team })
+			.sort({ date: -1 })
+			.limit(5)
+			.toArray();
+
+		const previous = await this.#collection.find({ team })
+			.sort({ date: -1 })
+			.skip(5)
+			.limit(5)
+			.toArray();
+
+		const recentAvg = recent.length ? recent.reduce((sum, d) => sum + d.totalTime, 0) / recent.length : 0;
+		const previousAvg = previous.length ? previous.reduce((sum, d) => sum + d.totalTime, 0) / previous.length : 0;
+
+		let progression = 0;
+		if (previousAvg > 0 && recentAvg > 0) {
+			const difference = previousAvg - recentAvg;
+			const baseLine = Math.max(previousAvg, recentAvg);
+			progression = (difference / baseLine) * 100;
+
+			progression = Math.max(-100, Math.min(100, progression));
+		}
+
+		// Streak - calculer les jours consécutifs sans dépassement (plus de 10 minutes)
+		const allDailys = await this.#collection.find({ team })
+			.sort({ date: -1 })
+			.toArray();
+
+		let streak = 0;
+		for (const daily of allDailys) {
+			if (daily.totalTime <= 600) {
+				streak++;
+			} else {
+				break;
+			}
+		}
+
 		return {
 			moyen: moyen[0]?.average || 0,
 			total: total[0]?.total || 0,
-			moyenPersonne: moyenParticipants[0]?.average || 0
+			moyenPersonne: moyenParticipants[0]?.average || 0,
+			equilibre: Math.sqrt(equilibre[0]?.avgVariance || 0),
+			ponctualite: ponctualite[0]?.score || 0,
+			efficacite: (efficacite[0]?.avgEfficiency || 0) * 1000,
+			progression: progression,
+			streak: streak
 		};
 	}
 

@@ -24,8 +24,8 @@ export const PUT = async ({ request }) => {
 		throw error(401, "Unauthorized");
 	}
 
-	const { color, timer, users, weather, qwertee } = await request.json();
-	const newUser = await userService.update(user._id, { color, timer, users, weather, qwertee });
+	const { color, timer, users, weather, qwertee, euromillion, programmedDates } = await request.json();
+	const newUser = await userService.update(user._id, { color, timer, users, weather, qwertee, euromillion, programmedDates });
 
 	return json(newUser);
 };

@@ -14,13 +14,11 @@
 	import DateStart from '$lib/components/DateStart.svelte';
 	import animationData from '$lib/animation.json';
 	import TopPlayers from '$lib/components/TopPlayers.svelte';
-	import Hyrox from '$lib/components/Hyrox.svelte';
 	import Qwertee from '$lib/components/Qwertee.svelte';
 	import PartyHat from '$lib/components/PartyHat.svelte';
 	import { Confetti } from 'svelte-confetti';
 	import Bouns from '$lib/components/Bouns.svelte';
 	import Rain from '$lib/components/Rain.svelte';
-	import TeamMood from '$lib/components/TeamMood.svelte';
 	import ProgrammedDate from '$lib/components/ProgrammedDate.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 
@@ -39,6 +37,9 @@
 	let alreadySave = false;
 
 	let interval = null;
+	let recapInterval = null;
+	let currentRecapSection = 0;
+	let recapSections = [];
 
 	let dailyMng = {
 		users: [{}],
@@ -150,6 +151,10 @@
 			key: 'ArrowLeft',
 			keyName: '←',
 			action: () => {
+				if (dailyMng.state == 'ENDED') {
+					navigateRecap(-1);
+					return;
+				}
 				if (dailyMng.index - 1 < 0) {
 					return;
 				} else {
@@ -158,6 +163,18 @@
 						dailyMng?.users?.[dailyMng.index]?.nickname || dailyMng?.users?.[dailyMng.index]?.name
 					);
 				}
+			}
+		},
+		{
+			actionName: 'Next',
+			key: 'ArrowRight',
+			keyName: '→',
+			action: () => {
+				if (dailyMng.state == 'ENDED') {
+					navigateRecap(1);
+					return;
+				}
+				newSpeaker();
 			}
 		}
 	];
@@ -171,8 +188,6 @@
 	function keydownHandler(e) {
 		actualKeyDown = e.code;
 
-		if (dailyMng.state == 'ENDED') return;
-
 		if (keydownInterval) {
 			clearTimeout(keydownInterval);
 		}
@@ -180,6 +195,15 @@
 		keydownInterval = setTimeout(() => {
 			actualKeyDown = '';
 		}, 300);
+
+		if (dailyMng.state == 'ENDED') {
+			if (e.code === 'ArrowLeft') {
+				navigateRecap(-1);
+			} else if (e.code === 'ArrowRight') {
+				navigateRecap(1);
+			}
+			return;
+		}
 
 		if (e.code === 'Tab' || e.code === 'Escape') {
 			if (toggleGif()) return;
@@ -239,6 +263,9 @@
 		if (interval) {
 			clearInterval(interval);
 		}
+		if (recapInterval) {
+			clearInterval(recapInterval);
+		}
 		document.removeEventListener('keydown', keydownHandler);
 		document.body.style.removeProperty('background-color');
 	});
@@ -281,8 +308,13 @@
 			dailyMng.state = 'IN_PROGRESS';
 		}
 
-		textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
-		animationSpeaker(dailyMng.users[dailyMng.index].animation);
+		if (dailyMng.state === 'ENDED') {
+			initRecapSections(false);
+			document.body.style.removeProperty('background-color');
+		} else {
+			textToSpeech(dailyMng.users[dailyMng.index].nickname || dailyMng.users[dailyMng.index].name);
+			animationSpeaker(dailyMng.users[dailyMng.index].animation);
+		}
 
 		interval = setInterval(() => {
 			if (dailyMng.state == 'ENDED') return;
@@ -340,6 +372,7 @@
 			dailyMng.index = 0;
 			saveDaily();
 			document.body.style.removeProperty('background-color');
+			initRecapSections();
 
 			if (interval) {
 				clearInterval(interval);
@@ -441,6 +474,59 @@
 			LastDayOnProjectDate.getFullYear() === actualDate.getFullYear()
 		);
 	};
+
+	const initRecapSections = (displayStats = true) => {
+		recapSections = ['topPlayers'];
+
+		if (displayStats) {
+			recapSections.push('informations');
+		}
+
+		// Ajouter la météo si disponible
+		if ($user.weather && $user.weather.length > 0) {
+			recapSections.push('weather');
+		}
+
+		// Ajouter les dates programmées si il y en a
+		if ($user?.programmedDates && $user.programmedDates.length > 0) {
+			recapSections.push('programmedDates');
+		}
+
+		// Ajouter Qwertee si disponible
+		if ($user.qwertee) {
+			recapSections.push('qwertee');
+		}
+
+		// Ajouter EuroMillion si activé
+		if ($user.euromillion) {
+			recapSections.push('euromillion');
+		}
+
+		currentRecapSection = 0;
+
+		recapInterval = setInterval(() => {
+			currentRecapSection = (currentRecapSection + 1) % recapSections.length;
+		}, 5000);
+	};
+
+	const navigateRecap = (direction) => {
+		if (recapSections.length === 0) return;
+
+		if (recapInterval) {
+			clearInterval(recapInterval);
+		}
+
+		currentRecapSection =
+			(currentRecapSection + direction + recapSections.length) % recapSections.length;
+
+		setTimeout(() => {
+			if (!recapInterval) {
+				recapInterval = setInterval(() => {
+					currentRecapSection = (currentRecapSection + 1) % recapSections.length;
+				}, 5000);
+			}
+		}, 3000);
+	};
 </script>
 
 <svelte:head>
@@ -457,52 +543,273 @@
 
 <section>
 	{#if dailyMng.state == 'ENDED'}
-		<h1>Le daily est terminé</h1>
+		<div class="recap-fullscreen">
+			<div class="recap-header">
+				<h1><i class="fa-solid fa-trophy"></i> Daily terminé !</h1>
+				<div class="recap-navigation">
+					<div class="nav-indicators">
+						{#each recapSections as section, index}
+							<div class="indicator {index === currentRecapSection ? 'active' : ''}" />
+						{/each}
+					</div>
+					<p>
+						<i class="fa-solid fa-arrow-left"></i> <i class="fa-solid fa-arrow-right"></i> pour
+						naviguer • Section {currentRecapSection + 1}/{recapSections.length}
+					</p>
+				</div>
+			</div>
 
-		<TopPlayers speakers={dailyMng.users} />
+			<div class="recap-content">
+				{#if recapSections[currentRecapSection] === 'topPlayers'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-ranking-star"></i> Classement des participants</h2>
+							<p>Temps de parole par participant</p>
+						</div>
+						<div class="widget-content">
+							<TopPlayers speakers={dailyMng.users} />
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'weather'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-cloud-sun"></i> Météo du jour</h2>
+							<p>Conditions météorologiques actuelles</p>
+						</div>
+						<div class="widget-content weather-container">
+							{#if $user.weather && $user.weather.length > 0}
+								<div class="weather-grid">
+									{#each $user.weather as city}
+										<Weather {city} />
+									{/each}
+								</div>
+							{:else}
+								<div class="no-weather">
+									<i class="fa-solid fa-cloud-question"></i>
+									<p>Aucune ville configurée pour la météo</p>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'informations'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-chart-line"></i> Statistiques du Daily</h2>
+							<p>Analyse et comparaison avec les précédents daily</p>
+						</div>
+						<div class="widget-content stats-content">
+							{#await stats}
+								<div class="stats-loading">
+									<i class="fa-solid fa-spinner fa-spin"></i>
+									<p>Chargement des statistiques...</p>
+								</div>
+							{:then data}
+								<div class="stat-cards">
+									<div class="stat-card primary" style="--delay: 0s">
+										<div class="stat-icon">
+											<i class="fa-solid fa-clock"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Durée du daily</h3>
+											<p class="stat-value">{timeFormater(dailyMng.totalTimer)}</p>
+											<p class="stat-detail">
+												Commencé à <strong>{dailyMng.startDailyDate.toLocaleTimeString()}</strong>
+											</p>
+										</div>
+									</div>
 
-		<div class="separator-vertical">
-			<div></div>
-		</div>
+									<div
+										class="stat-card {dailyMng.totalTimer > data.moyen ? 'warning' : 'success'}"
+										style="--delay: 0.1s"
+									>
+										<div class="stat-icon">
+											<i
+												class="fa-solid fa-{dailyMng.totalTimer > data.moyen
+													? 'arrow-up'
+													: 'arrow-down'}"
+											></i>
+										</div>
+										<div class="stat-info">
+											<h3>Comparaison moyenne</h3>
+											<p class="stat-value">
+												{dailyMng.totalTimer > data.moyen ? 'Plus' : 'Moins'} long
+											</p>
+											<p class="stat-detail">
+												Moyenne équipe : <strong>{timeFormater(data.moyen)}</strong>
+											</p>
+										</div>
+									</div>
 
-		<div class="container-result">
-			<div class="weather">
-				{#if $user.weather && $user.weather.length > 0}
-					{#each $user.weather as city}
-						<Weather {city} />
-					{/each}
+									<div class="stat-card info" style="--delay: 0.2s">
+										<div class="stat-icon">
+											<i class="fa-solid fa-calendar-days"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Temps total équipe</h3>
+											<p class="stat-value">{timeFormater(data.total)}</p>
+											<p class="stat-detail">passé en daily depuis le début</p>
+										</div>
+									</div>
+
+									<div class="stat-card secondary" style="--delay: 0.3s">
+										<div class="stat-icon">
+											<i class="fa-solid fa-users"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Participants moyens</h3>
+											<p class="stat-value">{fixeNumber(data.moyenPersonne)}</p>
+											<p class="stat-detail">personnes par daily en moyenne</p>
+										</div>
+									</div>
+
+									<div
+										class="stat-card {data.equilibre < 30
+											? 'success'
+											: data.equilibre < 60
+												? 'warning'
+												: 'danger'}"
+										style="--delay: 0.4s"
+									>
+										<div class="stat-icon">
+											<i class="fa-solid fa-balance-scale"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Équilibre de parole</h3>
+											<p class="stat-value">{Math.round(data.equilibre)}s</p>
+											<p class="stat-detail">
+												Écart-type des temps de parole
+												{data.equilibre < 30
+													? '(Très équilibré)'
+													: data.equilibre < 60
+														? '(Moyennement équilibré)'
+														: '(Déséquilibré)'}
+											</p>
+										</div>
+									</div>
+
+									<div
+										class="stat-card {data.streak >= 5
+											? 'success'
+											: data.streak >= 2
+												? 'warning'
+												: 'danger'}"
+										style="--delay: 0.5s"
+									>
+										<div class="stat-icon">
+											<i class="fa-solid fa-fire"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Streak ponctualité</h3>
+											<p class="stat-value">{data.streak}</p>
+											<p class="stat-detail">
+												daily{data.streak > 1 ? 's' : ''} consécutif{data.streak > 1 ? 's' : ''} ≤ 10min
+											</p>
+										</div>
+									</div>
+
+									<div class="stat-card info" style="--delay: 0.6s">
+										<div class="stat-icon">
+											<i class="fa-solid fa-gauge-high"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Efficacité</h3>
+											<p class="stat-value">{fixeNumber(data.efficacite)}</p>
+											<p class="stat-detail">Ratio participants/seconde × 1000</p>
+										</div>
+									</div>
+
+									<div
+										class="stat-card {data.ponctualite >= 80
+											? 'success'
+											: data.ponctualite >= 50
+												? 'warning'
+												: 'danger'}"
+										style="--delay: 0.7s"
+									>
+										<div class="stat-icon">
+											<i class="fa-solid fa-stopwatch"></i>
+										</div>
+										<div class="stat-info">
+											<h3>Score de ponctualité</h3>
+											<p class="stat-value">{Math.round(data.ponctualite)}%</p>
+											<p class="stat-detail">de dailys terminés en moins de 10min</p>
+										</div>
+									</div>
+
+									<div
+										class="stat-card {data.progression > 5
+											? 'success'
+											: data.progression >= -5
+												? 'info'
+												: 'warning'}"
+										style="--delay: 0.8s"
+									>
+										<div class="stat-icon">
+											<i
+												class="fa-solid fa-{data.progression > 5
+													? 'chart-line'
+													: data.progression >= -5
+														? 'minus'
+														: 'chart-line-down'}"
+											></i>
+										</div>
+										<div class="stat-info">
+											<h3>Progression</h3>
+											<p class="stat-value">
+												{data.progression > 0 ? '+' : ''}{Math.round(data.progression)}%
+											</p>
+											<p class="stat-detail">
+												vs les 5 dailys précédents
+												{data.progression > 5
+													? '(Amélioration)'
+													: data.progression >= -5
+														? '(Stable)'
+														: '(Dégradation)'}
+											</p>
+										</div>
+									</div>
+								</div>
+							{:catch error}
+								<div class="stats-error">
+									<i class="fa-solid fa-exclamation-triangle"></i>
+									<p>Erreur lors du chargement des statistiques</p>
+									<small>{error}</small>
+								</div>
+							{/await}
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'qwertee'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-shirt"></i> T-shirts du jour</h2>
+							<p>Découvrez les designs Qwertee tendance</p>
+						</div>
+						<div class="widget-content qwertee-container">
+							<Qwertee />
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'euromillion'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-coins"></i> Tirage EuroMillion</h2>
+							<p>Résultats du tirage EuroMillion</p>
+						</div>
+						<div class="widget-content euromillion-container">
+							<EuroMillion />
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'programmedDates'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-calendar-alt"></i> Dates importantes</h2>
+							<p>Échéances et événements programmés</p>
+						</div>
+						<div class="widget-content">
+							<ProgrammedDate />
+						</div>
+					</div>
 				{/if}
 			</div>
-
-			<div class="informations">
-				{#await stats then data}
-					<p>
-						Le daily a commencé à <b>{dailyMng.startDailyDate.toLocaleTimeString()}</b> il a duré
-						<b>{timeFormater(dailyMng.totalTimer)}</b>
-						c'est
-						<u class={dailyMng.totalTimer > data.moyen ? 'warning' : 'success'}
-							>{dailyMng.totalTimer > data.moyen ? 'plus' : 'moins'}</u
-						>
-						long que la moyenne qui est à
-						<b>{timeFormater(data.moyen)}</b>
-					</p>
-
-					<p>Vous avez passé <b>{timeFormater(data.total)}</b> dans un daily</p>
-					<p>En moyenne il y a <b>{fixeNumber(data.moyenPersonne)}</b> personnes dans un daily</p>
-				{/await}
-			</div>
-
-			{#if $user.qwertee}
-				<Qwertee />
-			{/if}
-
-			{#if $user.username == 'nfs'}
-				<div class="weather">
-					<Hyrox />
-					<TeamMood />
-					<ProgrammedDate dateModule={$user?.date} />
-				</div>
-			{/if}
 		</div>
 	{:else}
 		<h1>Le daily {$user?.username || ''}</h1>
@@ -652,10 +959,17 @@
 		{/if}
 	{/if}
 
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<i
+		role="button"
+		tabindex="0"
 		on:click={() => {
 			if (interval) {
 				clearInterval(interval);
+			}
+			if (recapInterval) {
+				clearInterval(recapInterval);
 			}
 
 			window.localStorage.removeItem('daily');
@@ -701,15 +1015,522 @@
 
 	.close-daily {
 		position: fixed;
-		top: 0;
-		right: 0;
-		margin: 1em;
-		font-size: 2em;
+		top: 1rem;
+		right: 1rem;
+		font-size: 1.5rem;
 		cursor: no-drop;
-		transition: filter 0.5s;
+		transition: all 0.3s ease;
+		z-index: 1000;
+		background: rgba(255, 255, 255, 0.2);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
+		width: 50px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		backdrop-filter: blur(10px);
 
 		&:hover {
-			filter: grayscale(0.9);
+			background: rgba(255, 255, 255, 0.3);
+			transform: scale(1.1);
+			cursor: pointer;
+		}
+	}
+
+	.recap-navigation {
+		position: relative;
+		text-align: center;
+		margin-bottom: 1rem;
+		color: var(--primary-100);
+
+		.nav-indicators {
+			display: flex;
+			justify-content: center;
+			gap: 0.4rem;
+			margin-bottom: 0.4rem;
+
+			.indicator {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: var(--primary-300);
+				transition: all 0.3s ease;
+
+				&.active {
+					background-color: var(--primary-950);
+					transform: scale(1.2);
+				}
+			}
+		}
+
+		p {
+			margin: 0;
+			font-size: 0.8rem;
+			color: var(--primary-100);
+			font-weight: 500;
+
+			i {
+				color: var(--primary-100);
+				margin: 0 0.2rem;
+			}
+		}
+	}
+
+	.recap-fullscreen {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+		display: flex;
+		flex-direction: column;
+		z-index: 100;
+	}
+
+	.recap-header {
+		padding: 1rem 2rem;
+		text-align: center;
+		background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+		color: white;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+		h1 {
+			margin: 0 0 0.5rem 0;
+			font-size: 2rem;
+			font-weight: 700;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+
+			i {
+				color: #ffd700;
+				margin-right: 0.5rem;
+			}
+		}
+	}
+
+	.recap-content {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		overflow: hidden;
+	}
+
+	.recap-widget {
+		width: 100%;
+		max-width: 1200px;
+		height: 100%;
+		background: white;
+		border-radius: 1.5rem;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.widget-header {
+		background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+		color: white;
+		padding: 1rem 1.5rem;
+		text-align: center;
+		flex-shrink: 0;
+
+		h2 {
+			margin: 0 0 0.25rem 0;
+			font-size: 1.5rem;
+			font-weight: 600;
+
+			i {
+				margin-right: 0.5rem;
+				color: var(--primary-100);
+			}
+		}
+
+		p {
+			margin: 0;
+			font-size: 0.9rem;
+			opacity: 0.9;
+			font-weight: 300;
+		}
+	}
+
+	.widget-content {
+		flex: 1;
+		padding: 1.5rem;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.stats-content {
+		.stats-loading,
+		.stats-error {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 3rem 1rem;
+			text-align: center;
+			color: var(--primary-600);
+
+			i {
+				font-size: 2.5rem;
+				margin-bottom: 1rem;
+				opacity: 0.7;
+			}
+
+			p {
+				margin: 0.5rem 0;
+				font-size: 1.1rem;
+				font-weight: 500;
+			}
+
+			small {
+				opacity: 0.6;
+				font-size: 0.9rem;
+			}
+		}
+
+		.stats-loading i {
+			color: var(--primary-500);
+		}
+
+		.stats-error i {
+			color: #e74c3c;
+		}
+
+		.stat-cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 1.5rem;
+			width: 100%;
+		}
+
+		.stat-card {
+			background: white;
+			border-radius: 1rem;
+			padding: 1.5rem;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+			border-left: 4px solid var(--primary-500);
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			transition: all 0.3s ease;
+			animation: slideInScale 0.5s ease-out forwards;
+			animation-delay: var(--delay);
+			opacity: 0;
+			transform: translateY(20px) scale(0.95);
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 2px;
+				background: linear-gradient(90deg, transparent, var(--primary-200), transparent);
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+
+			&:hover {
+				transform: translateY(-3px);
+				box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+				&::before {
+					opacity: 1;
+				}
+			}
+
+			&.primary {
+				border-left-color: var(--primary-600);
+				.stat-icon {
+					background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+				}
+			}
+
+			&.success {
+				border-left-color: #10b981;
+				.stat-icon {
+					background: linear-gradient(135deg, #10b981, #059669);
+				}
+			}
+
+			&.warning {
+				border-left-color: #f59e0b;
+				.stat-icon {
+					background: linear-gradient(135deg, #f59e0b, #d97706);
+				}
+			}
+
+			&.info {
+				border-left-color: #3b82f6;
+				.stat-icon {
+					background: linear-gradient(135deg, #3b82f6, #2563eb);
+				}
+			}
+
+			&.secondary {
+				border-left-color: #8b5cf6;
+				.stat-icon {
+					background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+				}
+			}
+
+			&.danger {
+				border-left-color: #ef4444;
+				.stat-icon {
+					background: linear-gradient(135deg, #ef4444, #dc2626);
+				}
+			}
+
+			.stat-icon {
+				width: 50px;
+				height: 50px;
+				border-radius: 0.75rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 1.2rem;
+				flex-shrink: 0;
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+			}
+
+			.stat-info {
+				flex: 1;
+				min-width: 0;
+
+				h3 {
+					margin: 0 0 0.3rem 0;
+					font-size: 0.95rem;
+					font-weight: 600;
+					color: var(--primary-700);
+					text-transform: uppercase;
+					letter-spacing: 0.5px;
+				}
+
+				.stat-value {
+					margin: 0 0 0.2rem 0;
+					font-size: 1.6rem;
+					font-weight: 700;
+					color: var(--primary-900);
+					line-height: 1.2;
+				}
+
+				.stat-detail {
+					margin: 0;
+					font-size: 0.8rem;
+					color: var(--primary-600);
+					opacity: 0.9;
+					line-height: 1.3;
+
+					strong {
+						color: var(--primary-700);
+						font-weight: 600;
+					}
+				}
+			}
+		}
+	}
+
+	@keyframes slideInScale {
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.weather-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.weather-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		width: 100%;
+	}
+
+	.no-weather {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 3rem;
+		color: var(--primary-500);
+		text-align: center;
+
+		i {
+			font-size: 3rem;
+			margin-bottom: 1rem;
+			opacity: 0.6;
+		}
+
+		p {
+			margin: 0;
+			font-size: 1.1rem;
+			opacity: 0.8;
+		}
+	}
+
+	.qwertee-container {
+		overflow: hidden;
+		border-radius: 1rem;
+		padding: 0;
+	}
+
+	.euromillion-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 1rem;
+		border-radius: 1rem;
+	}
+
+	// Responsive pour les sections du recap
+	@media (max-width: 1200px) {
+		.weather-grid {
+			gap: 0.8rem;
+		}
+
+		.qwertee-container {
+			border-radius: 0.8rem;
+		}
+
+		.stats-content .stat-cards {
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 1.2rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.recap-widget {
+			margin: 0 1rem;
+
+			.widget-header {
+				padding: 1rem;
+
+				h2 {
+					font-size: 1.3rem;
+				}
+
+				p {
+					font-size: 0.85rem;
+				}
+			}
+
+			.widget-content {
+				padding: 1rem;
+			}
+		}
+
+		.weather-container {
+			gap: 1rem;
+		}
+
+		.weather-grid {
+			gap: 0.8rem;
+		}
+
+		.no-weather {
+			padding: 2rem;
+
+			i {
+				font-size: 2rem;
+			}
+
+			p {
+				font-size: 1rem;
+			}
+		}
+
+		.stats-content {
+			.stat-cards {
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1rem;
+			}
+
+			.stat-card {
+				padding: 1.2rem;
+				gap: 0.8rem;
+
+				.stat-icon {
+					width: 45px;
+					height: 45px;
+					font-size: 1.1rem;
+				}
+
+				.stat-info {
+					h3 {
+						font-size: 0.9rem;
+					}
+
+					.stat-value {
+						font-size: 1.4rem;
+					}
+
+					.stat-detail {
+						font-size: 0.75rem;
+					}
+				}
+			}
+		}
+	}
+
+	@media (max-width: 480px) {
+		.recap-widget {
+			margin: 0 0.5rem;
+			border-radius: 1rem;
+
+			.widget-header {
+				padding: 0.8rem;
+
+				h2 {
+					font-size: 1.2rem;
+				}
+			}
+		}
+
+		.weather-container {
+			gap: 0.8rem;
+		}
+
+		.stats-content {
+			.stat-cards {
+				grid-template-columns: 1fr;
+				gap: 0.8rem;
+			}
+
+			.stat-card {
+				padding: 1rem;
+				flex-direction: column;
+				text-align: center;
+				gap: 0.8rem;
+
+				.stat-icon {
+					width: 50px;
+					height: 50px;
+					font-size: 1.2rem;
+					margin: 0 auto;
+				}
+
+				.stat-info {
+					width: 100%;
+
+					.stat-value {
+						font-size: 1.6rem;
+					}
+				}
+			}
 		}
 	}
 
@@ -1040,5 +1861,10 @@
 				)
 				rotate(calc(-1deg * var(--shake-amplitude, 1)));
 		}
+	}
+
+	// Styles pour la section des dates programmées
+	.programmed-dates-section {
+		margin-top: 2rem;
 	}
 </style>

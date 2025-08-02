@@ -14,7 +14,10 @@
 	let showGifSearcher = false;
 	let currentEditingUserIndex = null;
 
-	$: color && myshades({ primary: color });
+	$: color &&
+		myshades({
+			primary: color === 'random' ? `#${Math.floor(Math.random() * 16777215).toString(16)}` : color
+		});
 	$: timer && user.change({ ...$user, timer });
 
 	const updateElementWithIndex = (valeur, index, key) => {
@@ -40,6 +43,60 @@
 		showGifSearcher = false;
 		currentEditingUserIndex = null;
 	}
+
+	function addProgrammedDate(isRecurring = false) {
+		const newDate = isRecurring
+			? {
+					title: '',
+					type: 'recurring',
+					weekday: 1,
+					description: '',
+					autoRemove: false
+				}
+			: {
+					title: '',
+					type: 'regular',
+					date: '',
+					description: '',
+					autoRemove: true
+				};
+
+		const currentDates = $user?.programmedDates || [];
+		user.change({
+			...$user,
+			programmedDates: [...currentDates, newDate]
+		});
+	}
+
+	function removeProgrammedDate(index) {
+		const currentDates = $user?.programmedDates || [];
+		const updatedDates = currentDates.filter((_, i) => i !== index);
+		user.change({
+			...$user,
+			programmedDates: updatedDates
+		});
+	}
+
+	function updateProgrammedDates() {
+		if (!$user.programmedDates) {
+			user.change({
+				...$user,
+				programmedDates: []
+			});
+		} else {
+			user.change({ ...$user });
+		}
+	}
+
+	const weekdayOptions = [
+		{ value: 1, label: 'Lundi' },
+		{ value: 2, label: 'Mardi' },
+		{ value: 3, label: 'Mercredi' },
+		{ value: 4, label: 'Jeudi' },
+		{ value: 5, label: 'Vendredi' },
+		{ value: 6, label: 'Samedi' },
+		{ value: 0, label: 'Dimanche' }
+	];
 </script>
 
 <svelte:head>
@@ -203,6 +260,21 @@
 	</div>
 
 	<div class="container">
+		<h1>EuroMillion</h1>
+		<p>Afficher le tirage EuroMillion du jour dans vos daily:</p>
+		<button
+			on:click={() => user.change({ ...$user, euromillion: !$user.euromillion })}
+			class:disabled={!$user.euromillion}
+		>
+			{#if $user.euromillion}
+				Status: Activé
+			{:else}
+				Status: Désactivé
+			{/if}
+		</button>
+	</div>
+
+	<div class="container">
 		<h1>Qwertee</h1>
 		<p>Afficher les Tshirt du jour du site Qwertee:</p>
 		<button
@@ -304,6 +376,104 @@
 		{/if}
 	</div>
 
+	<div class="container">
+		<h1>Dates programmées</h1>
+		<p>
+			Configurez des dates importantes à afficher dans vos daily (événements, deadlines, congés,
+			etc.)
+		</p>
+
+		<div class="dates-section">
+			{#if !$user?.programmedDates || $user.programmedDates.length === 0}
+				<p class="no-dates">Aucune date programmée pour le moment</p>
+			{/if}
+
+			{#if $user?.programmedDates && $user.programmedDates.length > 0}
+				<div class="dates-list">
+					{#each $user.programmedDates as dateItem, index}
+						<div class="date-item">
+							<div class="date-form">
+								<h2>Type {dateItem.type === 'recurring' ? 'Récurrente' : 'Fixe'}</h2>
+
+								<div class="form-row">
+									<label>Titre:</label>
+									<input
+										type="text"
+										bind:value={dateItem.title}
+										placeholder="Ex: Déployment v2.0"
+										on:input={() => updateProgrammedDates()}
+									/>
+								</div>
+
+								{#if dateItem.type === 'recurring'}
+									<div class="form-row">
+										<label>Jour de la semaine:</label>
+										<select bind:value={dateItem.weekday} on:change={() => updateProgrammedDates()}>
+											{#each weekdayOptions as option}
+												<option value={option.value}>{option.label}</option>
+											{/each}
+										</select>
+									</div>
+								{:else}
+									<div class="form-row">
+										<label>Date:</label>
+										<input
+											type="date"
+											bind:value={dateItem.date}
+											on:input={() => updateProgrammedDates()}
+										/>
+									</div>
+								{/if}
+
+								<div class="form-row">
+									<label>Description (optionnel):</label>
+									<input
+										type="text"
+										bind:value={dateItem.description}
+										placeholder="Ex: Déployment de la nouvelle version"
+										on:input={() => updateProgrammedDates()}
+									/>
+								</div>
+
+								{#if dateItem.type !== 'recurring'}
+									<div class="form-row checkbox-row">
+										<label>
+											<input
+												type="checkbox"
+												bind:checked={dateItem.autoRemove}
+												on:change={() => updateProgrammedDates()}
+											/>
+											Masquer automatiquement après la date
+										</label>
+									</div>
+								{/if}
+							</div>
+
+							<button
+								class="delete-date-btn"
+								on:click={() => removeProgrammedDate(index)}
+								title="Supprimer cette date"
+							>
+								<i class="fa-solid fa-trash"></i>
+							</button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+
+			<div class="add-date-buttons">
+				<button class="add-date-btn" on:click={() => addProgrammedDate(false)}>
+					<i class="fa-solid fa-calendar-plus"></i>
+					Ajouter une date fixe
+				</button>
+				<button class="add-date-btn recurring" on:click={() => addProgrammedDate(true)}>
+					<i class="fa-solid fa-repeat"></i>
+					Ajouter une date récurrente
+				</button>
+			</div>
+		</div>
+	</div>
+
 	<GifSearcher bind:isOpen={showGifSearcher} on:gifSelected={handleGifSelected} />
 
 	<div class="button-manager">
@@ -311,13 +481,30 @@
 			style=" width: 80%;"
 			on:click={async () => {
 				try {
-					await user.save({
-						...$user,
+					console.log('Données avant sauvegarde:', {
+						user: $user,
+						programmedDates: $user.programmedDates,
+						color,
 						timer
 					});
 
+					const dataToSave = {
+						...$user,
+						timer,
+						programmedDates: $user.programmedDates || [],
+						color,
+						euromillion: $user.euromillion || false
+					};
+
+					console.log('Données à sauvegarder:', dataToSave);
+
+					const result = await user.save(dataToSave);
+
+					console.log('Résultat sauvegarde:', result);
+
 					snacks.success('Modifications enregistrées');
 				} catch (error) {
+					console.error('Erreur sauvegarde:', error);
 					snacks.error(error.message);
 				}
 			}}
@@ -326,7 +513,7 @@
 		</button>
 	</div>
 
-	<div class="container" style="display: none;">
+	<div class="container">
 		<h1>Débogueur</h1>
 		{#key $user}
 			<pre>{JSON.stringify($user, null, 2)}</pre>
@@ -500,6 +687,185 @@
 
 			&:active {
 				background-color: var(--primary-700);
+			}
+		}
+	}
+
+	// Styles pour les dates programmées
+	.dates-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.no-dates {
+		text-align: center;
+		color: var(--primary-600);
+		font-style: italic;
+		padding: 2rem;
+		background: var(--primary-50);
+		border-radius: 0.5rem;
+		border: 2px dashed var(--primary-200);
+	}
+
+	.dates-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.date-item {
+		background: white;
+		border: 1px solid var(--primary-200);
+		border-radius: 0.75rem;
+		padding: 1.5rem;
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+		&:hover {
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+	}
+
+	.date-form {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.form-row {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+
+		label {
+			font-weight: 600;
+			color: var(--primary-700);
+			font-size: 0.9rem;
+		}
+
+		input[type='text'],
+		input[type='date'] {
+			padding: 0.6rem;
+			border: 1px solid var(--primary-300);
+			border-radius: 0.4rem;
+			font-size: 0.9rem;
+
+			&:focus {
+				outline: none;
+				border-color: var(--primary-500);
+				box-shadow: 0 0 0 2px rgba(var(--primary-500-rgb), 0.2);
+			}
+		}
+
+		&.checkbox-row {
+			flex-direction: row;
+			align-items: center;
+			gap: 0.5rem;
+
+			label {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-weight: normal;
+				cursor: pointer;
+			}
+
+			input[type='checkbox'] {
+				width: auto;
+				margin: 0;
+			}
+		}
+	}
+
+	.delete-date-btn {
+		background: #ef4444;
+		color: white;
+		border: none;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+
+		&:hover {
+			background: #dc2626;
+			transform: scale(1.05);
+		}
+
+		i {
+			font-size: 0.9rem;
+		}
+	}
+
+	.add-date-btn {
+		background: var(--primary-500);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		padding: 0.8rem 1.2rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		align-self: flex-start;
+
+		&:hover {
+			background: var(--primary-600);
+			transform: translateY(-1px);
+		}
+
+		&.recurring {
+			background: #06b6d4;
+
+			&:hover {
+				background: #0891b2;
+			}
+		}
+
+		i {
+			font-size: 0.8rem;
+		}
+	}
+
+	.add-date-buttons {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.date-item.recurring {
+		border-left: 4px solid #06b6d4;
+
+		.date-form {
+			background: linear-gradient(135deg, #cffafe 0%, #67e8f9 5%, white 5%);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.date-item {
+			flex-direction: column;
+			align-items: stretch;
+
+			.delete-date-btn {
+				align-self: flex-end;
+			}
+		}
+
+		.form-row {
+			&.checkbox-row {
+				flex-direction: column;
+				align-items: flex-start;
 			}
 		}
 	}
