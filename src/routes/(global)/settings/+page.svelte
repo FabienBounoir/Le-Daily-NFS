@@ -7,9 +7,12 @@
 	import { some } from 'd3';
 	import DecorationSelector from '$lib/components/DecorationSelector.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
+	import GifSearcher from '$lib/components/GifSearcher.svelte';
 
 	let color = $user.color;
 	let timer = $user.timer;
+	let showGifSearcher = false;
+	let currentEditingUserIndex = null;
 
 	$: color && myshades({ primary: color });
 	$: timer && user.change({ ...$user, timer });
@@ -24,6 +27,19 @@
 			users: usersElement
 		});
 	};
+
+	function openGifSearcher(userIndex) {
+		currentEditingUserIndex = userIndex;
+		showGifSearcher = true;
+	}
+
+	function handleGifSelected(event) {
+		if (currentEditingUserIndex !== null) {
+			updateElementWithIndex(event.detail.url, currentEditingUserIndex, 'animation');
+		}
+		showGifSearcher = false;
+		currentEditingUserIndex = null;
+	}
 </script>
 
 <svelte:head>
@@ -230,13 +246,19 @@
 					/>
 
 					<label>Animation:</label>
-					<input
-						type="text"
-						bind:value={user.animation}
-						on:keyup={() => {
-							updateElementWithIndex(user.animation, index, 'animation');
-						}}
-					/>
+					<div class="animation-input-section">
+						<input
+							type="text"
+							bind:value={user.animation}
+							placeholder="URL du GIF ou recherchez avec le bouton"
+							on:keyup={() => {
+								updateElementWithIndex(user.animation, index, 'animation');
+							}}
+						/>
+						<button type="button" class="gif-search-btn" on:click={() => openGifSearcher(index)}>
+							🔍 GIF
+						</button>
+					</div>
 
 					<label>Avatar:</label>
 					<input
@@ -282,6 +304,8 @@
 		{/if}
 	</div>
 
+	<GifSearcher bind:isOpen={showGifSearcher} on:gifSelected={handleGifSelected} />
+
 	<div class="button-manager">
 		<button
 			style=" width: 80%;"
@@ -325,44 +349,10 @@
 		backdrop-filter: blur(5px);
 		padding: 1em;
 	}
-	.new-animation,
-	.new-nickname {
-		display: flex;
-		gap: 1em;
-		align-items: center;
-		padding-top: 1em;
-		border-top: 1px solid var(--primary-100);
-
-		button {
-			width: min-content !important;
-		}
-
-		select {
-			width: min-content !important;
-		}
-	}
 
 	input:disabled {
 		background-color: var(--primary-100);
 		cursor: not-allowed;
-	}
-
-	.animation-container {
-		margin-bottom: 0.5em;
-		display: flex;
-		flex-direction: column;
-		gap: 1em;
-
-		span {
-			display: flex;
-			gap: 1em;
-			align-items: center;
-			justify-content: center;
-		}
-
-		button {
-			width: min-content !important;
-		}
 	}
 
 	.participants {
@@ -402,8 +392,7 @@
 			}
 		}
 
-		p:hover,
-		.active {
+		p:hover {
 			filter: grayscale(1);
 		}
 
@@ -415,15 +404,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2em;
-	}
-
-	.nickname {
-		display: flex;
-		gap: 1em;
-		align-items: center;
-		p {
-			min-width: 5em;
-		}
 	}
 
 	input[type='color'] {
@@ -492,5 +472,35 @@
 		border-radius: 50%;
 		position: relative;
 		z-index: 1;
+	}
+
+	.animation-input-section {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		input {
+			flex: 1;
+		}
+
+		.gif-search-btn {
+			background-color: var(--primary-500);
+			color: white;
+			border: none;
+			padding: 0.5rem 1rem;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-size: 0.9rem;
+			white-space: nowrap;
+			transition: background-color 0.2s;
+
+			&:hover {
+				background-color: var(--primary-600);
+			}
+
+			&:active {
+				background-color: var(--primary-700);
+			}
+		}
 	}
 </style>
