@@ -21,6 +21,7 @@
 	import Rain from '$lib/components/Rain.svelte';
 	import ProgrammedDate from '$lib/components/ProgrammedDate.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
+	import TruckToFood from '$lib/components/TruckToFood.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -497,9 +498,14 @@
 			recapSections.push('qwertee');
 		}
 
-		// Ajouter EuroMillion si activé
-		if ($user.euromillion) {
+		// Ajouter EuroMillion si activé et c'est un jour sélectionné
+		const currentDay = new Date().getDay();
+		if ($user.euromillion?.enabled && ($user.euromillion?.days || []).includes(currentDay)) {
 			recapSections.push('euromillion');
+		}
+
+		if ($user?.truckToFood?.enabled && ($user?.truckToFood?.days || []).includes(currentDay)) {
+			recapSections.push('truckToFood');
 		}
 
 		currentRecapSection = 0;
@@ -796,6 +802,16 @@
 						</div>
 						<div class="widget-content euromillion-container">
 							<EuroMillion />
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'truckToFood'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-truck"></i> Truck to Food</h2>
+							<p>Menu de la semaine</p>
+						</div>
+						<div class="widget-content truck-food-container">
+							<TruckToFood />
 						</div>
 					</div>
 				{:else if recapSections[currentRecapSection] === 'programmedDates'}

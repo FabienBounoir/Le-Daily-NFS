@@ -18,8 +18,9 @@ class UserService {
 	 *  users: object[];
 	 *  weather: string[]
 	 *  qwertee: boolean;
-	 *  euromillion: boolean;
+	 *  euromillion: object;
 	 *  programmedDates: object[];
+	 *  truckToFood: object;
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -81,7 +82,18 @@ class UserService {
 					user.qwertee = false;
 				}
 				if (user.euromillion === undefined) {
-					user.euromillion = false;
+					user.euromillion = { enabled: false, days: [] };
+				}
+				// Migration: convertir ancien boolean vers nouvelle structure
+				if (typeof user.euromillion === 'boolean') {
+					user.euromillion = { enabled: user.euromillion, days: [] };
+				}
+				if (!user.truckToFood) {
+					user.truckToFood = { enabled: false, days: [] };
+				}
+				// Migration: ajouter les jours si manquant
+				if (user.truckToFood && !user.truckToFood.days) {
+					user.truckToFood.days = [];
 				}
 				return user;
 			});
@@ -109,8 +121,9 @@ class UserService {
 			users: [],
 			weather: [],
 			qwertee: false,
-			euromillion: false,
-			programmedDates: []
+			euromillion: { enabled: false, days: [] },
+			programmedDates: [],
+			truckToFood: { enabled: false, days: [] }
 		});
 	}
 

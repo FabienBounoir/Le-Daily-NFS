@@ -263,15 +263,128 @@
 		<h1>EuroMillion</h1>
 		<p>Afficher le tirage EuroMillion du jour dans vos daily:</p>
 		<button
-			on:click={() => user.change({ ...$user, euromillion: !$user.euromillion })}
-			class:disabled={!$user.euromillion}
+			on:click={() => user.change({ 
+				...$user, 
+				euromillion: { 
+					...$user.euromillion, 
+					enabled: !($user.euromillion?.enabled || false) 
+				} 
+			})}
+			class:disabled={!($user.euromillion?.enabled || false)}
 		>
-			{#if $user.euromillion}
+			{#if $user.euromillion?.enabled}
 				Status: Activé
 			{:else}
 				Status: Désactivé
 			{/if}
 		</button>
+
+		{#if $user.euromillion?.enabled}
+			<div class="days-selector">
+				<h3>Jours d'affichage :</h3>
+				<p>Sélectionnez les jours où afficher le tirage EuroMillion :</p>
+				<div class="days-grid">
+					{#each [
+						{ key: 'monday', label: 'Lundi', value: 1 },
+						{ key: 'tuesday', label: 'Mardi', value: 2 },
+						{ key: 'wednesday', label: 'Mercredi', value: 3 },
+						{ key: 'thursday', label: 'Jeudi', value: 4 },
+						{ key: 'friday', label: 'Vendredi', value: 5 },
+						{ key: 'saturday', label: 'Samedi', value: 6 },
+						{ key: 'sunday', label: 'Dimanche', value: 0 }
+					] as day}
+						<button
+							type="button"
+							class="day-button"
+							class:selected={($user.euromillion?.days || []).includes(day.value)}
+							on:click={() => {
+								const currentDays = $user.euromillion?.days || [];
+								const newDays = currentDays.includes(day.value)
+									? currentDays.filter(d => d !== day.value)
+									: [...currentDays, day.value];
+								user.change({
+									...$user,
+									euromillion: {
+										...$user.euromillion,
+										enabled: $user.euromillion?.enabled || false,
+										days: newDays
+									}
+								});
+							}}
+						>
+							{day.label}
+						</button>
+					{/each}
+				</div>
+				{#if ($user.euromillion?.days || []).length === 0}
+					<p class="warning">⚠️ Aucun jour sélectionné - EuroMillion ne s'affichera jamais</p>
+				{/if}
+			</div>
+		{/if}
+	</div>
+
+	<div class="container">
+		<h1>Truck to Food</h1>
+		<p>Afficher le menu du jour Truck to Food dans les statistiques de fin:</p>
+		<button
+			on:click={() => user.change({ 
+				...$user, 
+				truckToFood: { 
+					...$user.truckToFood, 
+					enabled: !($user.truckToFood?.enabled || false) 
+				} 
+			})}
+			class:disabled={!($user.truckToFood?.enabled || false)}
+		>
+			{#if $user.truckToFood?.enabled}
+				Status: Activé
+			{:else}
+				Status: Désactivé
+			{/if}
+		</button>
+
+		{#if $user.truckToFood?.enabled}
+			<div class="days-selector">
+				<h3>Jours d'affichage :</h3>
+				<p>Sélectionnez les jours où afficher le menu Truck to Food :</p>
+				<div class="days-grid">
+					{#each [
+						{ key: 'monday', label: 'Lundi', value: 1 },
+						{ key: 'tuesday', label: 'Mardi', value: 2 },
+						{ key: 'wednesday', label: 'Mercredi', value: 3 },
+						{ key: 'thursday', label: 'Jeudi', value: 4 },
+						{ key: 'friday', label: 'Vendredi', value: 5 },
+						{ key: 'saturday', label: 'Samedi', value: 6 },
+						{ key: 'sunday', label: 'Dimanche', value: 0 }
+					] as day}
+						<button
+							type="button"
+							class="day-button"
+							class:selected={($user.truckToFood?.days || []).includes(day.value)}
+							on:click={() => {
+								const currentDays = $user.truckToFood?.days || [];
+								const newDays = currentDays.includes(day.value)
+									? currentDays.filter(d => d !== day.value)
+									: [...currentDays, day.value];
+								user.change({
+									...$user,
+									truckToFood: {
+										...$user.truckToFood,
+										enabled: $user.truckToFood?.enabled || false,
+										days: newDays
+									}
+								});
+							}}
+						>
+							{day.label}
+						</button>
+					{/each}
+				</div>
+				{#if ($user.truckToFood?.days || []).length === 0}
+					<p class="warning">⚠️ Aucun jour sélectionné - Truck to Food ne s'affichera jamais</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<div class="container">
@@ -493,7 +606,8 @@
 						timer,
 						programmedDates: $user.programmedDates || [],
 						color,
-						euromillion: $user.euromillion || false
+						euromillion: $user.euromillion || { enabled: false, days: [] },
+						truckToFood: $user.truckToFood || { enabled: false, days: [] }
 					};
 
 					console.log('Données à sauvegarder:', dataToSave);
@@ -849,6 +963,73 @@
 
 		.date-form {
 			background: linear-gradient(135deg, #cffafe 0%, #67e8f9 5%, white 5%);
+		}
+	}
+
+	.days-selector {
+		margin-top: 1.5rem;
+		padding: 1.5rem;
+		background: rgba(var(--primary-100-rgb), 0.1);
+		border-radius: 0.75rem;
+		border: 1px solid rgba(var(--primary-200-rgb), 0.3);
+
+		h3 {
+			margin: 0 0 0.5rem 0;
+			color: var(--primary-700);
+			font-size: 1.1rem;
+			font-weight: 600;
+		}
+
+		p {
+			margin: 0 0 1rem 0;
+			color: var(--primary-600);
+			font-size: 0.9rem;
+		}
+
+		.days-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+			gap: 0.75rem;
+			margin-bottom: 1rem;
+		}
+
+		.day-button {
+			padding: 0.75rem 1rem;
+			border: 2px solid var(--primary-200);
+			background: white;
+			color: var(--primary-600);
+			border-radius: 0.5rem;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			font-weight: 500;
+			font-size: 0.9rem;
+
+			&:hover {
+				border-color: var(--primary-400);
+				background: var(--primary-50);
+			}
+
+			&.selected {
+				background: var(--primary-500);
+				border-color: var(--primary-500);
+				color: white;
+				box-shadow: 0 2px 8px rgba(var(--primary-500-rgb), 0.3);
+
+				&:hover {
+					background: var(--primary-600);
+					border-color: var(--primary-600);
+				}
+			}
+		}
+
+		.warning {
+			color: #d97706;
+			font-size: 0.85rem;
+			margin: 0;
+			padding: 0.75rem;
+			background: rgba(251, 191, 36, 0.1);
+			border-radius: 0.5rem;
+			border-left: 3px solid #d97706;
 		}
 	}
 
