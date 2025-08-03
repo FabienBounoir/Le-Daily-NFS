@@ -263,13 +263,14 @@
 		<h1>EuroMillion</h1>
 		<p>Afficher le tirage EuroMillion du jour dans vos daily:</p>
 		<button
-			on:click={() => user.change({ 
-				...$user, 
-				euromillion: { 
-					...$user.euromillion, 
-					enabled: !($user.euromillion?.enabled || false) 
-				} 
-			})}
+			on:click={() =>
+				user.change({
+					...$user,
+					euromillion: {
+						...$user.euromillion,
+						enabled: !($user.euromillion?.enabled || false)
+					}
+				})}
 			class:disabled={!($user.euromillion?.enabled || false)}
 		>
 			{#if $user.euromillion?.enabled}
@@ -284,15 +285,7 @@
 				<h3>Jours d'affichage :</h3>
 				<p>Sélectionnez les jours où afficher le tirage EuroMillion :</p>
 				<div class="days-grid">
-					{#each [
-						{ key: 'monday', label: 'Lundi', value: 1 },
-						{ key: 'tuesday', label: 'Mardi', value: 2 },
-						{ key: 'wednesday', label: 'Mercredi', value: 3 },
-						{ key: 'thursday', label: 'Jeudi', value: 4 },
-						{ key: 'friday', label: 'Vendredi', value: 5 },
-						{ key: 'saturday', label: 'Samedi', value: 6 },
-						{ key: 'sunday', label: 'Dimanche', value: 0 }
-					] as day}
+					{#each [{ key: 'monday', label: 'Lundi', value: 1 }, { key: 'tuesday', label: 'Mardi', value: 2 }, { key: 'wednesday', label: 'Mercredi', value: 3 }, { key: 'thursday', label: 'Jeudi', value: 4 }, { key: 'friday', label: 'Vendredi', value: 5 }, { key: 'saturday', label: 'Samedi', value: 6 }, { key: 'sunday', label: 'Dimanche', value: 0 }] as day}
 						<button
 							type="button"
 							class="day-button"
@@ -300,7 +293,7 @@
 							on:click={() => {
 								const currentDays = $user.euromillion?.days || [];
 								const newDays = currentDays.includes(day.value)
-									? currentDays.filter(d => d !== day.value)
+									? currentDays.filter((d) => d !== day.value)
 									: [...currentDays, day.value];
 								user.change({
 									...$user,
@@ -327,13 +320,14 @@
 		<h1>Truck to Food</h1>
 		<p>Afficher le menu du jour Truck to Food dans les statistiques de fin:</p>
 		<button
-			on:click={() => user.change({ 
-				...$user, 
-				truckToFood: { 
-					...$user.truckToFood, 
-					enabled: !($user.truckToFood?.enabled || false) 
-				} 
-			})}
+			on:click={() =>
+				user.change({
+					...$user,
+					truckToFood: {
+						...$user.truckToFood,
+						enabled: !($user.truckToFood?.enabled || false)
+					}
+				})}
 			class:disabled={!($user.truckToFood?.enabled || false)}
 		>
 			{#if $user.truckToFood?.enabled}
@@ -348,15 +342,7 @@
 				<h3>Jours d'affichage :</h3>
 				<p>Sélectionnez les jours où afficher le menu Truck to Food :</p>
 				<div class="days-grid">
-					{#each [
-						{ key: 'monday', label: 'Lundi', value: 1 },
-						{ key: 'tuesday', label: 'Mardi', value: 2 },
-						{ key: 'wednesday', label: 'Mercredi', value: 3 },
-						{ key: 'thursday', label: 'Jeudi', value: 4 },
-						{ key: 'friday', label: 'Vendredi', value: 5 },
-						{ key: 'saturday', label: 'Samedi', value: 6 },
-						{ key: 'sunday', label: 'Dimanche', value: 0 }
-					] as day}
+					{#each [{ key: 'monday', label: 'Lundi', value: 1 }, { key: 'tuesday', label: 'Mardi', value: 2 }, { key: 'wednesday', label: 'Mercredi', value: 3 }, { key: 'thursday', label: 'Jeudi', value: 4 }, { key: 'friday', label: 'Vendredi', value: 5 }, { key: 'saturday', label: 'Samedi', value: 6 }, { key: 'sunday', label: 'Dimanche', value: 0 }] as day}
 						<button
 							type="button"
 							class="day-button"
@@ -364,7 +350,7 @@
 							on:click={() => {
 								const currentDays = $user.truckToFood?.days || [];
 								const newDays = currentDays.includes(day.value)
-									? currentDays.filter(d => d !== day.value)
+									? currentDays.filter((d) => d !== day.value)
 									: [...currentDays, day.value];
 								user.change({
 									...$user,
