@@ -22,6 +22,7 @@
 	import ProgrammedDate from '$lib/components/ProgrammedDate.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 	import TruckToFood from '$lib/components/TruckToFood.svelte';
+	import FeteDuJour from '$lib/components/FeteDuJour.svelte';
 
 	let audio = null;
 	let openMenu = false;
@@ -508,6 +509,9 @@
 			recapSections.push('truckToFood');
 		}
 
+		// Ajouter la section Fête du Jour + Question culture générale (toujours visible)
+		recapSections.push('feteDuJour');
+
 		currentRecapSection = 0;
 
 		recapInterval = setInterval(() => {
@@ -756,7 +760,7 @@
 													? 'chart-line'
 													: data.progression >= -5
 														? 'minus'
-														: 'chart-line-down'}"
+														: 'angles-down'}"
 											></i>
 										</div>
 										<div class="stat-info">
@@ -822,6 +826,16 @@
 						</div>
 						<div class="widget-content">
 							<ProgrammedDate />
+						</div>
+					</div>
+				{:else if recapSections[currentRecapSection] === 'feteDuJour'}
+					<div class="recap-widget" in:fly={{ duration: 300, x: 50, opacity: 0 }}>
+						<div class="widget-header">
+							<h2><i class="fa-solid fa-star"></i> Fête du jour & Culture</h2>
+							<p>Prochaine fête française et question culture générale quotidienne</p>
+						</div>
+						<div class="widget-content fete-du-jour-container">
+							<FeteDuJour />
 						</div>
 					</div>
 				{/if}
@@ -1882,5 +1896,12 @@
 	// Styles pour la section des dates programmées
 	.programmed-dates-section {
 		margin-top: 2rem;
+	}
+
+	// Styles pour la section Fête du jour
+	.fete-du-jour-container {
+		padding: 0;
+		overflow: hidden;
+		border-radius: 1rem;
 	}
 </style>
