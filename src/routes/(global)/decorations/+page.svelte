@@ -23,23 +23,6 @@
 		return `https://api.dicebear.com/7.x/avataaars/svg?seed=${decorationValue}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&radius=50`;
 	}
 
-	// Décorations populaires en premier
-	const popularDecorations = [
-		'angel',
-		'cat_ears',
-		'devil',
-		'fire',
-		'lightning',
-		'butterflies',
-		'flower_clouds',
-		'stardust',
-		'hugh_the_rainbow',
-		'sunflowers',
-		'snowfall',
-		'pirate_captain',
-		'confetti_festive'
-	];
-
 	$: filteredDecorations =
 		searchTerm.trim() === ''
 			? allDecorations
@@ -49,44 +32,46 @@
 
 	async function loadAllDecorations() {
 		try {
-			const response = await fetch(
-				'https://api.github.com/repos/ItsPi3141/discord-fake-avatar-decorations/contents/public/decorations'
-			);
-			const files = await response.json();
+			const response = await fetch('/_api/tools/decorations');
+			const data = await response.json();
 
-			if (Array.isArray(files)) {
-				const decorations = files
-					.filter((file) => file.name.endsWith('.png'))
-					.map((file) => ({
-						name: formatDecorationName(file.name.replace('.png', '')),
-						value: file.name.replace('.png', ''),
-						url: `${DECORATION_BASE_URL}${file.name}`
-					}));
+			if (data.success && Array.isArray(data.decorations)) {
+				allDecorations = data.decorations.map((decoration) => ({
+					name: decoration.formattedName,
+					value: decoration.name,
+					url: `${DECORATION_BASE_URL}${decoration.name}.png`
+				}));
 
-				// Trier avec les populaires en premier
-				const popular = decorations.filter((d) => popularDecorations.includes(d.value));
-				const others = decorations.filter((d) => !popularDecorations.includes(d.value));
-
-				allDecorations = [
-					...popular.sort((a, b) => a.name.localeCompare(b.name)),
-					...others.sort((a, b) => a.name.localeCompare(b.name))
-				];
+				if (data.fallback) {
+					console.warn('API GitHub indisponible, utilisation du fallback');
+				}
 
 				// Charger les premiers éléments automatiquement
 				loadMoreItems();
+			} else {
+				throw new Error(data.error || 'Réponse invalide du serveur');
 			}
 		} catch (error) {
 			console.warn('Erreur lors du chargement des décorations:', error);
+			// Fallback en cas d'erreur
+			allDecorations = [
+				{ name: 'Angel', value: 'angel', url: `${DECORATION_BASE_URL}angel.png` },
+				{ name: 'Cat Ears', value: 'cat_ears', url: `${DECORATION_BASE_URL}cat_ears.png` },
+				{ name: 'Devil', value: 'devil', url: `${DECORATION_BASE_URL}devil.png` },
+				{ name: 'Fire', value: 'fire', url: `${DECORATION_BASE_URL}fire.png` },
+				{ name: 'Lightning', value: 'lightning', url: `${DECORATION_BASE_URL}lightning.png` },
+				{ name: 'Butterflies', value: 'butterflies', url: `${DECORATION_BASE_URL}butterflies.png` },
+				{ name: 'Flower Clouds', value: 'flower_clouds', url: `${DECORATION_BASE_URL}flower_clouds.png` },
+				{ name: 'Stardust', value: 'stardust', url: `${DECORATION_BASE_URL}stardust.png` },
+				{ name: 'Hugh The Rainbow', value: 'hugh_the_rainbow', url: `${DECORATION_BASE_URL}hugh_the_rainbow.png` },
+				{ name: 'Sunflowers', value: 'sunflowers', url: `${DECORATION_BASE_URL}sunflowers.png` },
+				{ name: 'Snowfall', value: 'snowfall', url: `${DECORATION_BASE_URL}snowfall.png` },
+				{ name: 'Pirate Captain', value: 'pirate_captain', url: `${DECORATION_BASE_URL}pirate_captain.png` }
+			];
+			loadMoreItems();
 		} finally {
 			loading = false;
 		}
-	}
-
-	function formatDecorationName(filename) {
-		return filename
-			.split('_')
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
 	}
 
 	function loadMoreItems() {

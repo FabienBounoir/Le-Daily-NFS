@@ -708,7 +708,7 @@
 											<h3>Streak ponctualité</h3>
 											<p class="stat-value">{data.streak}</p>
 											<p class="stat-detail">
-												daily{data.streak > 1 ? 's' : ''} consécutif{data.streak > 1 ? 's' : ''} ≤ 10min
+												daily{data.streak > 1 ? 's' : ''} consécutif{data.streak > 1 ? 's' : ''} ≤ 15min
 											</p>
 										</div>
 									</div>
@@ -738,7 +738,7 @@
 										<div class="stat-info">
 											<h3>Score de ponctualité</h3>
 											<p class="stat-value">{Math.round(data.ponctualite)}%</p>
-											<p class="stat-detail">de dailys terminés en moins de 10min</p>
+											<p class="stat-detail">de dailys terminés en moins de 15min</p>
 										</div>
 									</div>
 
@@ -994,7 +994,7 @@
 			}
 			goto('/daily');
 		}}
-		class="fa-solid fa-rectangle-xmark close-daily"
+		class="fa-solid fa-times close-daily"
 		style={dailyMng.state == 'ENDED' ? 'cursor: pointer;' : ''}
 	></i>
 </section>
@@ -1037,7 +1037,7 @@
 		cursor: no-drop;
 		transition: all 0.3s ease;
 		z-index: 1000;
-		background: rgba(255, 255, 255, 0.2);
+		background: rgba(0, 0, 0, 0.7);
 		border: 2px solid rgba(255, 255, 255, 0.3);
 		border-radius: 50%;
 		width: 50px;
@@ -1049,7 +1049,7 @@
 		backdrop-filter: blur(10px);
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.3);
+			background: rgba(0, 0, 0, 0.9);
 			transform: scale(1.1);
 			cursor: pointer;
 		}

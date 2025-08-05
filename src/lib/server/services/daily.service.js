@@ -152,7 +152,7 @@ class DailyService {
 			}
 		]).toArray();
 
-		// Score de ponctualité - pourcentage de dailys terminés en moins de X temps (par exemple 10 minutes = 600 secondes)
+		// Score de ponctualité - pourcentage de dailys terminés en moins de X temps (par exemple 15 minutes = 900 secondes)
 		const ponctualite = await this.#collection.aggregate([
 			{
 				$match: { team }
@@ -163,7 +163,7 @@ class DailyService {
 					totalDailys: { $sum: 1 },
 					punctualDailys: {
 						$sum: {
-							$cond: [{ $lte: ["$totalTime", 600] }, 1, 0]
+							$cond: [{ $lte: ["$totalTime", 900] }, 1, 0]
 						}
 					}
 				}
@@ -226,14 +226,14 @@ class DailyService {
 			progression = Math.max(-100, Math.min(100, progression));
 		}
 
-		// Streak - calculer les jours consécutifs sans dépassement (plus de 10 minutes)
+		// Streak - calculer les jours consécutifs sans dépassement (plus de 15 minutes)
 		const allDailys = await this.#collection.find({ team })
 			.sort({ date: -1 })
 			.toArray();
 
 		let streak = 0;
 		for (const daily of allDailys) {
-			if (daily.totalTime <= 600) {
+			if (daily.totalTime <= 900) {
 				streak++;
 			} else {
 				break;

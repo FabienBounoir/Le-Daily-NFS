@@ -34,7 +34,7 @@
 					const type = dateModule.type || 'regular';
 
 					if (type === 'recurring') {
-						return true;
+						return isTodayRecurringDay(dateModule.weekday);
 					}
 
 					if (!dateModule.date) return false;
@@ -211,17 +211,6 @@
 			border-left-color: #06b6d4;
 			background: linear-gradient(135deg, #cffafe 0%, #67e8f9 5%, white 5%);
 			position: relative;
-
-			&::before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 2px;
-				background: linear-gradient(90deg, #06b6d4, rgba(6, 182, 212, 0.3));
-				border-radius: 0.75rem 0.75rem 0 0;
-			}
 		}
 	}
 

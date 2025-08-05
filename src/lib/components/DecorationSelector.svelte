@@ -13,23 +13,6 @@
 	let loading = true;
 	let searchTerm = '';
 
-	// Décorations populaires toujours affichées en premier
-	const popularDecorations = [
-		'angel',
-		'cat_ears',
-		'devil',
-		'fire',
-		'lightning',
-		'butterflies',
-		'flower_clouds',
-		'stardust',
-		'hugh_the_rainbow',
-		'sunflowers',
-		'snowfall',
-		'pirate_captain',
-		'confetti_festive'
-	];
-
 	/** @type {Array<{name: string, value: string | null}>} */
 	$: filteredDecorations = decorations.filter((decoration) =>
 		decoration.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,28 +20,25 @@
 
 	async function loadAllDecorations() {
 		try {
-			const response = await fetch(
-				'https://api.github.com/repos/ItsPi3141/discord-fake-avatar-decorations/contents/public/decorations'
-			);
-			const files = await response.json();
+			const response = await fetch('/_api/tools/decorations');
+			const data = await response.json();
 
-			if (Array.isArray(files)) {
-				const allDecorations = files
-					.filter((file) => file.name.endsWith('.png'))
-					.map((file) => ({
-						name: formatDecorationName(file.name.replace('.png', '')),
-						value: file.name.replace('.png', '')
-					}));
-
-				// Trier avec les populaires en premier
-				const popular = allDecorations.filter((d) => popularDecorations.includes(d.value));
-				const others = allDecorations.filter((d) => !popularDecorations.includes(d.value));
+			if (data.success && Array.isArray(data.decorations)) {
+				const allDecorations = data.decorations.map((decoration) => ({
+					name: decoration.formattedName,
+					value: decoration.name
+				}));
 
 				decorations = [
 					{ name: 'Aucune', value: null },
-					...popular.sort((a, b) => a.name.localeCompare(b.name)),
-					...others.sort((a, b) => a.name.localeCompare(b.name))
+					...allDecorations
 				];
+
+				if (data.fallback) {
+					console.warn('API GitHub indisponible, utilisation du fallback');
+				}
+			} else {
+				throw new Error(data.error || 'Réponse invalide du serveur');
 			}
 		} catch (error) {
 			console.warn('Erreur lors du chargement des décorations:', error);
@@ -81,13 +61,6 @@
 		} finally {
 			loading = false;
 		}
-	}
-
-	function formatDecorationName(filename) {
-		return filename
-			.split('_')
-			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-			.join(' ');
 	}
 
 	onMount(() => {
