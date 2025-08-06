@@ -1,5 +1,6 @@
 <script>
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
+	import { decorationsStore } from '$lib/stores/decorations.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -8,64 +9,22 @@
 	/** @type {boolean} */
 	export let isOpen = false;
 
-	/** @type {Array<{name: string, value: string | null}>} */
-	let decorations = [{ name: 'Aucune', value: null }];
-	let loading = true;
 	let searchTerm = '';
+
+	$: decorationsData = $decorationsStore;
+	$: loading = decorationsData.loading;
+	$: decorations = [
+		{ name: 'Aucune', value: null },
+		...decorationsData.decorations.map((decoration) => ({
+			name: decoration.formattedName,
+			value: decoration.name
+		}))
+	];
 
 	/** @type {Array<{name: string, value: string | null}>} */
 	$: filteredDecorations = decorations.filter((decoration) =>
 		decoration.name.toLowerCase().includes(searchTerm.toLowerCase())
 	);
-
-	async function loadAllDecorations() {
-		try {
-			const response = await fetch('/_api/tools/decorations');
-			const data = await response.json();
-
-			if (data.success && Array.isArray(data.decorations)) {
-				const allDecorations = data.decorations.map((decoration) => ({
-					name: decoration.formattedName,
-					value: decoration.name
-				}));
-
-				decorations = [
-					{ name: 'Aucune', value: null },
-					...allDecorations
-				];
-
-				if (data.fallback) {
-					console.warn('API GitHub indisponible, utilisation du fallback');
-				}
-			} else {
-				throw new Error(data.error || 'Réponse invalide du serveur');
-			}
-		} catch (error) {
-			console.warn('Erreur lors du chargement des décorations:', error);
-			// Fallback sur les décorations populaires en cas d'erreur
-			decorations = [
-				{ name: 'Aucune', value: null },
-				{ name: 'Angel', value: 'angel' },
-				{ name: 'Cat Ears', value: 'cat_ears' },
-				{ name: 'Devil', value: 'devil' },
-				{ name: 'Fire', value: 'fire' },
-				{ name: 'Lightning', value: 'lightning' },
-				{ name: 'Butterflies', value: 'butterflies' },
-				{ name: 'Flowers', value: 'flower_clouds' },
-				{ name: 'Stars', value: 'stardust' },
-				{ name: 'Rainbow', value: 'hugh_the_rainbow' },
-				{ name: 'Sunflowers', value: 'sunflowers' },
-				{ name: 'Snowflake', value: 'snowfall' },
-				{ name: 'Pirate', value: 'pirate_captain' }
-			];
-		} finally {
-			loading = false;
-		}
-	}
-
-	onMount(() => {
-		loadAllDecorations();
-	});
 
 	const DECORATION_BASE_URL =
 		'https://raw.githubusercontent.com/ItsPi3141/discord-fake-avatar-decorations/main/public/decorations/';

@@ -1,5 +1,11 @@
 import { json } from '@sveltejs/kit';
 
+/** @type {Array<{name: string, formattedName: string, downloadUrl: string, size: number}> | null} */
+let decorationsCache = null;
+/** @type {number | null} */
+let cacheTimestamp = null;
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
+
 // Décorations populaires triées en premier
 const popularDecorations = [
 	'angel',
@@ -16,6 +22,26 @@ const popularDecorations = [
 	'pirate_captain',
 	'confetti_festive'
 ];
+
+/**
+ * Vérifie si le cache est encore valide
+ * @returns {boolean}
+ */
+function isCacheValid() {
+	if (!decorationsCache || !cacheTimestamp) {
+		return false;
+	}
+	return Date.now() - cacheTimestamp < CACHE_DURATION;
+}
+
+/**
+ * Met à jour le cache avec de nouvelles données
+ * @param {Array<{name: string, formattedName: string, downloadUrl: string, size: number}>} decorations
+ */
+function updateCache(decorations) {
+	decorationsCache = decorations;
+	cacheTimestamp = Date.now();
+}
 
 /**
  * Formate le nom d'une décoration
@@ -47,6 +73,17 @@ function sortDecorations(decorations) {
 
 export async function GET() {
 	try {
+		if (isCacheValid()) {
+			console.log('Utilisation du cache pour les décorations');
+			return json({
+				success: true,
+				decorations: decorationsCache,
+				count: decorationsCache?.length || 0,
+				cached: true
+			});
+		}
+
+		console.log('Récupération des décorations depuis l\'API GitHub');
 		const response = await fetch(
 			'https://api.github.com/repos/ItsPi3141/discord-fake-avatar-decorations/contents/public/decorations',
 			{
@@ -82,13 +119,27 @@ export async function GET() {
 		// Trier avec les populaires en premier
 		const sortedDecorations = sortDecorations(decorations);
 
+		updateCache(sortedDecorations);
+
 		return json({
 			success: true,
 			decorations: sortedDecorations,
-			count: sortedDecorations.length
+			count: sortedDecorations.length,
+			cached: false
 		});
 	} catch (error) {
 		console.error('Erreur lors de la récupération des décorations:', error);
+
+		if (decorationsCache) {
+			return json({
+				success: true,
+				decorations: decorationsCache,
+				count: decorationsCache.length,
+				cached: true,
+				expired: true,
+				warning: 'Données du cache utilisées suite à une erreur API'
+			});
+		}
 
 		// Fallback avec une liste de décorations populaires
 		const fallbackDecorations = [

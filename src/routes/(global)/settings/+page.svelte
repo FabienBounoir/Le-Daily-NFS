@@ -1,5 +1,6 @@
 <script>
 	import { updated } from '$app/stores';
+	import { onMount } from 'svelte';
 	import Weather from '$lib/components/Weather.svelte';
 	import myshades from '$lib/myshades';
 	import { snacks } from '$lib/stores/snacks';
@@ -8,11 +9,16 @@
 	import DecorationSelector from '$lib/components/DecorationSelector.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 	import GifSearcher from '$lib/components/GifSearcher.svelte';
+	import { loadDecorations } from '$lib/stores/decorations.js';
 
 	let color = $user.color;
 	let timer = $user.timer;
 	let showGifSearcher = false;
 	let currentEditingUserIndex = null;
+
+	onMount(() => {
+		loadDecorations();
+	});
 
 	$: color &&
 		myshades({
