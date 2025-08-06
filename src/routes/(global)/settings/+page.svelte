@@ -50,6 +50,22 @@
 		currentEditingUserIndex = null;
 	}
 
+	function testPronunciation(nickname, userName) {
+		const textToSpeak = nickname || userName;
+		if (textToSpeak && 'speechSynthesis' in window) {
+			speechSynthesis.cancel();
+
+			const utterance = new SpeechSynthesisUtterance(textToSpeak);
+			utterance.lang = 'fr-FR';
+			utterance.rate = 0.8;
+			utterance.pitch = 1;
+
+			speechSynthesis.speak(utterance);
+		} else {
+			alert("La synthèse vocale n'est pas supportée par votre navigateur");
+		}
+	}
+
 	function addProgrammedDate(isRecurring = false) {
 		const newDate = isRecurring
 			? {
@@ -413,14 +429,25 @@
 						}}
 					/>
 
-					<label>Nickname:</label>
-					<input
-						type="text"
-						bind:value={user.nickname}
-						on:keyup={() => {
-							updateElementWithIndex(user.nickname, user.name, 'nickname');
-						}}
-					/>
+					<label>Voice Pronunciation:</label>
+					<div class="voice-input-section">
+						<input
+							type="text"
+							bind:value={user.nickname}
+							placeholder="Prononciation personnalisée"
+							on:keyup={() => {
+								updateElementWithIndex(user.nickname, user.name, 'nickname');
+							}}
+						/>
+						<button
+							type="button"
+							class="voice-test-btn"
+							on:click={() => testPronunciation(user.nickname, user.name)}
+							title="Tester la prononciation"
+						>
+							<i class="fa-solid fa-volume-high"></i>
+						</button>
+					</div>
 
 					<label>Animation:</label>
 					<div class="animation-input-section">
@@ -785,6 +812,40 @@
 			cursor: pointer;
 			font-size: 0.9rem;
 			white-space: nowrap;
+			transition: background-color 0.2s;
+
+			&:hover {
+				background-color: var(--primary-600);
+			}
+
+			&:active {
+				background-color: var(--primary-700);
+			}
+		}
+	}
+
+	.voice-input-section {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		input {
+			flex: 1;
+		}
+
+		.voice-test-btn {
+			background-color: var(--primary-500);
+			color: white;
+			border: none;
+			padding: 0.5rem;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-size: 1.2rem;
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			transition: background-color 0.2s;
 
 			&:hover {
