@@ -139,6 +139,7 @@
 				flex-direction: row;
 				justify-content: space-between;
 				width: -webkit-fill-available;
+				width: -moz-available;
 				padding: 0.5em;
 
 				& > div {
@@ -195,6 +196,7 @@
 					background-color: var(--primary-300);
 					border: 1px solid var(--primary-600);
 					width: -webkit-fill-available;
+					width: -moz-available;
 					text-align: center;
 					display: flex;
 					flex-direction: column;

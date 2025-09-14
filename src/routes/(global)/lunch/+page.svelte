@@ -32,6 +32,7 @@
 		width: 100%;
 		object-fit: cover;
 		width: -webkit-fill-available;
+		width: -moz-available;
 		max-height: 75vh;
 		border-radius: 0.5em;
 	}
