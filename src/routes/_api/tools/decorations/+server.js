@@ -85,7 +85,7 @@ export async function GET() {
 
 		console.log('Récupération des décorations depuis l\'API GitHub');
 		const response = await fetch(
-			'https://api.github.com/repos/ItsPi3141/discord-fake-avatar-decorations/contents/public/decorations',
+			'https://api.github.com/repos/fabienbounoir/avatar-decorations/contents/public/decorations',
 			{
 				headers: {
 					'User-Agent': 'Le-Daily-NFS-App',

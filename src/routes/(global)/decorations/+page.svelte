@@ -16,7 +16,7 @@
 	let scrollContainer;
 
 	const DECORATION_BASE_URL =
-		'https://raw.githubusercontent.com/ItsPi3141/discord-fake-avatar-decorations/main/public/decorations/';
+		'https://raw.githubusercontent.com/fabienbounoir/avatar-decorations/main/public/decorations/';
 
 	// Fonction pour générer l'URL de l'avatar DiceBear
 	function getAvatarUrl(decorationValue) {
