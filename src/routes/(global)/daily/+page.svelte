@@ -3,6 +3,8 @@
 	import { user } from '$lib/stores/user';
 	import { onMount } from 'svelte';
 
+	const DAILY_START_SETTINGS_KEY = 'daily-start-settings';
+
 	let users = $user.users;
 
 	let timeByUser = $user.timer || 120;
@@ -14,11 +16,33 @@
 
 	let fullScreen = true;
 
+	const persistDailyStartSettings = () => {
+		window.localStorage.setItem(
+			DAILY_START_SETTINGS_KEY,
+			JSON.stringify({ randomized, voiceSynthesis, animationSpeakers, fullScreen })
+		);
+	};
+
 	onMount(() => {
 		if (window.localStorage.getItem('daily')) {
 			const daily = JSON.parse(window.localStorage.getItem('daily'));
 			if (daily.state === 'IN_PROGRESS') {
 				dailyExists = true;
+			}
+		}
+
+		const settings = window.localStorage.getItem(DAILY_START_SETTINGS_KEY);
+		if (settings) {
+			try {
+				const parsedSettings = JSON.parse(settings);
+				if (typeof parsedSettings.randomized === 'boolean') randomized = parsedSettings.randomized;
+				if (typeof parsedSettings.voiceSynthesis === 'boolean')
+					voiceSynthesis = parsedSettings.voiceSynthesis;
+				if (typeof parsedSettings.animationSpeakers === 'boolean')
+					animationSpeakers = parsedSettings.animationSpeakers;
+				if (typeof parsedSettings.fullScreen === 'boolean') fullScreen = parsedSettings.fullScreen;
+			} catch (e) {
+				console.error(e);
 			}
 		}
 	});
@@ -114,13 +138,19 @@
 		<div style="display: flex; flex-direction: row; gap: 1em;">
 			<div
 				class={'toggler' + (randomized ? '' : ' disabled')}
-				on:click={() => (randomized = !randomized)}
+				on:click={() => {
+					randomized = !randomized;
+					persistDailyStartSettings();
+				}}
 			>
 				<p>{randomized ? 'Ordre des participants: aléatoire' : 'Ordre des participants: fixe'}</p>
 			</div>
 			<div
 				class={'toggler' + (voiceSynthesis ? '' : ' disabled')}
-				on:click={() => (voiceSynthesis = !voiceSynthesis)}
+				on:click={() => {
+					voiceSynthesis = !voiceSynthesis;
+					persistDailyStartSettings();
+				}}
 			>
 				<p>
 					{voiceSynthesis ? 'Synthèse vocale: activée' : 'Synthèse vocale: désactivée'}
@@ -128,7 +158,10 @@
 			</div>
 			<div
 				class={'toggler' + (animationSpeakers ? '' : ' disabled')}
-				on:click={() => (animationSpeakers = !animationSpeakers)}
+				on:click={() => {
+					animationSpeakers = !animationSpeakers;
+					persistDailyStartSettings();
+				}}
 			>
 				<p>
 					{animationSpeakers
@@ -139,7 +172,10 @@
 
 			<div
 				class={'toggler' + (fullScreen ? '' : ' disabled')}
-				on:click={() => (fullScreen = !fullScreen)}
+				on:click={() => {
+					fullScreen = !fullScreen;
+					persistDailyStartSettings();
+				}}
 			>
 				<p>
 					{fullScreen ? 'Plein écran: activé' : 'Plein écran: désactivé'}
