@@ -17,17 +17,26 @@
 	let fullScreen = true;
 
 	const persistDailyStartSettings = () => {
-		window.localStorage.setItem(
-			DAILY_START_SETTINGS_KEY,
-			JSON.stringify({ randomized, voiceSynthesis, animationSpeakers, fullScreen })
-		);
+		try {
+			window.localStorage.setItem(
+				DAILY_START_SETTINGS_KEY,
+				JSON.stringify({ randomized, voiceSynthesis, animationSpeakers, fullScreen })
+			);
+		} catch (e) {
+			console.error('Failed to persist daily start settings in localStorage', e);
+		}
 	};
 
 	onMount(() => {
-		if (window.localStorage.getItem('daily')) {
-			const daily = JSON.parse(window.localStorage.getItem('daily'));
-			if (daily.state === 'IN_PROGRESS') {
-				dailyExists = true;
+		const currentDaily = window.localStorage.getItem('daily');
+		if (currentDaily) {
+			try {
+				const daily = JSON.parse(currentDaily);
+				if (daily.state === 'IN_PROGRESS') {
+					dailyExists = true;
+				}
+			} catch (e) {
+				console.error('Failed to parse current daily from localStorage', e);
 			}
 		}
 
@@ -42,7 +51,8 @@
 					animationSpeakers = parsedSettings.animationSpeakers;
 				if (typeof parsedSettings.fullScreen === 'boolean') fullScreen = parsedSettings.fullScreen;
 			} catch (e) {
-				console.error(e);
+				console.error('Failed to parse daily start settings from localStorage', e);
+				window.localStorage.removeItem(DAILY_START_SETTINGS_KEY);
 			}
 		}
 	});
