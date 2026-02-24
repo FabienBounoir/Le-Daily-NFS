@@ -299,21 +299,29 @@
 		}
 
 		&.loading {
-			background: var(--primary-50);
-			color: var(--primary-700);
+			background: var(--primary-100);
+			border: 1px solid var(--primary-200);
+			border-radius: 0.875em;
+			box-shadow: none;
+			color: inherit;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			min-height: 200px;
+			&::before { display: none; }
 		}
 
 		&.empty {
-			background: var(--primary-50);
-			color: var(--primary-600);
+			background: var(--primary-100);
+			border: 1px solid var(--primary-200);
+			border-radius: 0.875em;
+			box-shadow: none;
+			color: inherit;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			min-height: 300px;
+			min-height: 220px;
+			&::before { display: none; }
 		}
 	}
 
@@ -321,10 +329,10 @@
 		text-align: center;
 
 		.spinner {
-			width: 40px;
-			height: 40px;
+			width: 36px;
+			height: 36px;
 			border: 3px solid var(--primary-200);
-			border-top: 3px solid var(--primary-500);
+			border-top: 3px solid var(--primary-600);
 			border-radius: 50%;
 			animation: spin 1s linear infinite;
 			margin: 0 auto 1em;

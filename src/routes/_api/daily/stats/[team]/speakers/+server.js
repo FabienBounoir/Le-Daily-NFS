@@ -28,8 +28,6 @@ export const GET = async ({ request, params }) => {
 
 		const dailySpeakers = await speakerService.getAll(team)
 
-
-
 		const ordered = dailySpeakers.sort((a, b) => {
 			// D'abord trier par statut removed (non-removed en premier)
 			const aRemoved = a.removed === true;

@@ -34,12 +34,6 @@
 			icon: 'fa-burger',
 			label: 'Burger',
 			user: 'nfs'
-		},
-		{
-			href: '/quarkus',
-			icon: 'quarkus',
-			label: 'Documentation Quarkus',
-			user: 'nfs'
 		}
 	];
 

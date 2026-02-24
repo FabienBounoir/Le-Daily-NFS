@@ -1,11 +1,8 @@
 <script>
-	import { updated } from '$app/stores';
 	import { onMount } from 'svelte';
-	import Weather from '$lib/components/Weather.svelte';
 	import myshades from '$lib/myshades';
 	import { snacks } from '$lib/stores/snacks';
 	import { user } from '$lib/stores/user';
-	import { some } from 'd3';
 	import DecorationSelector from '$lib/components/DecorationSelector.svelte';
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 	import GifSearcher from '$lib/components/GifSearcher.svelte';
@@ -15,6 +12,48 @@
 	let timer = $user.timer;
 	let showGifSearcher = false;
 	let currentEditingUserIndex = null;
+	let uploadingAvatarIndex = null;
+
+	const convertToBase64 = (file) => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				const base64Data = reader.result.split(',')[1];
+				resolve(base64Data);
+			};
+			reader.onerror = reject;
+			reader.readAsDataURL(file);
+		});
+	};
+
+	const handleAvatarUpload = async (event, index) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		if (file.size > 2 * 1024 * 1024) {
+			snacks.error('Fichier trop volumineux (max 2 Mo)');
+			return;
+		}
+
+		uploadingAvatarIndex = index;
+		try {
+			const base64 = await convertToBase64(file);
+			const response = await fetch('/_api/upload', {
+				method: 'POST',
+				body: base64
+			}).then((res) => res.json());
+
+			if (!response.url) throw new Error('No URL returned');
+
+			updateElementWithIndex(response.url, index, 'avatar');
+			snacks.success('Avatar uploadé avec succès');
+		} catch (e) {
+			snacks.error("Erreur lors de l'upload de l'avatar");
+		} finally {
+			uploadingAvatarIndex = null;
+			event.target.value = '';
+		}
+	};
 
 	onMount(() => {
 		loadDecorations();
@@ -171,7 +210,8 @@
 										animation: '',
 										avatar: '',
 										birthday: null,
-										lastDayOnProject: null
+										lastDayOnProject: null,
+										role: 'user'
 									}
 								]
 							});
@@ -210,30 +250,32 @@
 			vous semble, offrant ainsi à votre page une palette de couleurs aussi changeante que votre
 			humeur du moment !
 		</p>
-		{#if color !== 'random'}
-			<input
-				disabled={color === 'random'}
-				type="color"
-				bind:value={color}
-				on:change={() => {
-					user.change({
-						...$user,
-						color
-					});
-				}}
-			/>
-		{/if}
-		<button
-			on:click={() =>
-				(color =
-					color === 'random' ? `#${Math.floor(Math.random() * 16777215).toString(16)}` : 'random')}
-		>
-			{#if color === 'random'}
-				Arrêter le mode aléatoire
-			{:else}
-				Activer le mode aléatoire
+		<div style="display: flex; align-items: center; gap: 1em;">
+			{#if color !== 'random'}
+				<input
+					disabled={color === 'random'}
+					type="color"
+					bind:value={color}
+					on:change={() => {
+						user.change({
+							...$user,
+							color
+						});
+					}}
+				/>
 			{/if}
-		</button>
+			<button
+				on:click={() =>
+					(color =
+						color === 'random' ? `#${Math.floor(Math.random() * 16777215).toString(16)}` : 'random')}
+			>
+				{#if color === 'random'}
+					Arrêter le mode aléatoire
+				{:else}
+					Activer le mode aléatoire
+				{/if}
+			</button>
+		</div>
 	</div>
 	<div class="container">
 		<h1>Temps par participant (en secondes):</h1>
@@ -338,62 +380,64 @@
 		{/if}
 	</div>
 
-	<div class="container">
-		<h1>Truck to Food</h1>
-		<p>Afficher le menu du jour Truck to Food dans les statistiques de fin:</p>
-		<button
-			on:click={() =>
-				user.change({
-					...$user,
-					truckToFood: {
-						...$user.truckToFood,
-						enabled: !($user.truckToFood?.enabled || false)
-					}
-				})}
-			class:disabled={!($user.truckToFood?.enabled || false)}
-		>
-			{#if $user.truckToFood?.enabled}
-				Status: Activé
-			{:else}
-				Status: Désactivé
-			{/if}
-		</button>
-
-		{#if $user.truckToFood?.enabled}
-			<div class="days-selector">
-				<h3>Jours d'affichage :</h3>
-				<p>Sélectionnez les jours où afficher le menu Truck to Food :</p>
-				<div class="days-grid">
-					{#each [{ key: 'monday', label: 'Lundi', value: 1 }, { key: 'tuesday', label: 'Mardi', value: 2 }, { key: 'wednesday', label: 'Mercredi', value: 3 }, { key: 'thursday', label: 'Jeudi', value: 4 }, { key: 'friday', label: 'Vendredi', value: 5 }, { key: 'saturday', label: 'Samedi', value: 6 }, { key: 'sunday', label: 'Dimanche', value: 0 }] as day}
-						<button
-							type="button"
-							class="day-button"
-							class:selected={($user.truckToFood?.days || []).includes(day.value)}
-							on:click={() => {
-								const currentDays = $user.truckToFood?.days || [];
-								const newDays = currentDays.includes(day.value)
-									? currentDays.filter((d) => d !== day.value)
-									: [...currentDays, day.value];
-								user.change({
-									...$user,
-									truckToFood: {
-										...$user.truckToFood,
-										enabled: $user.truckToFood?.enabled || false,
-										days: newDays
-									}
-								});
-							}}
-						>
-							{day.label}
-						</button>
-					{/each}
-				</div>
-				{#if ($user.truckToFood?.days || []).length === 0}
-					<p class="warning">⚠️ Aucun jour sélectionné - Truck to Food ne s'affichera jamais</p>
+	{#if $user.username =="nfs"}
+		<div class="container">
+			<h1>Truck to Food</h1>
+			<p>Afficher le menu du jour Truck to Food dans les statistiques de fin:</p>
+			<button
+				on:click={() =>
+					user.change({
+						...$user,
+						truckToFood: {
+							...$user.truckToFood,
+							enabled: !($user.truckToFood?.enabled || false)
+						}
+					})}
+				class:disabled={!($user.truckToFood?.enabled || false)}
+			>
+				{#if $user.truckToFood?.enabled}
+					Status: Activé
+				{:else}
+					Status: Désactivé
 				{/if}
-			</div>
-		{/if}
-	</div>
+			</button>
+
+			{#if $user.truckToFood?.enabled}
+				<div class="days-selector">
+					<h3>Jours d'affichage :</h3>
+					<p>Sélectionnez les jours où afficher le menu Truck to Food :</p>
+					<div class="days-grid">
+						{#each [{ key: 'monday', label: 'Lundi', value: 1 }, { key: 'tuesday', label: 'Mardi', value: 2 }, { key: 'wednesday', label: 'Mercredi', value: 3 }, { key: 'thursday', label: 'Jeudi', value: 4 }, { key: 'friday', label: 'Vendredi', value: 5 }, { key: 'saturday', label: 'Samedi', value: 6 }, { key: 'sunday', label: 'Dimanche', value: 0 }] as day}
+							<button
+								type="button"
+								class="day-button"
+								class:selected={($user.truckToFood?.days || []).includes(day.value)}
+								on:click={() => {
+									const currentDays = $user.truckToFood?.days || [];
+									const newDays = currentDays.includes(day.value)
+										? currentDays.filter((d) => d !== day.value)
+										: [...currentDays, day.value];
+									user.change({
+										...$user,
+										truckToFood: {
+											...$user.truckToFood,
+											enabled: $user.truckToFood?.enabled || false,
+											days: newDays
+										}
+									});
+								}}
+							>
+								{day.label}
+							</button>
+						{/each}
+					</div>
+					{#if ($user.truckToFood?.days || []).length === 0}
+						<p class="warning">⚠️ Aucun jour sélectionné - Truck to Food ne s'affichera jamais</p>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	<div class="container">
 		<h1>Qwertee</h1>
@@ -420,33 +464,62 @@
 		{#if $user?.users}
 			{#each $user?.users as user, index}
 				<div class="speaker-information">
-					<label>Nom:</label>
-					<input
-						type="text"
-						bind:value={user.name}
-						on:keyup={(e) => {
-							updateElementWithIndex(user.name, index, 'name');
-						}}
-					/>
+					<div class="name-pronunciation-row">
+						<div class="field-group">
+							<label>Nom:</label>
+							<input
+								type="text"
+								bind:value={user.name}
+								on:keyup={(e) => {
+									updateElementWithIndex(user.name, index, 'name');
+								}}
+							/>
+						</div>
+						<div class="field-group">
+							<label>Voice Pronunciation:</label>
+							<div class="voice-input-section">
+								<input
+									type="text"
+									bind:value={user.nickname}
+									placeholder="Prononciation personnalisée"
+									on:keyup={() => {
+										updateElementWithIndex(user.nickname, user.name, 'nickname');
+									}}
+								/>
+								<button
+									type="button"
+									class="voice-test-btn"
+									on:click={() => testPronunciation(user.nickname, user.name)}
+									title="Tester la prononciation"
+								>
+									<i class="fa-solid fa-volume-high"></i>
+								</button>
+							</div>
+						</div>
+					</div>
 
-					<label>Voice Pronunciation:</label>
-					<div class="voice-input-section">
-						<input
-							type="text"
-							bind:value={user.nickname}
-							placeholder="Prononciation personnalisée"
-							on:keyup={() => {
-								updateElementWithIndex(user.nickname, user.name, 'nickname');
-							}}
-						/>
-						<button
-							type="button"
-							class="voice-test-btn"
-							on:click={() => testPronunciation(user.nickname, user.name)}
-							title="Tester la prononciation"
-						>
-							<i class="fa-solid fa-volume-high"></i>
-						</button>
+					<div class="name-pronunciation-row">
+						<!-- <div class="field-group">
+							<label>Role:</label>
+							<input
+								type="text"
+								bind:value={user.role}
+								placeholder="Ex: Dev, QA, PO..."
+								on:keyup={() => {
+									updateElementWithIndex(user.role?.toLowerCase(), index, 'role');
+								}}
+							/>
+						</div> -->
+						<div class="field-group">
+							<label>Birthday:</label>
+							<input
+								type="date"
+								bind:value={user.birthday}
+								on:change={() => {
+									updateElementWithIndex(user.birthday || null, index, 'birthday');
+								}}
+							/>
+						</div>
 					</div>
 
 					<label>Animation:</label>
@@ -465,25 +538,39 @@
 					</div>
 
 					<label>Avatar:</label>
-					<input
-						type="text"
-						bind:value={user.avatar}
-						on:keyup={() => {
-							updateElementWithIndex(user.avatar, index, 'avatar');
-						}}
-					/>
+					<div class="avatar-upload-section">
+						<input
+							type="text"
+							bind:value={user.avatar}
+							placeholder="Nom de fichier ou URL"
+							on:keyup={() => {
+								updateElementWithIndex(user.avatar, index, 'avatar');
+							}}
+						/>
+						<label class="upload-btn" title="Uploader une image">
+							{#if uploadingAvatarIndex === index}
+								<i class="fa-solid fa-spinner fa-spin"></i>
+							{:else}
+								<i class="fa-solid fa-upload"></i>
+							{/if}
+							<input
+								type="file"
+								accept="image/*"
+								style="display:none"
+								disabled={uploadingAvatarIndex !== null}
+								on:change={(e) => handleAvatarUpload(e, index)}
+							/>
+						</label>
+					</div>
 
 					<label>Décoration d'avatar:</label>
 					<div class="decoration-section">
 						<div class="avatar-preview-container">
 							{#if user.avatar}
 								<img
-									src={'/avatar/' + user.avatar}
+									src={user.avatar.startsWith('http') ? user.avatar : user.avatar === 'bouns.svelte' ? '/avatar/bouns.png' : '/avatar/' + user.avatar}
 									alt="Avatar preview"
 									class="avatar-preview-img"
-									on:error={() => {
-										// Fallback to generated avatar
-									}}
 								/>
 							{:else}
 								<img
@@ -743,14 +830,30 @@
 		flex-direction: column;
 
 		&.speaker {
-			display: flex;
-			flex-direction: column;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
 			gap: 1em;
+
+			h1,
+			& > p {
+				grid-column: 1 / -1;
+			}
 
 			.speaker-information {
 				background-color: var(--primary-200);
 				padding: 0.5em;
 				border-radius: 0.5em;
+
+				.name-pronunciation-row {
+					display: flex;
+					gap: 1em;
+
+					.field-group {
+						display: flex;
+						flex-direction: column;
+						flex: 1;
+					}
+				}
 			}
 		}
 
@@ -768,9 +871,8 @@
 		display: flex;
 		align-items: center;
 		gap: 1em;
-		margin-top: 0.5em;
 		/* Ajouté un padding pour éviter que les décorations soient coupées */
-		padding: 10px 0;
+		// padding: 10px 0;
 	}
 
 	.avatar-preview-container {
@@ -792,6 +894,36 @@
 		border-radius: 50%;
 		position: relative;
 		z-index: 1;
+	}
+
+	.avatar-upload-section {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		input[type='text'] {
+			flex: 1;
+		}
+
+		.upload-btn {
+			background-color: var(--primary-500);
+			color: white;
+			border: none;
+			padding: 0.5rem;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-size: 1rem;
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background-color 0.2s;
+
+			&:hover {
+				background-color: var(--primary-600);
+			}
+		}
 	}
 
 	.animation-input-section {

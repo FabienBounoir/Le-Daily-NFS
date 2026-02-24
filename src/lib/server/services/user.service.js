@@ -15,7 +15,16 @@ class UserService {
 	 *  teams: string[];
 	 *  color: string;
 	 *  timer: number;
-	 *  users: object[];
+	 *  users: {
+	 *    name: string;
+	 *    nickname: string;
+	 *    animation: string;
+	 *    avatar: string;
+	 *    birthday: string | null;
+	 *    lastDayOnProject: string | null;
+	 *    decoration: string;
+	 *    role: string;
+	 *  }[];
 	 *  weather: string[]
 	 *  qwertee: boolean;
 	 *  euromillion: object;
@@ -95,6 +104,16 @@ class UserService {
 				if (user.truckToFood && !user.truckToFood.days) {
 					user.truckToFood.days = [];
 				}
+
+				if (!user.users || user.users.length > 0) {
+					user.users.map(u => {
+						if (!u.role || u.role.length === 0) {
+							u.role = "user";
+						}
+						return u;
+					});
+				}
+
 				return user;
 			});
 		} catch (error) {

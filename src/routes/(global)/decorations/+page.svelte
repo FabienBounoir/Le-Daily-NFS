@@ -126,7 +126,7 @@
 </script>
 
 <svelte:head>
-	<title>Galerie de Décorations d'Avatar - Le Daily NFS</title>
+	<title>Galerie de Décorations d'Avatar - Le Daily</title>
 </svelte:head>
 
 <div class="decorations-page">

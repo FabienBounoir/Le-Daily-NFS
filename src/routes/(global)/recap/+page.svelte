@@ -265,444 +265,360 @@
 	/>
 </svelte:head>
 
-<main>
-	<header class="page-header">
-		<div class="header-content">
-			<div class="header-text">
-				<h1>🎯 Générateur de Récap</h1>
-				<p>Créez des cartes récap stylées avec vos statistiques de dailies</p>
-			</div>
-			<button class="help-button" on:click={() => (showHelpModal = true)}>
-				❓ Comment ça marche ?
-			</button>
-		</div>
-	</header>
-
-	<div class="content">
-		<aside class="controls" class:collapsed={!showPresets && recap}>
+<section>
+	<div class="page-grid">
+		<!-- Panneau de configuration -->
+		<div class="card card-controls">
 			{#if showPresets}
-				<section class="presets" in:slide={{ duration: 300 }}>
-					<h2>⚡ Périodes rapides</h2>
-					<div class="preset-grid">
-						{#each presets as preset}
-							<button
-								class="preset-button"
-								on:click={() => selectPreset(preset)}
-								in:scale={{ duration: 200, delay: presets.indexOf(preset) * 50 }}
-							>
-								<span class="preset-icon">{preset.icon}</span>
-								<span class="preset-name">{preset.name}</span>
-							</button>
-						{/each}
+				<div class="card-header" in:slide={{ duration: 300 }}>
+					<span class="card-icon">⚡</span>
+					<div>
+						<h2>Périodes rapides</h2>
+						<p class="card-desc">Sélectionne une période prédéfinie</p>
+					</div>
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<span class="help-btn" on:click={() => (showHelpModal = true)} title="Comment ça marche ?">❓</span>
+				</div>
+
+				<div class="preset-grid" in:slide={{ duration: 300 }}>
+					{#each presets as preset}
+						<button
+							class="preset-btn"
+							on:click={() => selectPreset(preset)}
+							in:scale={{ duration: 200, delay: presets.indexOf(preset) * 50 }}
+						>
+							<span class="preset-icon">{preset.icon}</span>
+							<span class="preset-name">{preset.name}</span>
+						</button>
+					{/each}
+				</div>
+
+				<div class="divider"><span>ou</span></div>
+
+				<button
+					class="btn-custom-period"
+					on:click={() => { customPeriod = true; showPresets = false; }}
+				>
+					📅 Période personnalisée
+				</button>
+			{:else}
+				<div class="card-header" in:slide={{ duration: 300 }}>
+					<span class="card-icon">🎨</span>
+					<div>
+						<h2>Configuration</h2>
+						<p class="card-desc">Paramètres du récap</p>
+					</div>
+				</div>
+
+				<form class="recap-form" on:submit|preventDefault={generateRecap} in:slide={{ duration: 300 }}>
+					<div class="input-group">
+						<label for="startDate">Date de début</label>
+						<input type="date" id="startDate" bind:value={startDate} required />
 					</div>
 
-					<div class="divider">
-						<span>ou</span>
+					<div class="input-group">
+						<label for="endDate">Date de fin</label>
+						<input type="date" id="endDate" bind:value={endDate} required />
+					</div>
+
+					<div class="input-group">
+						<label for="speaker">Speaker <span class="optional">(optionnel)</span></label>
+						<select id="speaker" bind:value={selectedSpeaker}>
+							<option value="">Toute l'équipe</option>
+							{#each speakers as speaker}
+								{#if !speaker.removed}
+									<option value={speaker.name}>{speaker.name}</option>
+								{/if}
+							{/each}
+						</select>
 					</div>
 
 					<button
-						class="custom-button"
-						on:click={() => {
-							customPeriod = true;
-							showPresets = false;
-						}}
+						type="submit"
+						class="btn-generate"
+						disabled={isLoading || !startDate || !endDate}
 					>
-						📅 Période personnalisée
+						{isLoading ? '⏳ Génération…' : '🚀 Générer le récap'}
 					</button>
-				</section>
-			{:else}
-				<section class="form-section" in:slide={{ duration: 300 }}>
-					<div class="form-header">
-						<h2>🎨 Configuration</h2>
-						<button
-							class="back-button"
-							on:click={() => {
-								showPresets = true;
-								resetForm();
-							}}
-						>
-							← Retour
+
+					{#if recap}
+						<button type="button" class="btn-reset" on:click={resetForm}>
+							🔄 Nouveau récap
 						</button>
-					</div>
+					{/if}
 
-					<form on:submit|preventDefault={generateRecap}>
-						<div class="input-group">
-							<label for="startDate">Date de début</label>
-							<input type="date" id="startDate" bind:value={startDate} required />
-						</div>
-
-						<div class="input-group">
-							<label for="endDate">Date de fin</label>
-							<input type="date" id="endDate" bind:value={endDate} required />
-						</div>
-
-						<div class="input-group">
-							<label for="speaker">Speaker (optionnel)</label>
-							<select id="speaker" bind:value={selectedSpeaker}>
-								<option value="">Toute l'équipe</option>
-								{#each speakers as speaker}
-									{#if !speaker.removed}
-										<option value={speaker.name}>{speaker.name}</option>
-									{/if}
-								{/each}
-							</select>
-							<small>Laissez vide pour un récap d'équipe</small>
-						</div>
-
-						<div class="form-actions">
-							<button
-								type="submit"
-								class="generate-button"
-								disabled={isLoading || !startDate || !endDate}
-							>
-								{#if isLoading}
-									⏳ Génération...
-								{:else}
-									🚀 Générer le récap
-								{/if}
-							</button>
-
-							{#if recap}
-								<button type="button" class="reset-button" on:click={resetForm}>
-									🔄 Nouveau récap
-								</button>
-							{/if}
-						</div>
-					</form>
-				</section>
+					<button
+						type="button"
+						class="btn-back"
+						on:click={() => { showPresets = true; resetForm(); }}
+					>← Retour aux périodes rapides</button>
+				</form>
 			{/if}
-		</aside>
+		</div>
 
-		<section class="recap-section">
-			<RecapCard {recap} {isLoading} on:download={downloadRecap} />
-		</section>
+		<!-- Résultat -->
+		<div class="card card-result">
+			<div class="card-header">
+				<span class="card-icon">📊</span>
+				<div>
+					<h2>Résultat</h2>
+					<p class="card-desc">Votre carte récap générée</p>
+				</div>
+			</div>
+			<div class="recap-container">
+				<RecapCard {recap} {isLoading} on:download={downloadRecap} />
+			</div>
+		</div>
 	</div>
 
 	<HelpModal bind:visible={showHelpModal} />
-</main>
+</section>
 
 <style lang="scss">
-	main {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2em;
-		min-height: 100vh;
+	/* ── Layout ── */
+	section {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5em;
 	}
 
-	.page-header {
-		text-align: center;
-		margin-bottom: 3em;
-
-		.header-content {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			max-width: 800px;
-			margin: 0 auto;
-
-			@media (max-width: 768px) {
-				flex-direction: column;
-				gap: 1.5em;
-			}
-		}
-
-		.header-text {
-			text-align: left;
-
-			@media (max-width: 768px) {
-				text-align: center;
-			}
-		}
-
-		h1 {
-			font-size: 2.5em;
-			font-weight: 700;
-			margin: 0 0 0.5em;
-			background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
-		}
-
-		p {
-			font-size: 1.1em;
-			color: var(--primary-600);
-			margin: 0;
-		}
-
-		.help-button {
-			background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
-			color: var(--on-primary-600);
-			border: none;
-			border-radius: 12px;
-			padding: 0.8em 1.5em;
-			font-weight: 600;
-			cursor: pointer;
-			transition:
-				transform 0.2s,
-				box-shadow 0.2s;
-			white-space: nowrap;
-
-			&:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 8px 25px rgba(var(--primary-500), 0.3);
-			}
-		}
-	}
-
-	.content {
+	.page-grid {
 		display: grid;
-		grid-template-columns: 400px 1fr;
-		gap: 3em;
+		grid-template-columns: 360px 1fr;
+		gap: 1.25em;
 		align-items: start;
 
-		@media (max-width: 1024px) {
+		@media (max-width: 900px) {
 			grid-template-columns: 1fr;
-			gap: 2em;
 		}
 	}
 
-	.controls {
+	/* ── Card ── */
+	.card {
 		background: var(--primary-50);
-		border: 1px solid var(--primary-200);
-		border-radius: 20px;
-		padding: 2em;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--primary-100);
+		border-radius: 0.875em;
+		padding: 1.25em 1.5em;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25em;
+	}
+
+	.card-controls {
 		position: sticky;
-		top: 2em;
-
-		&.collapsed {
-			@media (max-width: 1024px) {
-				position: static;
-			}
-		}
+		top: 1.5em;
 	}
 
-	.presets {
+	.card-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75em;
+
 		h2 {
-			margin: 0 0 1.5em;
-			font-size: 1.4em;
-			font-weight: 600;
-			color: var(--primary-700);
+			margin: 0;
+			font-size: 1.1rem;
+			font-weight: 700;
 		}
 
-		.preset-grid {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 1em;
-			margin-bottom: 2em;
+		.card-desc {
+			margin: 0;
+			font-size: 0.875rem;
+			opacity: 0.70;
 		}
 
-		.preset-button {
-			background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
-			border: 2px solid transparent;
-			border-radius: 15px;
-			padding: 1.5em 1em;
+		.help-btn {
+			margin-left: auto;
 			cursor: pointer;
-			transition: all 0.3s ease;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 0.5em;
-			text-align: center;
-			color: var(--on-primary-200);
+			font-size: 1.1rem;
+			opacity: 0.7;
+			transition: opacity 0.15s;
+			user-select: none;
 
-			&:hover {
-				transform: translateY(-3px);
-				box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-				background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-				color: var(--on-primary-700);
-			}
+			&:hover { opacity: 1; }
+		}
+	}
 
-			.preset-icon {
-				font-size: 2em;
-			}
+	.card-icon {
+		font-size: 1.4rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
 
-			.preset-name {
-				font-weight: 600;
-				font-size: 0.9em;
-			}
+	/* ── Presets ── */
+	.preset-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.75em;
+	}
+
+	.preset-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.4em;
+		padding: 1em 0.75em;
+		background: var(--primary-100);
+		border: 1px solid var(--primary-200);
+		border-radius: 0.75em;
+		cursor: pointer;
+		transition: background 0.15s, transform 0.15s;
+		user-select: none;
+		color: inherit;
+
+		&:hover {
+			background: var(--primary-200);
+			transform: translateY(-2px);
+		}
+	}
+
+	.preset-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+
+	.preset-name {
+		font-size: 0.82rem;
+		font-weight: 600;
+		text-align: center;
+	}
+
+	/* ── Divider ── */
+	.divider {
+		position: relative;
+		text-align: center;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 0;
+			right: 0;
+			height: 1px;
+			background: var(--primary-200);
 		}
 
-		.divider {
-			text-align: center;
-			margin: 2em 0;
+		span {
 			position: relative;
-
-			&::before {
-				content: '';
-				position: absolute;
-				top: 50%;
-				left: 0;
-				right: 0;
-				height: 1px;
-				background: var(--primary-300);
-			}
-
-			span {
-				background: var(--primary-50);
-				padding: 0 1em;
-				color: var(--primary-500);
-				font-size: 0.9em;
-			}
+			background: var(--primary-50);
+			padding: 0 0.75em;
+			font-size: 0.8rem;
+			color: var(--primary-400);
 		}
+	}
 
-		.custom-button {
-			width: 100%;
-			background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-			color: var(--on-primary-700);
-			border: none;
-			border-radius: 15px;
-			padding: 1.2em;
-			font-size: 1em;
+	/* ── Buttons ── */
+	.btn-custom-period {
+		width: 100%;
+		padding: 0.85em;
+		background: var(--primary-600);
+		color: white;
+		border: none;
+		border-radius: 0.75em;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.2s, opacity 0.2s;
+		user-select: none;
+
+		&:hover { background: var(--primary-700); }
+	}
+
+	.btn-back {
+		align-self: flex-start;
+		background: none;
+		border: none;
+		padding: 0;
+		font-size: 0.85rem;
+		font-weight: 500;
+		cursor: pointer;
+		color: var(--primary-500);
+		transition: color 0.15s;
+		user-select: none;
+
+		&:hover { color: var(--primary-700); }
+	}
+
+	.btn-generate {
+		width: 100%;
+		padding: 0.85em;
+		background: var(--primary-600);
+		color: white;
+		border: none;
+		border-radius: 0.75em;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.2s, opacity 0.2s;
+		user-select: none;
+
+		&:hover:not(:disabled) { background: var(--primary-700); }
+
+		&:disabled {
+			opacity: 0.35;
+			cursor: not-allowed;
+		}
+	}
+
+	.btn-reset {
+		width: 100%;
+		padding: 0.75em;
+		background: var(--primary-100);
+		color: inherit;
+		border: 1px solid var(--primary-200);
+		border-radius: 0.75em;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s;
+		user-select: none;
+
+		&:hover { background: var(--primary-200); }
+	}
+
+	/* ── Form ── */
+	.recap-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.1em;
+	}
+
+	.input-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4em;
+
+		label {
+			font-size: 0.875rem;
 			font-weight: 600;
-			cursor: pointer;
-			transition: transform 0.2s;
 
-			&:hover {
-				transform: translateY(-2px);
+			.optional {
+				font-weight: 400;
+				opacity: 0.60;
+				font-size: 0.85em;
+			}
+		}
+
+		input,
+		select {
+			padding: 0.65em 0.85em;
+			border: 1px solid var(--primary-200);
+			border-radius: 0.6em;
+			font-size: 0.95rem;
+			background: var(--primary-100);
+			color: inherit;
+			transition: border-color 0.15s;
+
+			&:focus {
+				outline: none;
+				border-color: var(--primary-500);
 			}
 		}
 	}
 
-	.form-section {
-		.form-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 2em;
-
-			h2 {
-				margin: 0;
-				font-size: 1.4em;
-				font-weight: 600;
-				color: var(--primary-700);
-			}
-
-			.back-button {
-				background: var(--primary-100);
-				border: 1px solid var(--primary-300);
-				border-radius: 8px;
-				padding: 0.5em 1em;
-				cursor: pointer;
-				font-size: 0.9em;
-				color: var(--primary-700);
-				transition: background 0.2s;
-
-				&:hover {
-					background: var(--primary-200);
-				}
-			}
-		}
-
-		form {
-			display: flex;
-			flex-direction: column;
-			gap: 1.5em;
-		}
-
-		.input-group {
-			display: flex;
-			flex-direction: column;
-			gap: 0.5em;
-
-			label {
-				font-weight: 600;
-				color: var(--primary-700);
-			}
-
-			input,
-			select {
-				padding: 0.8em;
-				border: 2px solid var(--primary-300);
-				border-radius: 10px;
-				font-size: 1em;
-				transition: border-color 0.2s;
-				background: var(--primary-50);
-				color: var(--primary-700);
-
-				&:focus {
-					outline: none;
-					border-color: var(--primary-500);
-				}
-
-				&::placeholder {
-					color: var(--primary-400);
-				}
-			}
-
-			small {
-				color: var(--primary-500);
-				font-size: 0.8em;
-			}
-		}
-
-		.form-actions {
-			display: flex;
-			flex-direction: column;
-			gap: 1em;
-			margin-top: 1em;
-
-			.generate-button {
-				background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-				color: var(--on-primary-700);
-				border: none;
-				border-radius: 12px;
-				padding: 1em;
-				font-size: 1em;
-				font-weight: 600;
-				cursor: pointer;
-				transition: transform 0.2s;
-
-				&:hover:not(:disabled) {
-					transform: translateY(-2px);
-				}
-
-				&:disabled {
-					opacity: 0.6;
-					cursor: not-allowed;
-				}
-			}
-
-			.reset-button {
-				background: var(--primary-100);
-				color: var(--primary-600);
-				border: 1px solid var(--primary-300);
-				border-radius: 12px;
-				padding: 0.8em;
-				font-size: 0.9em;
-				cursor: pointer;
-				transition: background 0.2s;
-
-				&:hover {
-					background: var(--primary-200);
-				}
-			}
-		}
-	}
-
-	.recap-section {
+	/* ── Result card ── */
+	.recap-container {
 		display: flex;
 		justify-content: center;
-	}
-
-	@media (max-width: 768px) {
-		main {
-			padding: 1em;
-		}
-
-		.content {
-			gap: 1.5em;
-		}
-
-		.controls {
-			padding: 1.5em;
-		}
-
-		.presets {
-			.preset-grid {
-				grid-template-columns: 1fr;
-			}
-		}
 	}
 </style>
