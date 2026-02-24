@@ -1,11 +1,11 @@
 <script>
 	import { api } from '$lib/utils/api';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
-	import { scale, slide } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import { user } from '$lib/stores/user';
 	import { snacks } from '$lib/stores/snacks';
 	import { goto } from '$app/navigation';
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 
 	/**
 	 * @type {any[]}
@@ -105,10 +105,7 @@
 
 <main>
 	<section class="speakers">
-		<div class="section-header">
-			<h2>❖ Les Statistiques par speakers</h2>
-			<a href="/recap" class="recap-button"> 🎯 Générer un récap </a>
-		</div>
+		<h2>❖ Les Statistiques par speakers</h2>
 		<div>
 			{#await speakers}
 				<p>loading...</p>
@@ -118,11 +115,11 @@
 				{:else}
 					{#key displayUserRemoved}
 						{#each speakers as speaker, i (speaker._id)}
-							{#if !speaker.removed || displayUserRemoved}
+						{#if (!speaker.removed && $user.users?.some((u) => u.name === speaker.name)) || displayUserRemoved}
 								<div
 									out:slide={{ duration: 300 }}
 									on:click={() => goto(`/statistics/${speaker.name}`)}
-									class:grayscale={speaker.removed}
+									class:grayscale={speaker.removed || !$user.users?.some((u) => u.name === speaker.name)}
 								>
 									<h1>{speaker.name}</h1>
 									<p>
@@ -135,7 +132,7 @@
 						{/each}
 					{/key}
 
-					{#if speakers.some((s) => s.removed)}
+					{#if speakers.some((s) => s.removed || !$user.users?.some((u) => u.name === s.name))}
 						<button
 							on:click={() => {
 								displayUserRemoved = !displayUserRemoved;

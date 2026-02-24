@@ -418,10 +418,6 @@
 			font-size: 2.5em;
 			font-weight: 700;
 			margin: 0 0 0.5em;
-			background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
 		}
 
 		p {
