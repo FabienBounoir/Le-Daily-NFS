@@ -876,7 +876,7 @@
 							{:else}
 								<img
 									in:blur={{ duration: 500, opacity: 0 }}
-									src={'/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatar}
+									src={dailyMng?.users?.[dailyMng.index]?.avatar?.startsWith('http') ? dailyMng.users[dailyMng.index].avatar : '/avatar/' + dailyMng?.users?.[dailyMng.index]?.avatar}
 									alt="Jira Avatar"
 									on:error={() => {
 										dailyMng.users[dailyMng.index].avatar = null;

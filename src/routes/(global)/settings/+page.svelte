@@ -12,6 +12,48 @@
 	let timer = $user.timer;
 	let showGifSearcher = false;
 	let currentEditingUserIndex = null;
+	let uploadingAvatarIndex = null;
+
+	const convertToBase64 = (file) => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				const base64Data = reader.result.split(',')[1];
+				resolve(base64Data);
+			};
+			reader.onerror = reject;
+			reader.readAsDataURL(file);
+		});
+	};
+
+	const handleAvatarUpload = async (event, index) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		if (file.size > 2 * 1024 * 1024) {
+			snacks.error('Fichier trop volumineux (max 2 Mo)');
+			return;
+		}
+
+		uploadingAvatarIndex = index;
+		try {
+			const base64 = await convertToBase64(file);
+			const response = await fetch('/_api/upload', {
+				method: 'POST',
+				body: base64
+			}).then((res) => res.json());
+
+			if (!response.url) throw new Error('No URL returned');
+
+			updateElementWithIndex(response.url, index, 'avatar');
+			snacks.success('Avatar uploadé avec succès');
+		} catch (e) {
+			snacks.error("Erreur lors de l'upload de l'avatar");
+		} finally {
+			uploadingAvatarIndex = null;
+			event.target.value = '';
+		}
+	};
 
 	onMount(() => {
 		loadDecorations();
@@ -457,7 +499,7 @@
 					</div>
 
 					<div class="name-pronunciation-row">
-						<div class="field-group">
+						<!-- <div class="field-group">
 							<label>Role:</label>
 							<input
 								type="text"
@@ -467,7 +509,7 @@
 									updateElementWithIndex(user.role?.toLowerCase(), index, 'role');
 								}}
 							/>
-						</div>
+						</div> -->
 						<div class="field-group">
 							<label>Birthday:</label>
 							<input
@@ -496,25 +538,39 @@
 					</div>
 
 					<label>Avatar:</label>
-					<input
-						type="text"
-						bind:value={user.avatar}
-						on:keyup={() => {
-							updateElementWithIndex(user.avatar, index, 'avatar');
-						}}
-					/>
+					<div class="avatar-upload-section">
+						<input
+							type="text"
+							bind:value={user.avatar}
+							placeholder="Nom de fichier ou URL"
+							on:keyup={() => {
+								updateElementWithIndex(user.avatar, index, 'avatar');
+							}}
+						/>
+						<label class="upload-btn" title="Uploader une image">
+							{#if uploadingAvatarIndex === index}
+								<i class="fa-solid fa-spinner fa-spin"></i>
+							{:else}
+								<i class="fa-solid fa-upload"></i>
+							{/if}
+							<input
+								type="file"
+								accept="image/*"
+								style="display:none"
+								disabled={uploadingAvatarIndex !== null}
+								on:change={(e) => handleAvatarUpload(e, index)}
+							/>
+						</label>
+					</div>
 
 					<label>Décoration d'avatar:</label>
 					<div class="decoration-section">
 						<div class="avatar-preview-container">
 							{#if user.avatar}
 								<img
-									src={'/avatar/' + user.avatar}
+									src={user.avatar.startsWith('http') ? user.avatar : user.avatar === 'bouns.svelte' ? '/avatar/bouns.png' : '/avatar/' + user.avatar}
 									alt="Avatar preview"
 									class="avatar-preview-img"
-									on:error={() => {
-										// Fallback to generated avatar
-									}}
 								/>
 							{:else}
 								<img
@@ -810,9 +866,8 @@
 		display: flex;
 		align-items: center;
 		gap: 1em;
-		margin-top: 0.5em;
 		/* Ajouté un padding pour éviter que les décorations soient coupées */
-		padding: 10px 0;
+		// padding: 10px 0;
 	}
 
 	.avatar-preview-container {
@@ -834,6 +889,36 @@
 		border-radius: 50%;
 		position: relative;
 		z-index: 1;
+	}
+
+	.avatar-upload-section {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+
+		input[type='text'] {
+			flex: 1;
+		}
+
+		.upload-btn {
+			background-color: var(--primary-500);
+			color: white;
+			border: none;
+			padding: 0.5rem;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-size: 1rem;
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background-color 0.2s;
+
+			&:hover {
+				background-color: var(--primary-600);
+			}
+		}
 	}
 
 	.animation-input-section {
