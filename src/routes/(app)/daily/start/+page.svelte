@@ -23,9 +23,12 @@
 	import AvatarDecoration from '$lib/components/AvatarDecoration.svelte';
 	import TruckToFood from '$lib/components/TruckToFood.svelte';
 	import FeteDuJour from '$lib/components/FeteDuJour.svelte';
+	import MemeMenu from '$lib/components/MemeMenu.svelte';
 
 	let audio = null;
 	let openMenu = false;
+	let openMemeMenu = false;
+	let showQuitConfirm = false;
 
 	let displayGif = false;
 	let gifUrl = 'https://media.tenor.com/iexmoynoWlIAAAAi/sourire-smile.gif';
@@ -178,6 +181,14 @@
 				}
 				newSpeaker();
 			}
+		},
+		{
+			actionName: 'Memes',
+			key: 'Semicolon',
+			keyName: 'M',
+			action: () => {
+				openMemeMenu = !openMemeMenu;
+			}
 		}
 	];
 
@@ -189,6 +200,8 @@
 
 	function keydownHandler(e) {
 		actualKeyDown = e.code;
+
+		console.log(e.code)
 
 		if (keydownInterval) {
 			clearTimeout(keydownInterval);
@@ -208,12 +221,18 @@
 		}
 
 		if (e.code === 'Tab' || e.code === 'Escape') {
-			if (toggleGif()) return;
+			if (toggleGif(true)) return;
+
+			if (openMemeMenu) {
+				openMemeMenu = false;
+				return;
+			}
 
 			openMenu = !openMenu;
 		}
 
 		if (openMenu) return;
+		if (openMemeMenu) return;
 
 		if (e.code === 'Space' || e.code === 'ArrowRight') {
 			newSpeaker();
@@ -246,10 +265,12 @@
 				}
 				dailyMng.users.splice(removeIndex, 1);
 			}
+		} else if (e.code === 'Semicolon') {
+			openMemeMenu = !openMemeMenu;
 		}
 
 		// @ts-ignore
-		if (animationData[e.code]) {
+		if (e.shiftKey && animationData[e.code]) {
 			if (toggleGif()) return;
 
 			// @ts-ignore
@@ -340,11 +361,18 @@
 		};
 	});
 
-	const toggleGif = () => {
+	const toggleGif = (reenterFullscreen = false) => {
 		if (displayGif) {
 			displayGif = false;
 			if (audio) {
 				audio.pause();
+			}
+			if (reenterFullscreen && dailyMng.fullScreen) {
+				setTimeout(() => {
+					if (!document.fullscreenElement) {
+						document.documentElement.requestFullscreen().catch(() => {});
+					}
+				}, 100);
 			}
 			return true;
 		}
@@ -978,6 +1006,8 @@
 
 		<Keys {keysArray} {actualKeyDown} />
 
+		<MemeMenu bind:visible={openMemeMenu} {animationData} />
+
 		<GifDisplay {gifUrl} {displayGif} {toggleGif} />
 
 		{#if profilAnimation && dailyMng.animation}
@@ -995,22 +1025,42 @@
 		role="button"
 		tabindex="0"
 		on:click={() => {
-			if (interval) {
-				clearInterval(interval);
+			if (dailyMng.state === 'ENDED') {
+				if (interval) clearInterval(interval);
+				if (recapInterval) clearInterval(recapInterval);
+				window.localStorage.removeItem('daily');
+				if (document.fullscreenElement) document.exitFullscreen();
+				goto('/daily');
+			} else {
+				showQuitConfirm = true;
 			}
-			if (recapInterval) {
-				clearInterval(recapInterval);
-			}
-
-			window.localStorage.removeItem('daily');
-			if (document.fullscreenElement) {
-				document.exitFullscreen();
-			}
-			goto('/daily');
 		}}
 		class="fa-solid fa-times close-daily"
 		style={dailyMng.state == 'ENDED' ? 'cursor: pointer;' : ''}
 	></i>
+
+	{#if showQuitConfirm}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div class="quit-backdrop" on:click={() => (showQuitConfirm = false)}>
+			<div class="quit-modal" on:click|stopPropagation>
+				<p>⚠️ Arrêter le daily sans sauvegarder ?</p>
+				<div class="quit-actions">
+					<button class="btn-cancel" on:click={() => (showQuitConfirm = false)}>Continuer</button>
+					<button
+						class="btn-confirm"
+						on:click={() => {
+							if (interval) clearInterval(interval);
+							if (recapInterval) clearInterval(recapInterval);
+							window.localStorage.removeItem('daily');
+							if (document.fullscreenElement) document.exitFullscreen();
+							goto('/daily');
+						}}>Quitter</button
+					>
+				</div>
+			</div>
+		</div>
+	{/if}
 </section>
 
 <style lang="scss">
@@ -1066,6 +1116,70 @@
 			background: rgba(0, 0, 0, 0.9);
 			transform: scale(1.1);
 			cursor: pointer;
+		}
+	}
+
+	.quit-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.7);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+	}
+
+	.quit-modal {
+		background: #1a1a2e;
+		border: 1px solid var(--primary-600);
+		border-radius: 1rem;
+		padding: 2em 2.5em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5em;
+		max-width: 360px;
+		width: 90%;
+
+		p {
+			margin: 0;
+			font-size: 1.1rem;
+			color: white;
+			text-align: center;
+		}
+	}
+
+	.quit-actions {
+		display: flex;
+		gap: 1em;
+
+		button {
+			padding: 0.6em 1.4em;
+			border-radius: 0.5em;
+			border: none;
+			font-size: 1rem;
+			cursor: pointer;
+			transition: all 0.2s;
+			font-weight: 600;
+		}
+
+		.btn-cancel {
+			background: rgba(255, 255, 255, 0.1);
+			color: white;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.2);
+			}
+		}
+
+		.btn-confirm {
+			background: #e53e3e;
+			color: white;
+
+			&:hover {
+				background: #c53030;
+			}
 		}
 	}
 
