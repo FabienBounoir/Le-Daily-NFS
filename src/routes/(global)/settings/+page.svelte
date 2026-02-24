@@ -830,9 +830,14 @@
 		flex-direction: column;
 
 		&.speaker {
-			display: flex;
-			flex-direction: column;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
 			gap: 1em;
+
+			h1,
+			& > p {
+				grid-column: 1 / -1;
+			}
 
 			.speaker-information {
 				background-color: var(--primary-200);
