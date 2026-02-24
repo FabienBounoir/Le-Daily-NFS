@@ -103,98 +103,111 @@
 	<meta name="description" content="Voici le statistique des daily passé" />
 </svelte:head>
 
-<main>
-	<section class="speakers">
-		<h2>❖ Les Statistiques par speakers</h2>
-		<div>
-			{#await speakers}
-				<p>loading...</p>
-			{:then speakers}
-				{#if speakers.length === 0}
-					<p>Lancer un daily pour voir les statistiques</p>
-				{:else}
+<section>
+	<!-- Speakers -->
+	<div class="card">
+		<div class="card-header">
+			<span class="card-icon">👤</span>
+			<div>
+				<h2>Statistiques par speaker</h2>
+				<p class="card-desc">Temps moyen et nombre de dailies</p>
+			</div>
+		</div>
+
+		{#await speakers}
+			<div class="speakers-grid">
+				{#each Array(4).fill(0) as _}
+					<div class="speaker-card skeleton">
+						<span class="speaker-name skeleton-text">████████</span>
+						<span class="speaker-stat skeleton-text">███ secondes</span>
+						<span class="speaker-stat skeleton-text">██ dailies</span>
+					</div>
+				{/each}
+			</div>
+		{:then speakers}
+			{#if speakers.length === 0}
+				<p class="empty-state">Lance un daily pour voir les statistiques.</p>
+			{:else}
+				<div class="speakers-grid">
 					{#key displayUserRemoved}
-						{#each speakers as speaker, i (speaker._id)}
-						{#if (!speaker.removed && $user.users?.some((u) => u.name === speaker.name)) || displayUserRemoved}
+						{#each speakers as speaker (speaker._id)}
+							{#if (!speaker.removed && $user.users?.some((u) => u.name === speaker.name)) || displayUserRemoved}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<!-- svelte-ignore a11y-no-static-element-interactions -->
 								<div
+									class="speaker-card {speaker.removed || !$user.users?.some((u) => u.name === speaker.name) ? 'speaker-card--off' : ''}"
 									out:slide={{ duration: 300 }}
 									on:click={() => goto(`/statistics/${speaker.name}`)}
-									class:grayscale={speaker.removed || !$user.users?.some((u) => u.name === speaker.name)}
 								>
-									<h1>{speaker.name}</h1>
-									<p>
+									<span class="speaker-name">{speaker.name}</span>
+									<span class="speaker-stat">
 										<i class="fa-solid fa-stopwatch-20"></i>
-										~{formatNumber(speaker.moyenTime)} secondes
-									</p>
-									<p><i class="fa-solid fa-hashtag"></i> {speaker.totalDaily} dailies</p>
+										~{formatNumber(speaker.moyenTime)} sec
+									</span>
+									<span class="speaker-stat">
+										<i class="fa-solid fa-hashtag"></i>
+										{speaker.totalDaily} dailies
+									</span>
 								</div>
 							{/if}
 						{/each}
 					{/key}
+				</div>
 
-					{#if speakers.some((s) => s.removed || !$user.users?.some((u) => u.name === s.name))}
-						<button
-							on:click={() => {
-								displayUserRemoved = !displayUserRemoved;
-							}}
-						>
-							{displayUserRemoved
-								? 'Cacher les utilisateurs supprimés'
-								: 'Afficher les utilisateurs supprimés'}
-						</button>
-					{/if}
+				{#if speakers.some((s) => s.removed || !$user.users?.some((u) => u.name === s.name))}
+					<button class="btn-toggle-removed" on:click={() => { displayUserRemoved = !displayUserRemoved; }}>
+						{displayUserRemoved ? 'Masquer les utilisateurs supprimés' : 'Afficher les utilisateurs supprimés'}
+					</button>
 				{/if}
-			{:catch error}
-				<p>{error}</p>
-			{/await}
-		</div>
-	</section>
+			{/if}
+		{:catch error}
+			<p class="empty-state">{error}</p>
+		{/await}
+	</div>
 
-	<section class="dailies">
-		<h2>❖ Historique des dailies</h2>
-		<div>
+	<!-- Historique -->
+	<div class="card">
+		<div class="card-header">
+			<span class="card-icon">📋</span>
+			<div>
+				<h2>Historique des dailies</h2>
+				<p class="card-desc">{totalCount} sessions enregistrées</p>
+			</div>
+		</div>
+
+		<div class="dailies-list">
 			{#await data}
-				{#each Array(Math.floor(Math.random() * 5) + 3).fill(0) as _}
-					<div class="daily-squeleton">
-						<p><span>➜ Daily team</span></p>
+				{#each Array(4).fill(0) as _}
+					<div class="daily-row skeleton">
+						<span class="skeleton-text">➜ Daily team nº00</span>
 						<span class="spacer"></span>
-						<p><span>00:00:00</span> <i class="fa-solid fa-clock"></i></p>
-						<p><span>0</span> <i class="fa-solid fa-user" /></p>
-						<p><span>00:00 - 00/00/0000</span> <i class="fa-solid fa-calendar-days"></i></p>
-						<i class="fa-solid fa-trash"></i>
+						<span class="daily-meta skeleton-text">00:00:00</span>
+						<span class="daily-meta skeleton-text">0</span>
+						<span class="daily-meta skeleton-text">00:00 - 00/00/0000</span>
 					</div>
 				{/each}
 			{:then _}
 				{#each dailies as daily, i}
-					<div
-						class="daily"
-						on:mouseover={(e) => {
-							if (e.target.tagName === 'I' && e.target.classList.contains('fa-trash'))
-								e.fromElement.style.filter = 'grayscale(1)';
-							else if (e.target.tagName === 'DIV') e.target.style.filter = 'grayscale(0)';
-						}}
-						on:mouseout={(e) => {
-							e.fromElement.style.filter = 'grayscale(0)';
-						}}
-					>
-						<p>➜ Daily {daily.team} n°{totalCount - i}</p>
+					<div class="daily-row">
+						<span class="daily-index">➜ Daily {daily.team} <strong>n°{totalCount - i}</strong></span>
 						<span class="spacer"></span>
-						<p>{timeFormater(daily.totalTime)} <i class="fa-solid fa-clock"></i></p>
-
-						<p>{daily?.users?.length} <i class="fa-solid fa-user" /></p>
-
-						<p>
+						<span class="daily-meta"><i class="fa-solid fa-clock"></i> {timeFormater(daily.totalTime)}</span>
+						<span class="daily-meta"><i class="fa-solid fa-user"></i> {daily?.users?.length}</span>
+						<span class="daily-meta">
+							<i class="fa-solid fa-calendar-days"></i>
 							{`${new Date(daily?.date).getHours()}`.padStart(2, '0') +
 								':' +
-								`${new Date(daily?.date).getMinutes()}`.padStart(2, '0')} -
+								`${new Date(daily?.date).getMinutes()}`.padStart(2, '0')} —
 							{`${new Date(daily?.date).getDate()}`.padStart(2, '0') +
 								'/' +
 								`${new Date(daily?.date).getMonth() + 1}`.padStart(2, '0') +
 								'/' +
-								new Date(daily?.date).getFullYear()} <i class="fa-solid fa-calendar-days"></i>
-						</p>
-
-						<i
+								new Date(daily?.date).getFullYear()}
+						</span>
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<span
+							class="daily-trash"
 							on:click={async () => {
 								try {
 									await api.delete(`/daily/${daily._id}`);
@@ -204,211 +217,244 @@
 									snacks.error(e.message);
 								}
 							}}
-							class="fa-solid fa-trash"
-						></i>
+						>
+							<i class="fa-solid fa-trash"></i>
+						</span>
 					</div>
 
-					<!-- Intersection observer target for the last few items -->
 					{#if i === dailies.length - 3 && hasMoreData}
-						<div class="intersection-observer" bind:this={lastElement} style="height: 1px;"></div>
+						<div class="intersection-observer" bind:this={lastElement}></div>
 					{/if}
 				{/each}
 
 				{#if isLoading}
 					{#each Array(3).fill(0) as _}
-						<div class="daily-squeleton">
-							<p><span>➜ Daily team</span></p>
+						<div class="daily-row skeleton">
+							<span class="skeleton-text">➜ Daily team nº00</span>
 							<span class="spacer"></span>
-							<p><span>00:00:00</span> <i class="fa-solid fa-clock"></i></p>
-							<p><span>0</span> <i class="fa-solid fa-user" /></p>
-							<p><span>00:00 - 00/00/0000</span> <i class="fa-solid fa-calendar-days"></i></p>
-							<i class="fa-solid fa-trash"></i>
+							<span class="daily-meta skeleton-text">00:00:00</span>
+							<span class="daily-meta skeleton-text">0</span>
+							<span class="daily-meta skeleton-text">00:00 - 00/00/0000</span>
 						</div>
 					{/each}
 				{/if}
 
 				{#if dailies.length === 0 && !isLoading}
-					<p>Aucun daily pour le moment</p>
+					<p class="empty-state">Aucun daily pour le moment.</p>
 				{/if}
 
 				{#if !hasMoreData && dailies.length > 0}
-					<p style="text-align: center; color: var(--primary-400); margin-top: 2em;">
-						Fin de la liste - {totalCount} dailies au total
-					</p>
+					<p class="end-of-list">Fin de la liste · {totalCount} dailies au total</p>
 				{/if}
 			{:catch error}
-				<h1>Oopsie... 🥸</h1>
-				<p>{error}</p>
+				<p class="empty-state">Oopsie… 🥸 {error}</p>
 			{/await}
 		</div>
-	</section>
-</main>
+	</div>
+</section>
 
 <style lang="scss">
+	/* ── Layout ── */
+	section {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5em;
+		user-select: none;
+	}
+
+	/* ── Card ── */
+	.card {
+		background: var(--primary-50);
+		border: 1px solid var(--primary-100);
+		border-radius: 0.875em;
+		padding: 1.25em 1.5em;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25em;
+	}
+
+	.card-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75em;
+
+		h2 {
+			margin: 0;
+			font-size: 1.1rem;
+			font-weight: 700;
+		}
+
+		.card-desc {
+			margin: 0;
+			font-size: 0.875rem;
+			opacity: 0.70;
+		}
+	}
+
+	.card-icon {
+		font-size: 1.4rem;
+		line-height: 1;
+	}
+
+	/* ── Speakers grid ── */
+	.speakers-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75em;
+	}
+
+	.speaker-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+		padding: 1em 1.25em;
+		background: var(--primary-100);
+		border: 1px solid var(--primary-200);
+		border-radius: 0.75em;
+		cursor: pointer;
+		transition: transform 0.15s, opacity 0.15s;
+
+		&:hover {
+			transform: translateY(-2px);
+		}
+
+		&--off {
+			opacity: 0.45;
+			filter: grayscale(1);
+		}
+	}
+
+	.speaker-name {
+		font-size: 1.1rem;
+		font-weight: 700;
+	}
+
+	.speaker-stat {
+		font-size: 0.9rem;
+		opacity: 0.70;
+
+		i {
+			margin-right: 0.3em;
+		}
+	}
+
+	/* ── Toggle removed button ── */
+	.btn-toggle-removed {
+		align-self: flex-start;
+		background: var(--primary-100);
+		border: 1px solid var(--primary-200);
+		border-radius: 2em;
+		padding: 0.5em 1.25em;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		color: inherit;
+		user-select: none;
+		transition: background 0.15s;
+
+		&:hover {
+			background: var(--primary-200);
+		}
+	}
+
+	/* ── Dailies list ── */
+	.dailies-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+
+		.daily-row:not(:last-child) {
+			border-bottom: 1px solid var(--primary-100);
+		}
+	}
+
+	.daily-row {
+		display: flex;
+		align-items: center;
+		gap: 1.25em;
+		padding: 0.9em 0;
+		font-size: 1rem;
+		flex-wrap: wrap;
+
+		&.skeleton {
+			opacity: 0.5;
+			animation: breathe 2s infinite;
+		}
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.daily-index {
+		font-weight: 500;
+		white-space: nowrap;
+	}
+
+	.daily-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.35em;
+		opacity: 0.70;
+		white-space: nowrap;
+		font-size: 0.9rem;
+
+		i {
+			font-size: 0.85rem;
+		}
+	}
+
+	.daily-trash {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.2em;
+		height: 2.2em;
+		border-radius: 0.5em;
+		background: var(--primary-100);
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+		flex-shrink: 0;
+
+		&:hover {
+			background: #fee2e2;
+			color: #dc2626;
+		}
+
+		i {
+			font-size: 0.9rem;
+		}
+	}
+
+	/* ── Skeleton text ── */
+	.skeleton-text {
+		background: var(--primary-200);
+		border-radius: 0.3em;
+		color: transparent;
+		pointer-events: none;
+	}
+
+	/* ── States ── */
+	.empty-state {
+		font-size: 0.95rem;
+		opacity: 0.5;
+		margin: 0;
+	}
+
+	.end-of-list {
+		text-align: center;
+		font-size: 0.875rem;
+		color: var(--primary-400);
+		padding: 0.75em 0 0;
+	}
+
 	.intersection-observer {
 		height: 1px;
 		visibility: hidden;
 	}
-	main {
-		user-select: none;
-		display: flex;
-		flex-direction: column;
-		gap: 3em;
-	}
-	h2 {
-		font-size: 1.2em;
-		font-weight: 600;
-		text-align: left;
-	}
 
-	button {
-		user-select: initial;
-	}
-
-	section {
-		display: flex;
-		flex-direction: column;
-		gap: 1em;
-	}
-
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1em;
-
-		.recap-button {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			color: white;
-			text-decoration: none;
-			padding: 0.8em 1.5em;
-			border-radius: 12px;
-			font-weight: 600;
-			font-size: 0.9em;
-			display: flex;
-			align-items: center;
-			gap: 0.5em;
-			transition:
-				transform 0.2s,
-				box-shadow 0.2s;
-
-			&:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-			}
-		}
-	}
-
-	.speakers {
-		.grayscale {
-			filter: grayscale(1);
-		}
-
-		& > div {
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-			gap: 1em;
-			flex-wrap: wrap;
-
-			h1 {
-				font-size: 1.7em;
-				font-weight: 700;
-			}
-
-			div {
-				display: flex;
-				flex-direction: column;
-				border: 0px solid black;
-				border-radius: 0.5em;
-				padding: 1em;
-				gap: 0.5em;
-				background-color: var(--primary-100);
-				width: 100%;
-				align-items: left;
-				transition: filter 0.5s;
-				width: fit-content;
-				transition: transform 0.5s;
-				cursor: pointer;
-
-				&:hover {
-					transform: scale(1.05);
-				}
-
-				.spacer {
-					flex: 1;
-				}
-
-				> i {
-					cursor: pointer;
-					background-color: var(--primary-300);
-					padding: 0.5em;
-					border-radius: 0.5em;
-				}
-			}
-		}
-	}
-
-	.dailies {
-		& > div {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 1em;
-
-			div {
-				display: flex;
-				flex-direction: row;
-				border: 0px solid black;
-				border-radius: 0.5em;
-				padding: 1em;
-				gap: 2em;
-				background-color: var(--primary-100);
-				width: 100%;
-				align-items: center;
-				transition: filter 0.5s;
-
-				.spacer {
-					flex: 1;
-				}
-
-				> i {
-					cursor: pointer;
-					background-color: var(--primary-300);
-					padding: 0.5em;
-					border-radius: 0.5em;
-				}
-			}
-		}
-
-		h1 {
-			font-size: 2em;
-			font-weight: 700;
-		}
-
-		.daily-squeleton {
-			filter: opacity(0.7);
-
-			p {
-				span {
-					background-color: var(--primary-600);
-					border-radius: 0.5em;
-					color: transparent;
-					animation: breathe 2s infinite;
-				}
-			}
-
-			@keyframes breathe {
-				0% {
-					filter: opacity(0.5);
-				}
-				50% {
-					filter: opacity(1);
-				}
-				100% {
-					filter: opacity(0.5);
-				}
-			}
-		}
+	@keyframes breathe {
+		0%, 100% { opacity: 0.4; }
+		50%       { opacity: 0.8; }
 	}
 </style>
