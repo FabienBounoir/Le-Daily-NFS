@@ -319,7 +319,6 @@
 		}
 
 		&--off {
-			opacity: 0.45;
 			filter: grayscale(1);
 		}
 	}
@@ -331,7 +330,7 @@
 
 	.speaker-stat {
 		font-size: 0.9rem;
-		opacity: 0.70;
+		opacity: 0.80;
 
 		i {
 			margin-right: 0.3em;

@@ -61,7 +61,9 @@
 				{/if}
 			</div>
 			<div class="actions">
-				<button on:click={downloadAsImage} title="Télécharger en image">�</button>
+				<button on:click={downloadAsImage} title="Télécharger en image">
+					<i class="fa-solid fa-download"></i>
+				</button>
 			</div>
 		</header>
 
@@ -312,16 +314,12 @@
 		}
 
 		&.empty {
-			background: var(--primary-100);
-			border: 1px solid var(--primary-200);
-			border-radius: 0.875em;
+			background: none;
 			box-shadow: none;
 			color: inherit;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			min-height: 220px;
-			&::before { display: none; }
 		}
 	}
 

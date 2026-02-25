@@ -28,6 +28,7 @@
 		overflow: auto;
 		list-style: none;
 		width: 15em;
+		z-index: 20;
 	}
 
 	li {

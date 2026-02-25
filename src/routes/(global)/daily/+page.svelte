@@ -393,8 +393,8 @@
 	}
 
 	.chip-off {
-		background: var(--primary-100);
-		color: var(--primary-400);
+		background: var(--primary-200);
+		color: var(--primary-800);
 	}
 
 	/* ── Options / toggles ── */

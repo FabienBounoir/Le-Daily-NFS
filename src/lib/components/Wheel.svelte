@@ -4,7 +4,7 @@
 	import { select, arc, pie } from 'd3';
 	import { Confetti } from 'svelte-confetti';
 
-	let isSpinning = false;
+	export let isSpinning = false;
 	let spinDeg = Math.random() * 360;
 	let firstSpin = true;
 
@@ -19,9 +19,18 @@
 
 	/** Currently selected name, set when the spin ends */
 	export let winner = null;
+	/** Accumulated list of all winners (including current) */
+	export let selectedWinners = [];
 	export let items = ['yes', 'no', 'maybe'];
 	export let colors = Array.from({ length: items.length }, generateColors);
-	export let size = document.documentElement.clientHeight / 1.5;
+
+	let windowWidth = typeof window !== 'undefined' ? window.innerWidth : 800;
+	let windowHeight = typeof window !== 'undefined' ? window.innerHeight : 600;
+
+	$: size = windowWidth < 600
+		? Math.min(windowWidth - 32, windowHeight * 0.55)
+		: windowHeight / 1.5;
+
 	export let pointerSize = size / 9;
 	/**
 	 * @template string
@@ -30,7 +39,8 @@
 	export let textColor = 'white';
 
 	/* wheel sizes */
-	$: radius = Math.min(size, size) / 2;
+	$: pointerSize = size / 9;
+	$: radius = size / 2;
 
 	const spinWheel = (e) => {
 		e.stopPropagation();
@@ -108,14 +118,32 @@
 	afterUpdate(svgRender);
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+
 <div class="wheel-wrapper">
-	{#if winner}
-		<div class="winner-banner" key={winner}>
-			{#key winner}
-				<span class="winner-name">{winner}</span>
-			{/key}
+	{#if isSpinning && selectedWinners.length > 0}
+		<div class="winner-banner">
+			<div class="winners-row">
+				{#each selectedWinners as w, i}
+					{#if i > 0}<span class="winner-sep">+</span>{/if}
+					<span class="winner-name winner-past">{w}</span>
+				{/each}
+				<span class="winner-sep">+</span>
+				<span class="winner-name winner-pending">…</span>
+			</div>
 		</div>
-		{:else}
+	{:else if !isSpinning && selectedWinners.length > 0}
+		<div class="winner-banner">
+			<div class="winners-row">
+				{#each selectedWinners as w, i}
+					{#if i > 0}<span class="winner-sep">+</span>{/if}
+					{#key w + i}
+						<span class="winner-name {i === selectedWinners.length - 1 ? 'winner-current' : 'winner-past'}">{w}</span>
+					{/key}
+				{/each}
+			</div>
+		</div>
+	{:else}
 		<div class="winner-banner winner-placeholder">
 			<span class="winner-label">En attente d'un tour de roue…</span>
 		</div>
@@ -152,15 +180,12 @@
 
 <style lang="scss">
 	.wheel-wrapper {
-		position: absolute;
-		transform: translate(-50%, -50%);
-		top: 50%;
-		left: 60%;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 1em;
 		width: max-content;
+		max-width: 100%;
 	}
 
 	.winner-banner {
@@ -175,6 +200,7 @@
 		text-align: center;
 		z-index: 10;
 		animation: fadeIn 0.3s ease;
+		max-width: 100%;
 	}
 
 	.winner-placeholder {
@@ -188,15 +214,52 @@
 		font-weight: 700;
 		opacity: 0.90;
 		color: var(--primary-900);
+	}
 
+	.winners-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.3em 0.5em;
+	}
+
+	.winner-sep {
+		font-size: 1rem;
+		font-weight: 800;
+		opacity: 0.4;
+		color: var(--primary-600);
 	}
 
 	.winner-name {
+		line-height: 1.1;
+	}
+
+	.winner-past {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--primary-400);
+		opacity: 0.7;
+	}
+
+	.winner-current {
 		font-size: 1.5rem;
 		font-weight: 800;
 		color: var(--primary-600);
-		line-height: 1.1;
 		animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.winner-pending {
+		font-size: 1.5rem;
+		font-weight: 800;
+		color: var(--primary-400);
+		opacity: 0.5;
+		animation: pulse 0.8s ease-in-out infinite alternate;
+	}
+
+	@keyframes pulse {
+		from { opacity: 0.3; }
+		to   { opacity: 0.8; }
 	}
 
 	@keyframes fadeIn {

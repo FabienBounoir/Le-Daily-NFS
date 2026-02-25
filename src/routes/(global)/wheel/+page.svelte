@@ -8,8 +8,40 @@
 	let colors = [];
 	let mounted = false;
 	let winner = null;
+	let isSpinning = false;
+	let selectedWinners = [];
+	let lastProcessedWinner = null;
 
 	let userMap = new Map();
+
+	const onWinnerChange = () => {
+		if (winner && winner !== lastProcessedWinner) {
+			lastProcessedWinner = winner;
+			selectedWinners = [...selectedWinners, winner];
+		}
+	};
+
+	let prevIsSpinning = false;
+	$: {
+		if (isSpinning && !prevIsSpinning && winner && userMap.has(winner)) {
+			const current = userMap.get(winner);
+			userMap.set(winner, Math.max(0, current - 1));
+			userMap = new Map(userMap);
+		}
+		prevIsSpinning = isSpinning;
+	}
+
+	const resetWheel = () => {
+		selectedWinners = [];
+		winner = null;
+		lastProcessedWinner = null;
+		for (const name of userMap.keys()) {
+			userMap.set(name, 1);
+		}
+		userMap = new Map(userMap);
+	};
+
+	$: winner, onWinnerChange();
 
 	onMount(() => {
 		setTimeout(() => {
@@ -122,8 +154,16 @@
 	<div class="wheel-area">
 		{#if items?.length > 0}
 			{#if mounted}
-				<Wheel {items} {colors} bind:winner />
+				<Wheel {items} {colors} {selectedWinners} bind:winner bind:isSpinning />
 			{/if}
+			{#if selectedWinners.length > 0}
+				<button class="reset-btn" on:click={resetWheel}>🔄 Réinitialiser</button>
+			{/if}
+		{:else if selectedWinners.length > 0}
+			<div class="all-selected">
+				<p>Tous les participants ont été sélectionnés !</p>
+				<button class="reset-btn" on:click={resetWheel}>🔄 Recommencer</button>
+			</div>
 		{:else}
 			<div class="empty-wheel">
 				<span class="empty-wheel-icon">🎡</span>
@@ -142,6 +182,8 @@
 
 		@media (max-width: 700px) {
 			flex-direction: column;
+			gap: 1em;
+			align-items: center;
 		}
 	}
 
@@ -152,6 +194,7 @@
 
 		@media (max-width: 700px) {
 			width: 100%;
+			max-width: 100%;
 		}
 	}
 
@@ -194,6 +237,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5em;
+
+		@media (max-width: 700px) {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		}
 	}
 
 	.participant-row {
@@ -282,9 +330,44 @@
 	.wheel-area {
 		flex: 1;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		min-height: 400px;
+		gap: 1em;
+		min-height: 300px;
+		overflow: hidden;
+
+		@media (max-width: 700px) {
+			width: 100%;
+			min-height: unset;
+		}
+	}
+
+	.reset-btn {
+		padding: 0.55em 1.4em;
+		border-radius: 2em;
+		border: 1.5px solid var(--primary-300);
+		background: var(--primary-50);
+		color: var(--primary-700);
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s;
+
+		&:hover {
+			background: var(--primary-100);
+			border-color: var(--primary-400);
+		}
+	}
+
+	.all-selected {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1em;
+		opacity: 0.85;
+		text-align: center;
+		p { font-size: 0.95rem; margin: 0; }
 	}
 
 	.empty-wheel {
