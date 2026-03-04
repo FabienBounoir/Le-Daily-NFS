@@ -4,8 +4,9 @@
 	import { onMount } from 'svelte';
 
 	const DAILY_START_SETTINGS_KEY = 'daily-start-settings';
+	const DAILY_DISABLED_USERS_KEY = 'daily-disabled-users';
 
-	let users = $user.users;
+	let users = [];
 
 	let timeByUser = $user.timer || 120;
 	let randomized = true;
@@ -23,6 +24,11 @@
 		);
 	};
 
+	const persistDisabledUsers = () => {
+		const disabled = ($user.users || []).filter((u) => !users.some((s) => s.name === u.name)).map((u) => u.name);
+		window.localStorage.setItem(DAILY_DISABLED_USERS_KEY, JSON.stringify(disabled));
+	};
+
 	onMount(() => {
 		if (window.localStorage.getItem('daily')) {
 			const daily = JSON.parse(window.localStorage.getItem('daily'));
@@ -30,6 +36,19 @@
 				dailyExists = true;
 			}
 		}
+
+		// Restaurer les users désactivés (en vacances) depuis le localStorage
+		let disabledNames = new Set();
+		const storedDisabled = window.localStorage.getItem(DAILY_DISABLED_USERS_KEY);
+		if (storedDisabled) {
+			try {
+				disabledNames = new Set(JSON.parse(storedDisabled));
+			} catch (e) {
+				console.error(e);
+			}
+		}
+		// Inclure tous les users du store SAUF ceux marqués comme désactivés
+		users = ($user.users || []).filter((u) => !disabledNames.has(u.name));
 
 		const settings = window.localStorage.getItem(DAILY_START_SETTINGS_KEY);
 		if (settings) {
@@ -134,6 +153,7 @@
 							} else {
 								users = [...users, u];
 							}
+							persistDisabledUsers();
 						}}
 					>
 						{#if !users.some((obj) => obj.name === u.name)}<s>{u.name}</s>{:else}{u.name}{/if}
