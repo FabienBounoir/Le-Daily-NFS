@@ -394,7 +394,7 @@
 				<div class="toggle {$user.euromillion?.enabled ? 'on' : ''}" on:click={() => user.change({ ...$user, euromillion: { ...$user.euromillion, enabled: !($user.euromillion?.enabled || false) } })}><div class="toggle-knob"></div></div>
 			</div>
 
-			{#if $user.username === 'nfs'}
+			{#if $user.username === 'cjr' || $user?.weather?.includes?.('Montpellier')}
 				<!-- TruckToFood toggle -->
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->

@@ -30,6 +30,7 @@ class UserService {
 	 *  euromillion: object;
 	 *  programmedDates: object[];
 	 *  truckToFood: object;
+	 *  customLogoUrl: string | null;
 	 * }>} collection
 	 */
 	constructor(collection) {
@@ -142,7 +143,8 @@ class UserService {
 			qwertee: false,
 			euromillion: { enabled: false, days: [] },
 			programmedDates: [],
-			truckToFood: { enabled: false, days: [] }
+			truckToFood: { enabled: false, days: [] },
+			customLogoUrl: null
 		});
 	}
 

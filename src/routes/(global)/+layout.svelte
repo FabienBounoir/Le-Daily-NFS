@@ -33,7 +33,7 @@
 			href: '/burger',
 			icon: 'fa-burger',
 			label: 'Burger',
-			user: 'nfs'
+			user: 'cjr'
 		}
 	];
 
@@ -52,23 +52,30 @@
 <div class="layout">
 	<nav>
 		<div class="profile">
-			<svg
-				width="500"
-				height="500"
-				viewBox="0 0 500 500"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					fill-rule="evenodd"
-					clip-rule="evenodd"
-					d="M450 425C450 438.8 438.8 450 425 450H75C61.2 450 50 438.8 50 425V175C50 161.2 61.2 150 75 150H425C438.8 150 450 161.2 450 175V425ZM450 50V25C450 11.2 438.8 0 425 0C411.2 0 400 11.2 400 25V50H275V25C275 11.2 263.8 0 250 0C236.2 0 225 11.2 225 25V50H100V25C100 11.2 88.8 0 75 0C61.2 0 50 11.2 50 25V50C22.375 50 0 72.375 0 100V450C0 477.6 22.375 500 50 500H450C477.625 500 500 477.6 500 450V100C500 72.375 477.625 50 450 50Z"
-					fill="var(--primary-600)"
-				/>
-			</svg>
+			{#if $user.customLogoUrl}
+				<img src={$user.customLogoUrl} alt="Avatar" />
+			{:else}
+				<svg
+					width="500"
+					height="500"
+					viewBox="0 0 500 500"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						fill-rule="evenodd"
+						clip-rule="evenodd"
+						d="M450 425C450 438.8 438.8 450 425 450H75C61.2 450 50 438.8 50 425V175C50 161.2 61.2 150 75 150H425C438.8 150 450 161.2 450 175V425ZM450 50V25C450 11.2 438.8 0 425 0C411.2 0 400 11.2 400 25V50H275V25C275 11.2 263.8 0 250 0C236.2 0 225 11.2 225 25V50H100V25C100 11.2 88.8 0 75 0C61.2 0 50 11.2 50 25V50C22.375 50 0 72.375 0 100V450C0 477.6 22.375 500 50 500H450C477.625 500 500 477.6 500 450V100C500 72.375 477.625 50 450 50Z"
+						fill="var(--primary-600)"
+					/>
+				</svg>
 
-			<p>{new Date().getDate()}</p>
+				<p>{new Date().getDate()}</p>
+			{/if}
 		</div>
+
+
+
 
 		<ul>
 			{#each links as link (link.href)}
@@ -252,6 +259,15 @@
 					$size: 3.25rem;
 					height: $size;
 					width: $size;
+
+					object-fit: cover;
+					border-radius: inherit;
+				}
+
+				img {
+					display: block;
+					max-width: 4.50rem;
+					max-height: 8rem;
 
 					object-fit: cover;
 					border-radius: inherit;

@@ -88,7 +88,7 @@ export async function GET() {
 			'https://api.github.com/repos/fabienbounoir/avatar-decorations/contents/public/decorations',
 			{
 				headers: {
-					'User-Agent': 'Le-Daily-NFS-App',
+					'User-Agent': 'Le-Daily-App',
 				}
 			}
 		);

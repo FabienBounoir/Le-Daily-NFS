@@ -259,7 +259,7 @@
 
 		<!-- Footer -->
 		<footer class="recap-footer">
-			<p>Généré le {formatDate(recap.recapDate)} • Le Daily NFS</p>
+			<p>Généré le {formatDate(recap.recapDate)} • Le Daily</p>
 		</footer>
 	</div>
 {:else}
